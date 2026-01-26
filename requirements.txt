@@ -7,5 +7,6 @@ google-auth-oauthlib>=1.1.0
 flask
 selenium
 webdriver-manager
+python-dotenv
 keyboard>=0.13.5
 python-dotenv>=1.0.0

@@ -1,17 +1,22 @@
 import os
 import time
 import subprocess
-import shutil
+from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
+
+# Load Environment Variables
+load_dotenv()
 
 # Targets
 LOGIN_URL = "http://door.yl.co.kr"
-USER_ID = "00160003"
-USER_PW = "1234"
+USER_ID = os.getenv("YOUNGRIM_ID", "00160003")
+USER_PW = os.getenv("YOUNGRIM_PW", "1234")
 
 # Possible Avast Browser Paths
 AVAST_PATHS = [
@@ -32,7 +37,7 @@ def kill_browser():
     try:
         subprocess.run(["taskkill", "/F", "/IM", "AvastBrowser.exe"], 
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        time.sleep(2) # Wait for file locks to release
+        time.sleep(2) 
     except Exception as e:
         print(f"Warning during kill: {e}")
 
@@ -49,6 +54,7 @@ def launch_browser(binary_path):
         f"--user-data-dir={profile_dir}",
         "--no-first-run",
         "--no-default-browser-check",
+        # "--window-position=9999,9999", # Uncomment to hide window after verification
         LOGIN_URL
     ]
     
@@ -56,16 +62,56 @@ def launch_browser(binary_path):
     print(f"Profile (Isolated): {profile_dir}")
     
     # Launch as a separate process
-    process = subprocess.Popen(cmd)
-    return process
+    return subprocess.Popen(cmd)
+
+def handle_login(driver):
+    """Automates ID/PW input and detects authentication requirement."""
+    try:
+        # Wait for either Login form or Main page
+        wait = WebDriverWait(driver, 10)
+        
+        # 1. Check if we are already logged in
+        if "login" not in driver.current_url.lower() and "main" in driver.current_url.lower():
+            print("Already logged in. Skipping login step.")
+            return True
+
+        # 2. Try to find login fields
+        try:
+            id_field = wait.until(EC.presence_of_element_located((By.NAME, "userid")))
+            pw_field = driver.find_element(By.NAME, "passwd")
+            
+            print(f"Inputting credentials for ID: {USER_ID}...")
+            id_field.clear()
+            id_field.send_keys(USER_ID)
+            pw_field.clear()
+            pw_field.send_keys(USER_PW)
+            
+            # Click Login button (Usually an image or submit button)
+            login_btn = driver.find_element(By.CSS_SELECTOR, "a[href*='login_action']")
+            login_btn.click()
+            time.sleep(2)
+        except Exception:
+            print("Login fields not found or already past login. Checking for Auth page...")
+
+        # 3. Detect "New Device/Environment Authentication"
+        # This is a placeholder for the actual selector once identified
+        if "auth" in driver.current_url.lower() or "certify" in driver.page_source.lower():
+            print("\n" + "!"*50)
+            print(" [보안 알림] 새로운 기기/환경 인증이 필요합니다.")
+            print(" 브라우저에서 인증(SMS/이메일 등)을 완료한 후, 이 창에서 [Enter]를 눌러주세요.")
+            print("!"*50)
+            input("인증 완료 후 Enter...")
+            return True
+
+        return True
+    except Exception as e:
+        print(f"Login error: {e}")
+        return False
 
 def main():
-    # input("준비되셨으면 Enter를 눌러주세요...")
-    
     binary_path = find_avast_binary()
     if not binary_path:
         print("ERROR: Could not find Avast Secure Browser executable.")
-        print("Checked paths:", AVAST_PATHS)
         return
 
     # 1. Kill existing instances
@@ -80,7 +126,7 @@ def main():
     
     for attempt in range(3):
         try:
-            time.sleep(5) # Wait 5s, 10s, 15s...
+            time.sleep(5)
             print(f"Connection attempt {attempt+1}/3...")
             
             options = Options()
@@ -100,21 +146,26 @@ def main():
 
     # 4. Connected - Proceed
     try:
-        
-        # 5. Interactive Login Wait
-        # 6. Navigate to Ledger List (V4 Batch Logic)
+        # Step 4: Handle Login & Authentication Transfer
+        if not handle_login(driver):
+            print("Login failed or cancelled.")
+            return
+
+        # Step 5: Navigate to Ledger List
         list_url = "http://door.yl.co.kr/oms/ledger_list.jsp"
         driver.get(list_url)
         print(f"Navigated to List: {list_url}")
-        time.sleep(3) # Wait for table load
+        time.sleep(3)
         
-        # Check Login (Redirects usually change URL)
+        # Final Verification of Login
         if "login" in driver.current_url.lower():
-            print("="*50)
-            print(" [알림] 로그인이 필요합니다.")
-            input(" 브라우저에서 로그인 후, 이 창에서 [Enter]를 눌러주세요...")
+            print("Still stuck at login. Please manual login once.")
+            input("Manual login and press Enter...")
             driver.get(list_url)
             time.sleep(3)
+        
+        print("Login environment is ready. Session saved to profile.")
+        print("You can now run the automation unattended in the future.")
         
         # 7. Scrape Transactions
         print("Scraping transaction list...")

@@ -13,15 +13,17 @@
 - Edge connected automatically on port 9333.
 - Distributed lock connected (Machine: DS-StoreA).
 
-## Session Wrap-up: 2026-01-15 16:55
-- **Goal**: System Stabilization & Feature Integration (Dashboard Download, ERP Upload Test)
+## Session Wrap-up: 2026-01-26 19:00
+- **Goal**: Establish Youngrim Login Strategy & Edge Migration
 - **Achievements**:
-  1. **Dashboard Integration**: Implemented Manual Download & Specific Date Download features.
-  2. **Process Control**: Created `kill_processes.bat` for clean server restarts.
-  3. **Testing**: Verified ERP Upload logic using `run_test_upload.py` and local HTML (`26-01-15.html`).
-- **Current State**: Server code updated with new features, Test scripts ready.
+  1. **Credential Audit**: Identified Youngrim credentials in legacy scripts.
+  2. **Strategy Approval**: Confirmed "Authentication Transfer" + "Session Replication" as the safest path.
+  3. **Architecture Change**: Decided to use Microsoft Edge for both desktop and automation to ensure profile compatibility.
+  4. **Preparation**: Created `.env` for secure storage and drafted the `implementation_plan.md`.
+- **Current State**: Plan approved (LGTM). Code changes pending execution.
 
 ## Tasks for Next Session
-- [ ] Monitor V10 Server stability with new download triggers.
-- [ ] Verify End-to-End flow for "Specific Date Download" in live environment.
-- [ ] Refactor `v10_auto_server.py` if `run_test_upload.py` logic needs to be merged deeper.
+- [ ] Refactor `login_door_yl.py` to target Microsoft Edge (msedgedriver).
+- [ ] Implement `sync_session()` utility for Edge profile migration.
+- [ ] Execute initial "Authentication Transfer" (1rd Manual Auth in Automation window).
+- [ ] Verify persistent login and **Apply Headless mode (Completely invisible automation)**.
