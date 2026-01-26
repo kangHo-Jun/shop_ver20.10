@@ -311,13 +311,23 @@ The Flask server exposes these endpoints:
 
 **Status API:**
 - `GET /api/stats` - System status, pending counts, lock manager state
+- `GET /api/health` - System health check (browser, login, downloader stuck detection)
+- `GET /api/upload_state` - Upload state tracking for pending_save confirmation
 - `GET /api/pending` - List of pending orders
 - `GET /api/history` - Processing history
 
 **Control API:**
 - `POST /trigger_download` - Manual download trigger
-- `POST /upload_ledger` - Manual ledger upload
-- `POST /upload_estimate` - Manual estimate upload
+- `POST /trigger_download_force` - Force download (bypass history/lock checks)
+- `POST /trigger_ledger` - Manual ledger upload
+- `POST /trigger_estimate` - Manual estimate upload
+- `POST /check_login` - Check Youngrim OMS login status
+- `POST /restart_downloader` - Restart the downloader thread
+- `POST /reset_status` - Reset all server status
+
+**Upload Confirmation API (pending_save flow):**
+- `POST /confirm_save` - Confirm ERP save was successful (body: `{"type": "ledger"}` or `{"type": "estimate"}`)
+- `POST /mark_failed` - Mark upload as failed for retry (body: `{"type": "ledger"}` or `{"type": "estimate"}`)
 
 Dashboard updates every 3 seconds via JavaScript fetch.
 
@@ -587,3 +597,90 @@ start_all.bat
 - `Downloader already running` 에러: 다운로더 스레드가 실행 중. 잠시 기다리거나 서버 재시작
 - `Edge is not running on port 9333`: Edge 브라우저를 디버그 모드로 재시작 후 서버 재시작
 - `invalid session id`: Edge 브라우저 연결이 끊김. Edge와 서버 모두 재시작 필요
+
+---
+
+### 2026-01-26: System Health Monitoring & Upload Save Confirmation
+
+**Context**:
+사용자가 보고한 4가지 주요 문제점 해결:
+1. 로그인이 안되는 경우 감지 불가
+2. 데이터가 다운로드 되지 않는 경우 원인 파악 어려움
+3. 서버가 꼬여서 초기화가 필요한 경우가 많음
+4. 업로드 후 저장 버튼을 눌렀는지 확인 불가
+
+**Problem Analysis**:
+1. **로그인 문제**: 영림 OMS 로그인 상태 확인 로직이 전혀 없었음
+2. **다운로드 실패**: 브라우저 연결 상태 모니터링 없이 에러만 로깅
+3. **서버 stuck**: 스레드 상태 모니터링 및 자동 복구 메커니즘 부재
+4. **업로드 저장 확인**: ERP에 데이터 붙여넣기 후 바로 history에 추가하여 저장 여부 확인 불가
+
+**Solution Implemented**:
+
+1. **Browser Health Check** (`DoorBrowser` class):
+   ```python
+   def is_healthy(self) -> bool:
+       # 브라우저 연결 상태 확인
+
+   def ensure_connection(self) -> bool:
+       # 연결 끊김 시 자동 복구 시도
+
+   def check_youngrim_login(self) -> bool:
+       # 영림 OMS 로그인 상태 확인
+   ```
+
+2. **Upload State Machine** (pending_save flow):
+   ```
+   상태 전이: idle → running → pending_save → completed/failed
+
+   - 데이터 붙여넣기 완료 시 pending_save 상태로 전환
+   - 사용자가 대시보드에서 [저장 완료] 또는 [저장 실패] 버튼 클릭
+   - 저장 완료 시에만 history에 추가
+   ```
+
+3. **System Health Dashboard Card**:
+   - 브라우저 연결 상태 표시 (🟢/🔴)
+   - 영림 OMS 로그인 상태 표시
+   - 다운로더 stuck 감지 및 표시
+   - 가동 시간 표시
+   - [로그인 확인], [다운로더 재시작] 버튼 추가
+
+4. **Pending Save Confirmation UI**:
+   - 업로드 후 저장 대기 상태 표시
+   - 대기 파일 목록 및 대기 시간 표시
+   - [✅ 저장 완료], [❌ 저장 실패] 버튼
+
+5. **Auto-Recovery Mechanism**:
+   - 다운로더 heartbeat 추적
+   - 연속 5회 에러 시 자동 복구 시도
+   - 브라우저 연결 끊김 시 자동 재연결
+
+**New API Endpoints**:
+- `GET /api/health` - 시스템 상태 확인
+- `GET /api/upload_state` - 업로드 상태 조회
+- `POST /check_login` - 영림 로그인 상태 확인
+- `POST /restart_downloader` - 다운로더 재시작
+- `POST /confirm_save` - 저장 완료 확인
+- `POST /mark_failed` - 저장 실패 처리
+
+**Dashboard Changes**:
+- 상단에 경고 배너 추가 (브라우저 끊김, 로그인 필요, 다운로더 stuck 시)
+- System Health 카드 추가
+- 저장 확인 대기 카드 추가 (pending_save 상태일 때만 표시)
+
+**Key Insights**:
+1. **상태 머신 도입**: 단순한 running/idle 상태 대신 세분화된 상태 관리로 사용자 확인 단계 추가
+2. **Health Check 패턴**: 주기적인 상태 확인과 대시보드 표시로 문제 조기 감지
+3. **Graceful Degradation**: 자동 복구 실패 시에도 수동 복구 버튼으로 대응 가능
+4. **사용자 확인 필수화**: 자동화 시스템에서도 중요한 단계는 사용자 확인을 받아야 데이터 무결성 보장
+
+**Files Modified**:
+- [v10_auto_server.py](v10_auto_server.py) - 전체 개선 (DoorBrowser, AutoDownloader, upload_state, 새 엔드포인트, 대시보드 UI)
+
+**Usage**:
+```
+1. 업로드 버튼 클릭 → 데이터 붙여넣기 자동 수행
+2. ERP에서 F8 (저장) 버튼 클릭 (수동)
+3. 대시보드에서 [저장 완료] 또는 [저장 실패] 클릭
+4. 저장 완료 시에만 history에 추가되어 다음 업로드에서 제외됨
+```

@@ -49,8 +49,32 @@ server_status = {
     "empty_cycle_count": 0,
     "start_time": datetime.datetime.now().isoformat(),
     "lock_manager_connected": False,  # V10
-    "machine_id": ""  # V10
+    "machine_id": "",  # V10
+    "browser_healthy": False,
+    "youngrim_logged_in": None  # None = unknown, True/False = checked
 }
+
+# Upload state tracking for pending_save confirmation
+# States: idle, running, pending_save, completed, failed
+upload_state = {
+    "ledger": {
+        "status": "idle",
+        "pending_files": [],  # Files awaiting save confirmation
+        "pending_since": None,  # Timestamp when entered pending_save
+        "last_completed": None,
+        "last_error": None
+    },
+    "estimate": {
+        "status": "idle",
+        "pending_files": [],
+        "pending_since": None,
+        "last_completed": None,
+        "last_error": None
+    }
+}
+
+# Timeout for pending_save state (30 minutes)
+PENDING_SAVE_TIMEOUT_SEC = 1800
 
 # HTML Template for V10 UI
 HTML_TEMPLATE = """
@@ -69,26 +93,52 @@ HTML_TEMPLATE = """
         .card h2 { margin-top: 0; font-size: 1.2em; color: #00d9ff; display: flex; justify-content: space-between; }
         .badge { font-size: 0.7em; background: #0f3460; padding: 4px 10px; border-radius: 20px; color: #38ef7d; }
         .badge-warning { background: #f5576c; color: white; }
+        .badge-ok { background: #38ef7d; color: #0d1117; }
+        .badge-error { background: #f5576c; color: white; }
         .btn { display: inline-block; padding: 14px 28px; font-size: 15px; font-weight: bold; color: white; border: none; border-radius: 8px; cursor: pointer; text-decoration: none; width: 100%; box-sizing: border-box; text-align: center; margin-top: 10px; transition: all 0.2s; }
         .btn-blue { background: linear-gradient(135deg, #667eea, #764ba2); }
         .btn-green { background: linear-gradient(135deg, #11998e, #38ef7d); }
         .btn-orange { background: linear-gradient(135deg, #f093fb, #f5576c); }
         .btn-gray { background: linear-gradient(135deg, #4b5d67, #322f3d); }
+        .btn-red { background: linear-gradient(135deg, #eb3349, #f45c43); }
+        .btn-small { padding: 10px 20px; font-size: 13px; width: auto; }
         .btn:disabled { background: #444; opacity: 0.6; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
         .status-box { background: #0f3460; padding: 15px; border-radius: 8px; font-family: 'Cascadia Code', monospace; margin-top: 15px; font-size: 0.9em; line-height: 1.6; }
         .label { color: #888; margin-right: 10px; }
         .val { color: #fff; }
+        .val-ok { color: #38ef7d; }
+        .val-warn { color: #ffd93d; }
+        .val-error { color: #f5576c; }
         .pending-count { color: #f5576c; font-weight: bold; }
         .footer { text-align: center; margin-top: 40px; color: #444; font-size: 0.8em; }
         .pulse { animation: pulse-animation 2s infinite; }
         @keyframes pulse-animation { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
         .v10-badge { background: linear-gradient(135deg, #11998e, #38ef7d); padding: 5px 12px; border-radius: 15px; font-size: 0.7em; color: white; font-weight: bold; }
+        .pending-save-card { border: 2px solid #ffd93d; background: #1a1a2e; }
+        .pending-save-card h2 { color: #ffd93d; }
+        .btn-row { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-row .btn { flex: 1; }
+        .health-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .alert-banner { background: #f5576c; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold; }
+        .alert-banner.warning { background: #ffd93d; color: #0d1117; }
     </style>
     <script>
+        let lastUploadState = null;
+
         async function updateStats() {
             try {
-                const res = await fetch('/api/stats');
-                const data = await res.json();
+                const [statsRes, healthRes, uploadStateRes] = await Promise.all([
+                    fetch('/api/stats'),
+                    fetch('/api/health'),
+                    fetch('/api/upload_state')
+                ]);
+                const data = await statsRes.json();
+                const health = await healthRes.json();
+                const uploadState = await uploadStateRes.json();
+                lastUploadState = uploadState;
+
+                // Update Health Status
+                updateHealthStatus(health);
 
                 // Update Lock Manager Status
                 const lockStatus = document.getElementById('lock-status');
@@ -97,60 +147,135 @@ HTML_TEMPLATE = """
                     lockStatus.innerText = '✅ Connected';
                     lockStatus.style.color = '#38ef7d';
                 } else {
-                    lockStatus.innerText = '❌ Disconnected';
-                    lockStatus.style.color = '#f5576c';
+                    lockStatus.innerText = '❌ Disconnected (Standalone)';
+                    lockStatus.style.color = '#ffd93d';
                 }
-                lockMachine.innerText = data.status.machine_id || 'Unknown';
+                lockMachine.innerText = data.status.machine_id || 'Local';
 
                 // Update Downloader
                 document.getElementById('dl-status').innerText = data.status.downloader_status;
                 document.getElementById('dl-last').innerText = data.status.downloader_last_run || 'None';
 
                 // Update Ledger
-                document.getElementById('l-pending').innerText = data.pending.ledger;
-                document.getElementById('l-history').innerText = data.history_count.ledger;
-                const lBtn = document.getElementById('btn-l');
-                if (data.pending.ledger > 0 && data.status.ledger_uploader_status === 'Idle') {
-                    lBtn.disabled = false;
-                    lBtn.innerText = `⬆ Upload Ledger (${data.pending.ledger} items)`;
-                    lBtn.classList.remove('btn-gray');
-                    lBtn.classList.add('btn-blue');
-                } else {
-                    lBtn.disabled = true;
-                    if (data.status.ledger_uploader_status === 'Running') lBtn.innerText = '⏳ Processing...';
-                    else {
-                        lBtn.innerText = '⬆ No items to upload';
-                        lBtn.classList.add('btn-gray');
-                        lBtn.classList.remove('btn-blue');
-                    }
-                }
+                updateUploadCard('ledger', data, uploadState.ledger);
 
                 // Update Estimate
-                document.getElementById('e-pending').innerText = data.pending.estimate;
-                document.getElementById('e-history').innerText = data.history_count.estimate;
-                const eBtn = document.getElementById('btn-e');
-                if (data.pending.estimate > 0 && data.status.estimate_uploader_status === 'Idle') {
-                    eBtn.disabled = false;
-                    eBtn.innerText = `⬆ Upload Estimate (${data.pending.estimate} items)`;
-                    eBtn.classList.remove('btn-gray');
-                    eBtn.classList.add('btn-orange');
+                updateUploadCard('estimate', data, uploadState.estimate);
+
+            } catch (e) { console.error("Stats update failed", e); }
+        }
+
+        function updateHealthStatus(health) {
+            // Browser status
+            const browserEl = document.getElementById('health-browser');
+            if (health.browser_healthy) {
+                browserEl.innerHTML = '🟢 연결됨';
+                browserEl.className = 'val val-ok';
+            } else {
+                browserEl.innerHTML = '🔴 연결 안됨';
+                browserEl.className = 'val val-error';
+            }
+
+            // Login status
+            const loginEl = document.getElementById('health-login');
+            if (health.youngrim_logged_in === true) {
+                loginEl.innerHTML = '🟢 로그인됨';
+                loginEl.className = 'val val-ok';
+            } else if (health.youngrim_logged_in === false) {
+                loginEl.innerHTML = '🔴 로그인 필요';
+                loginEl.className = 'val val-error';
+            } else {
+                loginEl.innerHTML = '⚪ 확인 안됨';
+                loginEl.className = 'val val-warn';
+            }
+
+            // Downloader stuck
+            const stuckEl = document.getElementById('health-stuck');
+            if (health.downloader_stuck) {
+                stuckEl.innerHTML = '🔴 응답 없음';
+                stuckEl.className = 'val val-error';
+            } else {
+                stuckEl.innerHTML = '🟢 정상';
+                stuckEl.className = 'val val-ok';
+            }
+
+            // Uptime
+            const uptimeMin = Math.floor(health.uptime_seconds / 60);
+            document.getElementById('health-uptime').innerText = uptimeMin + '분';
+
+            // Alert banner
+            const alertBanner = document.getElementById('alert-banner');
+            if (!health.browser_healthy) {
+                alertBanner.style.display = 'block';
+                alertBanner.className = 'alert-banner';
+                alertBanner.innerText = '⚠️ 브라우저 연결 끊김 - Edge 브라우저를 확인하세요';
+            } else if (health.youngrim_logged_in === false) {
+                alertBanner.style.display = 'block';
+                alertBanner.className = 'alert-banner warning';
+                alertBanner.innerText = '⚠️ 영림 OMS 로그인 필요 - 브라우저에서 로그인하세요';
+            } else if (health.downloader_stuck) {
+                alertBanner.style.display = 'block';
+                alertBanner.className = 'alert-banner';
+                alertBanner.innerText = '⚠️ 다운로더 응답 없음 - 재시작이 필요할 수 있습니다';
+            } else {
+                alertBanner.style.display = 'none';
+            }
+        }
+
+        function updateUploadCard(type, data, state) {
+            const prefix = type === 'ledger' ? 'l' : 'e';
+            const pendingEl = document.getElementById(prefix + '-pending');
+            const historyEl = document.getElementById(prefix + '-history');
+            const btn = document.getElementById('btn-' + prefix);
+            const pendingCard = document.getElementById('pending-' + type);
+
+            pendingEl.innerText = data.pending[type];
+            historyEl.innerText = data.history_count[type];
+
+            // Check if in pending_save state
+            if (state.status === 'pending_save') {
+                pendingCard.style.display = 'block';
+                const filesEl = document.getElementById('pending-' + type + '-files');
+                const timeEl = document.getElementById('pending-' + type + '-time');
+
+                filesEl.innerText = state.pending_files.join(', ');
+
+                if (state.pending_since) {
+                    const since = new Date(state.pending_since);
+                    const elapsed = Math.floor((Date.now() - since.getTime()) / 1000);
+                    const min = Math.floor(elapsed / 60);
+                    const sec = elapsed % 60;
+                    timeEl.innerText = min + '분 ' + sec + '초';
+                }
+
+                btn.disabled = true;
+                btn.innerText = '⏳ 저장 확인 대기중...';
+            } else {
+                pendingCard.style.display = 'none';
+
+                if (data.pending[type] > 0 && data.status[type + '_uploader_status'] === 'Idle') {
+                    btn.disabled = false;
+                    btn.innerText = `⬆ Upload ${type === 'ledger' ? 'Ledger' : 'Estimate'} (${data.pending[type]} items)`;
+                    btn.classList.remove('btn-gray');
+                    btn.classList.add(type === 'ledger' ? 'btn-blue' : 'btn-orange');
                 } else {
-                    eBtn.disabled = true;
-                    if (data.status.estimate_uploader_status === 'Running') eBtn.innerText = '⏳ Processing...';
-                    else {
-                        eBtn.innerText = '⬆ No items to upload';
-                        eBtn.classList.add('btn-gray');
-                        eBtn.classList.remove('btn-orange');
+                    btn.disabled = true;
+                    if (data.status[type + '_uploader_status'] === 'Running') {
+                        btn.innerText = '⏳ Processing...';
+                    } else {
+                        btn.innerText = '⬆ No items to upload';
+                        btn.classList.add('btn-gray');
+                        btn.classList.remove(type === 'ledger' ? 'btn-blue' : 'btn-orange');
                     }
                 }
-            } catch (e) { console.error("Stats update failed", e); }
+            }
         }
 
         function triggerAction(endpoint, btn) {
             btn.disabled = true;
             fetch(endpoint, { method: 'POST' })
                 .then(r => r.json())
-                .then(d => { 
+                .then(d => {
                     if (d.status === 'success') {
                         setTimeout(updateStats, 500);
                     } else {
@@ -161,12 +286,50 @@ HTML_TEMPLATE = """
                 .catch(e => { alert(e); btn.disabled = false; });
         }
 
+        function confirmSave(type) {
+            fetch('/confirm_save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: type })
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.status === 'success') {
+                    alert('✅ ' + d.message);
+                    updateStats();
+                } else {
+                    alert('Error: ' + d.message);
+                }
+            });
+        }
+
+        function markFailed(type) {
+            if (!confirm('저장에 실패했습니까? 해당 파일들은 다시 업로드됩니다.')) return;
+
+            fetch('/mark_failed', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: type })
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.status === 'success') {
+                    alert('⚠️ ' + d.message);
+                    updateStats();
+                } else {
+                    alert('Error: ' + d.message);
+                }
+            });
+        }
+
         setInterval(updateStats, 3000);
         window.onload = updateStats;
     </script>
 </head>
 <body>
     <div class="container">
+        <div id="alert-banner" class="alert-banner" style="display:none;"></div>
+
         <div class="header">
             <div>
                 <h1>⚡ V10 Dashboard <span class="v10-badge">DISTRIBUTED</span></h1>
@@ -176,10 +339,23 @@ HTML_TEMPLATE = """
         </div>
 
         <div class="card">
+            <h2>🏥 System Health</h2>
+            <div class="status-box health-grid">
+                <div><span class="label">브라우저:</span><span class="val" id="health-browser">-</span></div>
+                <div><span class="label">영림 로그인:</span><span class="val" id="health-login">-</span></div>
+                <div><span class="label">다운로더:</span><span class="val" id="health-stuck">-</span></div>
+                <div><span class="label">가동시간:</span><span class="val" id="health-uptime">-</span></div>
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-gray btn-small" onclick="triggerAction('/check_login', this)">🔍 로그인 확인</button>
+                <button class="btn btn-gray btn-small" onclick="triggerAction('/restart_downloader', this)">🔄 다운로더 재시작</button>
+            </div>
+        </div>
+
+        <div class="card">
             <h2>🔒 Distributed Lock Manager <span class="badge" id="lock-status-badge">Active</span></h2>
             <div class="status-box">
                 <div><span class="label">Status:</span><span class="val" id="lock-status">Loading...</span></div>
-                <div><span class="label">Machine ID:</span><span class="val" id="lock-machine">-</span></div>
             </div>
         </div>
 
@@ -189,9 +365,36 @@ HTML_TEMPLATE = """
                 <div><span class="label">Status:</span><span class="val" id="dl-status">Loading...</span></div>
                 <div><span class="label">Last Run:</span><span class="val" id="dl-last">-</span></div>
             </div>
-            <div style="display: flex; gap: 10px;">
+            <div class="btn-row">
                 <button class="btn btn-blue" onclick="triggerAction('/trigger_download', this)">📩 Manual Download</button>
-                <button class="btn btn-orange" onclick="triggerAction('/trigger_download_force', this)">🔥 Force Sync (Bypass)</button>
+                <button class="btn btn-orange" onclick="triggerAction('/trigger_download_force', this)">🔥 Force Sync</button>
+            </div>
+        </div>
+
+        <!-- Pending Save Confirmation Cards (hidden by default) -->
+        <div id="pending-ledger" class="card pending-save-card" style="display:none;">
+            <h2>⏳ 원장 저장 확인 필요</h2>
+            <div class="status-box">
+                <div><span class="label">대기 파일:</span><span class="val" id="pending-ledger-files">-</span></div>
+                <div><span class="label">대기 시간:</span><span class="val" id="pending-ledger-time">-</span></div>
+            </div>
+            <p style="color:#ffd93d; margin:10px 0;">ERP에서 저장(F8) 버튼을 클릭했는지 확인하세요</p>
+            <div class="btn-row">
+                <button class="btn btn-green" onclick="confirmSave('ledger')">✅ 저장 완료</button>
+                <button class="btn btn-red" onclick="markFailed('ledger')">❌ 저장 실패</button>
+            </div>
+        </div>
+
+        <div id="pending-estimate" class="card pending-save-card" style="display:none;">
+            <h2>⏳ 견적 저장 확인 필요</h2>
+            <div class="status-box">
+                <div><span class="label">대기 파일:</span><span class="val" id="pending-estimate-files">-</span></div>
+                <div><span class="label">대기 시간:</span><span class="val" id="pending-estimate-time">-</span></div>
+            </div>
+            <p style="color:#ffd93d; margin:10px 0;">ERP에서 저장(F8) 버튼을 클릭했는지 확인하세요</p>
+            <div class="btn-row">
+                <button class="btn btn-green" onclick="confirmSave('estimate')">✅ 저장 완료</button>
+                <button class="btn btn-red" onclick="markFailed('estimate')">❌ 저장 실패</button>
             </div>
         </div>
 
@@ -215,7 +418,7 @@ HTML_TEMPLATE = """
 
         <div class="card">
             <h2>⚙️ Server Control</h2>
-            <button class="btn btn-gray" onclick="triggerAction('/reset_status', this)">🔄 Reset Server Status</button>
+            <button class="btn btn-gray" onclick="triggerAction('/reset_status', this)">🔄 Reset All Status</button>
         </div>
 
         <div class="footer">
@@ -230,6 +433,76 @@ class DoorBrowser:
     """Browser controller for scraping"""
     def __init__(self):
         self.driver = None
+        self.last_health_check = None
+        self.youngrim_login_status = None
+
+    def is_healthy(self) -> bool:
+        """Check if browser connection is alive and responsive"""
+        try:
+            if not self.driver:
+                return False
+            # Test connection with simple operation
+            _ = self.driver.current_url
+            self.last_health_check = datetime.datetime.now().isoformat()
+            return True
+        except Exception as e:
+            logger.warning(f"[Browser] Health check failed: {e}")
+            return False
+
+    def ensure_connection(self) -> bool:
+        """Ensure browser is connected, attempt recovery if not"""
+        if self.is_healthy():
+            return True
+
+        logger.info("[Browser] Connection lost, attempting recovery...")
+        self.driver = None
+        try:
+            self.launch()
+            return True
+        except Exception as e:
+            logger.error(f"[Browser] Recovery failed: {e}")
+            return False
+
+    def check_youngrim_login(self) -> bool:
+        """Check if currently logged into Youngrim OMS"""
+        try:
+            if not self.is_healthy():
+                self.youngrim_login_status = False
+                return False
+
+            # Navigate to main page
+            self.driver.get(config.YOUNGRIM_URL)
+            time.sleep(2)
+
+            current_url = self.driver.current_url
+
+            # Check for login form elements (indicates NOT logged in)
+            login_indicators = self.driver.find_elements(By.CSS_SELECTOR,
+                "input[name='user_id'], input[name='password'], form[action*='login']")
+
+            if login_indicators:
+                logger.warning("[Browser] Youngrim login required - login form detected")
+                self.youngrim_login_status = False
+                return False
+
+            # Check for logged-in indicators (menu, navigation, etc.)
+            logged_in_indicators = self.driver.find_elements(By.CSS_SELECTOR,
+                ".logout, .gnb, .lnb, #menu, .user-info, a[href*='logout']")
+
+            if logged_in_indicators:
+                logger.info("[Browser] Youngrim login confirmed")
+                self.youngrim_login_status = True
+                return True
+
+            # If neither found, assume logged in (some pages don't have these elements)
+            logger.info("[Browser] Youngrim login status uncertain - assuming logged in")
+            self.youngrim_login_status = True
+            return True
+
+        except Exception as e:
+            logger.warning(f"[Browser] Youngrim login check failed: {e}")
+            self.youngrim_login_status = False
+            return False
 
     def launch(self):
         if self.driver:
@@ -310,41 +583,86 @@ class AutoDownloader(threading.Thread):
         self.running = True
         self.active_mode = False
         self.daemon = True
+        self.last_heartbeat = time.time()
+        self.consecutive_errors = 0
+        self.max_consecutive_errors = 5  # Auto-reset after 5 consecutive errors
 
     def activate(self):
         self.active_mode = True
+
+    def update_heartbeat(self):
+        """Update heartbeat timestamp"""
+        self.last_heartbeat = time.time()
+
+    def is_stuck(self) -> bool:
+        """Check if downloader is stuck (no heartbeat for 10+ minutes while running)"""
+        if server_status["downloader_status"] != "Running":
+            return False
+        elapsed = time.time() - self.last_heartbeat
+        return elapsed > 600  # 10 minutes
 
     def run(self):
         logger.info("[Downloader] Thread Initiated. Waiting for start command...")
         while self.running:
             if self.active_mode:
+                self.update_heartbeat()
                 try:
                     self.download_cycle()
+                    self.consecutive_errors = 0  # Reset error count on success
                 except Exception as e:
-                    error_handler.handle(e, context={"thread": "Downloader"}, severity=ErrorSeverity.HIGH)
+                    self.consecutive_errors += 1
+                    error_handler.handle(e, context={"thread": "Downloader", "consecutive_errors": self.consecutive_errors}, severity=ErrorSeverity.HIGH)
+                    server_status["last_error"] = f"{datetime.datetime.now().strftime('%H:%M:%S')} - {str(e)[:100]}"
+
+                    # Auto-recovery after too many consecutive errors
+                    if self.consecutive_errors >= self.max_consecutive_errors:
+                        logger.warning(f"[Downloader] Too many consecutive errors ({self.consecutive_errors}). Attempting auto-recovery...")
+                        self._attempt_recovery()
 
                 # Intelligent Wait based on empty cycles
                 wait_sec = config.DOWNLOAD_INTERVAL_SEC
                 if server_status["empty_cycle_count"] >= 5:
-                    wait_sec = min(wait_sec * 2, 7200) # Max 2 hours
+                    wait_sec = min(wait_sec * 2, 7200)  # Max 2 hours
                     logger.info(f"[Downloader] Consecutive empty cycles detected ({server_status['empty_cycle_count']}). Extending wait to {wait_sec//60} min.")
 
-                # Wait loop with termination check
+                # Wait loop with termination check and heartbeat updates
                 for _ in range(max(1, wait_sec // 5)):
-                    if not self.running or self.active_mode == False: break # Force stop or deactivation
+                    if not self.running or not self.active_mode:
+                        break
+                    self.update_heartbeat()  # Keep heartbeat alive during wait
                     time.sleep(5)
             else:
                 time.sleep(2)
 
+    def _attempt_recovery(self):
+        """Attempt to recover from consecutive errors"""
+        try:
+            # Reset browser connection
+            browser_manager.driver = None
+            time.sleep(5)
+
+            # Reset status
+            server_status["downloader_status"] = "Idle"
+            server_status["last_error"] = None
+            self.consecutive_errors = 0
+
+            logger.info("[Downloader] Auto-recovery completed")
+        except Exception as e:
+            logger.error(f"[Downloader] Auto-recovery failed: {e}")
+
     def download_cycle(self, force_mode=False):
         server_status["downloader_status"] = "Running"
         server_status["downloader_last_run"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.update_heartbeat()
 
         try:
             logger.info(f"[Downloader] Starting cycle (Force Mode: {force_mode})...")
 
-            # 1. Launch/Check Browser
-            browser_manager.launch()
+            # 1. Ensure browser connection (with auto-recovery)
+            if not browser_manager.ensure_connection():
+                raise ConnectionError("Failed to establish browser connection")
+
+            server_status["browser_healthy"] = True
 
             logger.info(f"[Downloader] Navigating to {config.YOUNGRIM_URL} to ensure session...")
             browser_manager.navigate(config.YOUNGRIM_URL)
@@ -596,14 +914,21 @@ def get_stats():
 
 @app.route('/trigger_ledger', methods=['POST'])
 def trigger_ledger_upload():
-    """Trigger ledger upload with lock awareness"""
+    """Trigger ledger upload with lock awareness and pending_save state"""
     if not ledger_lock.acquire(blocking=False):
         return jsonify({"status": "error", "message": "Ledger upload already running"}), 409
 
+    # Check if already in pending_save state
+    if upload_state["ledger"]["status"] == "pending_save":
+        ledger_lock.release()
+        return jsonify({"status": "error", "message": "이전 업로드 저장 확인이 필요합니다"}), 409
+
     try:
         server_status["ledger_uploader_status"] = "Running"
+        upload_state["ledger"]["status"] = "running"
 
         def run_upload():
+            processed_files = []
             try:
                 logger.info("[Server] Ledger upload triggered")
 
@@ -619,6 +944,7 @@ def trigger_ledger_upload():
                 if not pending_files:
                     logger.info("[Server] No pending ledger files to process")
                     server_status["ledger_uploader_status"] = "Idle"
+                    upload_state["ledger"]["status"] = "idle"
                     ledger_lock.release()
                     return
 
@@ -649,10 +975,9 @@ def trigger_ledger_upload():
                             automation.close(keep_browser_open=True)
 
                             if success:
-                                # Add to history
-                                history["ledger"].append(order_id)
-                                save_history(history)
-                                logger.info(f"[Server] ✅ Successfully uploaded {order_id}")
+                                # Don't add to history yet - wait for save confirmation
+                                processed_files.append(order_id)
+                                logger.info(f"[Server] 📋 Pasted {order_id} - awaiting save confirmation")
                             else:
                                 logger.error(f"[Server] ❌ Failed to upload {order_id}")
                         else:
@@ -662,12 +987,22 @@ def trigger_ledger_upload():
                         logger.error(f"[Server] Error processing {order_id}: {e}")
                         continue
 
+                # Set to pending_save state if any files were processed
+                if processed_files:
+                    upload_state["ledger"]["status"] = "pending_save"
+                    upload_state["ledger"]["pending_files"] = processed_files
+                    upload_state["ledger"]["pending_since"] = datetime.datetime.now().isoformat()
+                    logger.info(f"[Server] ⏳ Ledger upload complete - {len(processed_files)} files awaiting save confirmation")
+                else:
+                    upload_state["ledger"]["status"] = "idle"
+
                 server_status["ledger_uploader_status"] = "Idle"
-                logger.info("[Server] Ledger upload complete")
 
             except Exception as e:
                 logger.error(f"[Server] Ledger upload error: {e}")
                 server_status["ledger_uploader_status"] = "Idle"
+                upload_state["ledger"]["status"] = "idle"
+                upload_state["ledger"]["last_error"] = str(e)
             finally:
                 ledger_lock.release()
 
@@ -678,18 +1013,26 @@ def trigger_ledger_upload():
 
     except Exception as e:
         ledger_lock.release()
+        upload_state["ledger"]["status"] = "idle"
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/trigger_estimate', methods=['POST'])
 def trigger_estimate_upload():
-    """Trigger estimate upload with lock awareness"""
+    """Trigger estimate upload with lock awareness and pending_save state"""
     if not estimate_lock.acquire(blocking=False):
         return jsonify({"status": "error", "message": "Estimate upload already running"}), 409
 
+    # Check if already in pending_save state
+    if upload_state["estimate"]["status"] == "pending_save":
+        estimate_lock.release()
+        return jsonify({"status": "error", "message": "이전 업로드 저장 확인이 필요합니다"}), 409
+
     try:
         server_status["estimate_uploader_status"] = "Running"
+        upload_state["estimate"]["status"] = "running"
 
         def run_upload():
+            processed_files = []
             try:
                 logger.info("[Server] Estimate upload triggered")
 
@@ -705,6 +1048,7 @@ def trigger_estimate_upload():
                 if not pending_files:
                     logger.info("[Server] No pending estimate files to process")
                     server_status["estimate_uploader_status"] = "Idle"
+                    upload_state["estimate"]["status"] = "idle"
                     estimate_lock.release()
                     return
 
@@ -735,10 +1079,9 @@ def trigger_estimate_upload():
                             automation.close(keep_browser_open=True)
 
                             if success:
-                                # Add to history
-                                history["estimate"].append(order_id)
-                                save_history(history)
-                                logger.info(f"[Server] ✅ Successfully uploaded {order_id}")
+                                # Don't add to history yet - wait for save confirmation
+                                processed_files.append(order_id)
+                                logger.info(f"[Server] 📋 Pasted {order_id} - awaiting save confirmation")
                             else:
                                 logger.error(f"[Server] ❌ Failed to upload {order_id}")
                         else:
@@ -748,12 +1091,22 @@ def trigger_estimate_upload():
                         logger.error(f"[Server] Error processing {order_id}: {e}")
                         continue
 
+                # Set to pending_save state if any files were processed
+                if processed_files:
+                    upload_state["estimate"]["status"] = "pending_save"
+                    upload_state["estimate"]["pending_files"] = processed_files
+                    upload_state["estimate"]["pending_since"] = datetime.datetime.now().isoformat()
+                    logger.info(f"[Server] ⏳ Estimate upload complete - {len(processed_files)} files awaiting save confirmation")
+                else:
+                    upload_state["estimate"]["status"] = "idle"
+
                 server_status["estimate_uploader_status"] = "Idle"
-                logger.info("[Server] Estimate upload complete")
 
             except Exception as e:
                 logger.error(f"[Server] Estimate upload error: {e}")
                 server_status["estimate_uploader_status"] = "Idle"
+                upload_state["estimate"]["status"] = "idle"
+                upload_state["estimate"]["last_error"] = str(e)
             finally:
                 estimate_lock.release()
 
@@ -764,6 +1117,7 @@ def trigger_estimate_upload():
 
     except Exception as e:
         estimate_lock.release()
+        upload_state["estimate"]["status"] = "idle"
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/trigger_download', methods=['POST'])
@@ -807,7 +1161,165 @@ def reset_status():
     server_status["downloader_status"] = "Idle"
     server_status["ledger_uploader_status"] = "Idle"
     server_status["estimate_uploader_status"] = "Idle"
+    # Reset upload states
+    upload_state["ledger"]["status"] = "idle"
+    upload_state["ledger"]["pending_files"] = []
+    upload_state["estimate"]["status"] = "idle"
+    upload_state["estimate"]["pending_files"] = []
     return jsonify({"status": "success"})
+
+@app.route('/api/health')
+def health_check():
+    """System health check endpoint"""
+    browser_ok = browser_manager.is_healthy() if browser_manager else False
+    server_status["browser_healthy"] = browser_ok
+
+    # Check if downloader thread is stuck (no activity for 10+ minutes while "Running")
+    downloader_stuck = False
+    if server_status["downloader_status"] == "Running" and server_status["downloader_last_run"]:
+        try:
+            last_run = datetime.datetime.strptime(server_status["downloader_last_run"], "%Y-%m-%d %H:%M:%S")
+            elapsed = (datetime.datetime.now() - last_run).total_seconds()
+            downloader_stuck = elapsed > 600  # 10 minutes
+        except:
+            pass
+
+    # Check pending_save timeout
+    pending_save_timeout = {}
+    for doc_type in ["ledger", "estimate"]:
+        if upload_state[doc_type]["status"] == "pending_save" and upload_state[doc_type]["pending_since"]:
+            try:
+                pending_time = datetime.datetime.fromisoformat(upload_state[doc_type]["pending_since"])
+                elapsed = (datetime.datetime.now() - pending_time).total_seconds()
+                if elapsed > PENDING_SAVE_TIMEOUT_SEC:
+                    pending_save_timeout[doc_type] = int(elapsed)
+            except:
+                pass
+
+    uptime = (datetime.datetime.now() - datetime.datetime.fromisoformat(server_status["start_time"])).total_seconds()
+
+    return jsonify({
+        "browser_healthy": browser_ok,
+        "youngrim_logged_in": server_status.get("youngrim_logged_in"),
+        "downloader_stuck": downloader_stuck,
+        "pending_save_timeout": pending_save_timeout,
+        "uptime_seconds": int(uptime),
+        "last_error": server_status.get("last_error")
+    })
+
+@app.route('/check_login', methods=['POST'])
+def check_login():
+    """Manually check Youngrim OMS login status"""
+    try:
+        if not browser_manager:
+            return jsonify({"status": "error", "message": "Browser not initialized"}), 500
+
+        logged_in = browser_manager.check_youngrim_login()
+        server_status["youngrim_logged_in"] = logged_in
+
+        return jsonify({
+            "status": "success",
+            "logged_in": logged_in,
+            "message": "로그인 상태 정상" if logged_in else "로그인 필요 - 브라우저에서 영림 OMS에 로그인하세요"
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/upload_state')
+def get_upload_state():
+    """Get current upload state for pending_save tracking"""
+    return jsonify(upload_state)
+
+@app.route('/confirm_save', methods=['POST'])
+def confirm_save():
+    """Confirm that ERP save was clicked successfully"""
+    data = request.get_json() or {}
+    doc_type = data.get("type", "ledger")  # ledger or estimate
+
+    if doc_type not in ["ledger", "estimate"]:
+        return jsonify({"status": "error", "message": "Invalid type"}), 400
+
+    if upload_state[doc_type]["status"] != "pending_save":
+        return jsonify({"status": "error", "message": f"No pending save for {doc_type}"}), 400
+
+    # Move pending files to history
+    history = load_history()
+    for file_id in upload_state[doc_type]["pending_files"]:
+        if file_id not in history.get(doc_type, []):
+            history[doc_type].append(file_id)
+    save_history(history)
+
+    # Update state
+    upload_state[doc_type]["status"] = "idle"
+    upload_state[doc_type]["last_completed"] = datetime.datetime.now().isoformat()
+    completed_count = len(upload_state[doc_type]["pending_files"])
+    upload_state[doc_type]["pending_files"] = []
+    upload_state[doc_type]["pending_since"] = None
+
+    logger.info(f"[Server] ✅ Save confirmed for {doc_type} ({completed_count} files)")
+
+    return jsonify({
+        "status": "success",
+        "message": f"{completed_count}건 저장 완료 확인됨",
+        "completed_count": completed_count
+    })
+
+@app.route('/mark_failed', methods=['POST'])
+def mark_failed():
+    """Mark pending upload as failed (needs retry)"""
+    data = request.get_json() or {}
+    doc_type = data.get("type", "ledger")
+
+    if doc_type not in ["ledger", "estimate"]:
+        return jsonify({"status": "error", "message": "Invalid type"}), 400
+
+    if upload_state[doc_type]["status"] != "pending_save":
+        return jsonify({"status": "error", "message": f"No pending save for {doc_type}"}), 400
+
+    # Don't add to history - files will be retried
+    failed_count = len(upload_state[doc_type]["pending_files"])
+
+    # Update state
+    upload_state[doc_type]["status"] = "idle"
+    upload_state[doc_type]["last_error"] = datetime.datetime.now().isoformat()
+    upload_state[doc_type]["pending_files"] = []
+    upload_state[doc_type]["pending_since"] = None
+
+    logger.warning(f"[Server] ❌ Save failed for {doc_type} ({failed_count} files will be retried)")
+
+    return jsonify({
+        "status": "success",
+        "message": f"{failed_count}건 저장 실패 - 다시 시도 필요",
+        "failed_count": failed_count
+    })
+
+@app.route('/restart_downloader', methods=['POST'])
+def restart_downloader():
+    """Restart the downloader thread"""
+    global downloader
+
+    try:
+        # Stop current downloader
+        if downloader:
+            downloader.running = False
+            downloader.active_mode = False
+            time.sleep(2)
+
+        # Reset status
+        server_status["downloader_status"] = "Idle"
+        server_status["empty_cycle_count"] = 0
+
+        # Start new downloader
+        downloader = AutoDownloader()
+        downloader.start()
+        downloader.activate()
+
+        logger.info("[Server] Downloader restarted successfully")
+        return jsonify({"status": "success", "message": "다운로더가 재시작되었습니다"})
+
+    except Exception as e:
+        logger.error(f"[Server] Failed to restart downloader: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 # Main Execution
 def cleanup_port(port):
