@@ -47,11 +47,12 @@ echo.
 
 REM Edge 실행 경로 (표준 경로)
 set EDGE_PATH=C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe
+set AUTO_DATA_DIR=%CD%\data\edge_profile
 
 start "" "%EDGE_PATH%" ^
   --remote-debugging-port=9333 ^
-  --user-data-dir="%LOCALAPPDATA%\Microsoft\Edge\User Data" ^
-  --profile-directory="Default" ^
+  --user-data-dir="%AUTO_DATA_DIR%" ^
+  --profile-directory="Automation" ^
   --no-first-run ^
   --no-default-browser-check ^
   http://door.yl.co.kr/oms/main.jsp
