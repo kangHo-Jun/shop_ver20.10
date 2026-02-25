@@ -11,19 +11,21 @@ from selenium import webdriver
 from selenium.webdriver.edge.options import Options as EdgeOptions
 from selenium.webdriver.common.by import By
 import traceback
+import atexit
+import signal
 
 # Import foundation modules
 from config import config
 from logging_config import logger
 from error_handler import error_handler, ErrorSeverity
 
-# V10: Import distributed lock manager
-from lock_manager import DistributedLockManager
+from lock_manager import DistributedLockManager, RetryExhaustedError
 
 # Import existing logic
 try:
     import local_file_processor
     from erp_upload_automation_v2 import ErpUploadAutomation
+    from state_manager import state_manager
 except ImportError as e:
     logger.critical(f"Error importing modules: {e}")
     sys.exit(1)
@@ -33,6 +35,7 @@ app = Flask(__name__)
 lock = threading.Lock()
 ledger_lock = threading.Lock()
 estimate_lock = threading.Lock()
+browser_lock = threading.Lock()  # V10: 브라우저 포트(9333) 경합 방지용 락
 
 # V10: Initialize distributed lock manager
 distributed_lock = DistributedLockManager()
@@ -231,6 +234,15 @@ HTML_TEMPLATE = """
 
             pendingEl.innerText = data.pending[type];
             historyEl.innerText = data.history_count[type];
+            
+            // New V10 Metrics
+            if (data.metrics) {
+                document.getElementById(prefix + '-metrics-row').style.display = 'flex';
+                document.getElementById(prefix + '-today-dl').innerText = data.metrics[type].today_downloaded;
+                document.getElementById(prefix + '-ready').innerText = data.metrics[type].ready_to_upload;
+                document.getElementById(prefix + '-today-up').innerText = data.metrics[type].uploaded_today;
+                document.getElementById(prefix + '-failed').innerText = data.metrics[type].failed;
+            }
 
             // Check if in pending_save state
             if (state.status === 'pending_save') {
@@ -401,8 +413,14 @@ HTML_TEMPLATE = """
         <div class="card">
             <h2>📦 Purchase Order (원장)</h2>
             <div class="status-box">
-                <div><span class="label">Pending:</span><span class="val pending-count" id="l-pending">0</span> items</div>
-                <div><span class="label">History:</span><span class="val" id="l-history">0</span> processed</div>
+                <div><span class="label">Pending (READY):</span><span class="val pending-count" id="l-pending">0</span> items</div>
+                <div><span class="label">Total History:</span><span class="val" id="l-history">0</span> processed</div>
+                <div id="l-metrics-row" style="display:none; flex-wrap: wrap; gap: 15px; margin-top: 10px; border-top: 1px solid #0f3460; padding-top: 10px; font-size: 0.8em;">
+                    <div><span class="label">Today Downloaded:</span><span class="val" id="l-today-dl">0</span></div>
+                    <div><span class="label">Ready:</span><span class="val" id="l-ready">0</span></div>
+                    <div><span class="label">Uploaded Today:</span><span class="val" id="l-today-up">0</span></div>
+                    <div><span class="label">Failed:</span><span class="val" id="l-failed">0</span></div>
+                </div>
             </div>
             <button id="btn-l" class="btn btn-blue" onclick="triggerAction('/trigger_ledger', this)" disabled>⬆ Upload Ledger</button>
         </div>
@@ -410,8 +428,14 @@ HTML_TEMPLATE = """
         <div class="card">
             <h2>📋 Sales Estimate (견적)</h2>
             <div class="status-box">
-                <div><span class="label">Pending:</span><span class="val pending-count" id="e-pending">0</span> items</div>
-                <div><span class="label">History:</span><span class="val" id="e-history">0</span> processed</div>
+                <div><span class="label">Pending (READY):</span><span class="val pending-count" id="e-pending">0</span> items</div>
+                <div><span class="label">Total History:</span><span class="val" id="e-history">0</span> processed</div>
+                <div id="e-metrics-row" style="display:none; flex-wrap: wrap; gap: 15px; margin-top: 10px; border-top: 1px solid #0f3460; padding-top: 10px; font-size: 0.8em;">
+                    <div><span class="label">Today Downloaded:</span><span class="val" id="e-today-dl">0</span></div>
+                    <div><span class="label">Ready:</span><span class="val" id="e-ready">0</span></div>
+                    <div><span class="label">Uploaded Today:</span><span class="val" id="e-today-up">0</span></div>
+                    <div><span class="label">Failed:</span><span class="val" id="e-failed">0</span></div>
+                </div>
             </div>
             <button id="btn-e" class="btn btn-orange" onclick="triggerAction('/trigger_estimate', this)" disabled>⬆ Upload Estimate</button>
         </div>
@@ -527,9 +551,25 @@ class DoorBrowser:
         sock.close()
 
         if result != 0:
-            error_msg = f"[Browser] Edge is not running on port {debug_port}. Please run start_edge_debug.ps1 first!"
-            logger.error(error_msg)
-            raise ConnectionError(error_msg)
+            logger.info(f"[Browser] Edge is not running on port {debug_port}. Attempting auto-launch...")
+            try:
+                # start_edge_debug.bat을 새로운 콘솔창에서 비동기로 실행
+                subprocess.Popen(["cmd", "/c", "start_edge_debug.bat"], 
+                                 creationflags=subprocess.CREATE_NEW_CONSOLE)
+                logger.info("[Browser] Waiting for Edge to initialize (5s)...")
+                time.sleep(5)
+                
+                # 포트 재점검
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                result = sock.connect_ex(('127.0.0.1', debug_port))
+                sock.close()
+                
+                if result != 0:
+                    raise ConnectionError(f"Edge failed to start on port {debug_port} after auto-launch attempt.")
+            except Exception as e:
+                error_msg = f"[Browser] Auto-launch failed: {e}"
+                logger.error(error_msg)
+                raise ConnectionError(error_msg)
 
         logger.info(f"[Browser] Edge detected on port {debug_port}")
         time.sleep(2)
@@ -573,8 +613,11 @@ def load_history():
     return default_history
 
 def save_history(history_dict):
-    with open(config.HISTORY_FILE, 'w', encoding='utf-8') as f:
-        json.dump(history_dict, f, ensure_ascii=False, indent=2)
+    try:
+        with open(config.HISTORY_FILE, 'w', encoding='utf-8') as f:
+            json.dump(history_dict, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logger.error(f"[History] Failed to save history: {e}")
 
 class AutoDownloader(threading.Thread):
     """Background thread to download files from both ledger and estimate pages"""
@@ -637,16 +680,21 @@ class AutoDownloader(threading.Thread):
     def _attempt_recovery(self):
         """Attempt to recover from consecutive errors"""
         try:
-            # Reset browser connection
+            logger.warning("[Downloader] Running aggressive recovery...")
+            
+            # 1. Force close any browser processes on debug port
+            cleanup_port(config.BROWSER_DEBUG_PORT)
+            
+            # 2. Reset browser connection
             browser_manager.driver = None
             time.sleep(5)
 
-            # Reset status
+            # 3. Reset status
             server_status["downloader_status"] = "Idle"
             server_status["last_error"] = None
             self.consecutive_errors = 0
 
-            logger.info("[Downloader] Auto-recovery completed")
+            logger.info("[Downloader] Aggressive auto-recovery completed")
         except Exception as e:
             logger.error(f"[Downloader] Auto-recovery failed: {e}")
 
@@ -659,14 +707,16 @@ class AutoDownloader(threading.Thread):
             logger.info(f"[Downloader] Starting cycle (Force Mode: {force_mode})...")
 
             # 1. Ensure browser connection (with auto-recovery)
-            if not browser_manager.ensure_connection():
-                raise ConnectionError("Failed to establish browser connection")
+            with browser_lock:
+                if not browser_manager.ensure_connection():
+                    raise ConnectionError("Failed to establish browser connection")
 
             server_status["browser_healthy"] = True
 
             logger.info(f"[Downloader] Navigating to {config.YOUNGRIM_URL} to ensure session...")
-            browser_manager.navigate(config.YOUNGRIM_URL)
-            time.sleep(3)
+            with browser_lock:
+                browser_manager.navigate(config.YOUNGRIM_URL)
+                time.sleep(3)
 
             # 2. Download from Ledger Lists (multiple pages: 산업/임업)
             logger.info("[Downloader] Processing Ledger Lists...")
@@ -689,6 +739,12 @@ class AutoDownloader(threading.Thread):
                 server_status["empty_cycle_count"] = 0
                 logger.info(f"[Downloader] Downloaded {l_new} ledger + {e_new} estimate files.")
         
+        except RetryExhaustedError as e:
+            logger.error(f"[V10] Critical Lock Manager failure: {e}")
+            logger.warning("[V10] Switching to STANDALONE mode for this machine due to persistent API errors")
+            config.ENABLE_DISTRIBUTED_LOCK = False
+            server_status["lock_manager_connected"] = False
+            server_status["last_error"] = "Lock Manager Error - Switched to Standalone"
         except Exception as e:
             logger.error(f"[Downloader] Cycle failed: {e}")
             raise e
@@ -707,8 +763,9 @@ class AutoDownloader(threading.Thread):
             force_mode: If True, bypass history and lock checks
         """
         logger.info(f"[Downloader] Fetching page: {list_url}")
-        browser_manager.navigate(list_url)
-        time.sleep(2)
+        with browser_lock:
+            browser_manager.navigate(list_url)
+            time.sleep(2)
 
         html_source = browser_manager.get_source()
 
@@ -731,18 +788,23 @@ class AutoDownloader(threading.Thread):
             if not order_no or order_no == "":
                 continue
 
-            # V10: Check distributed lock BEFORE checking local history (only if enabled)
-            # SKIP if lock exists and NOT in force mode
-            if not force_mode:
+                # V10: Check v10_state.json BEFORE checking local history
+                # SKIP if already completed or locked
+                state_keys = state_manager.get_keys_by_status(doc_type, state_manager.STATUS_COMPLETED)
+                if order_no in state_keys or any(k.startswith(order_no) for k in state_keys):
+                    logger.info(f"[Downloader] {order_no} already completed in state - skipping")
+                    continue
+
                 # Only use distributed lock if enabled
                 if config.ENABLE_DISTRIBUTED_LOCK:
                     if not distributed_lock.acquire_lock(order_no, notes=f"Download attempt from {doc_type}"):
                         logger.info(f"[V10] Order {order_no} is locked by another machine or already completed - skipping")
                         continue
 
-                # Check local history (backward compatibility)
+                # Check local history (backward compatibility - still skip if in v10_history)
                 if order_no in history.get(doc_type, []):
                     logger.info(f"[Downloader] {order_no} already in local history - skipping")
+                    # No need to update state manager here as it might be an old entry
                     # Release lock since we're skipping (only if distributed lock enabled)
                     if config.ENABLE_DISTRIBUTED_LOCK:
                         distributed_lock.release_lock(order_no, status=DistributedLockManager.STATUS_COMPLETED,
@@ -812,16 +874,17 @@ class AutoDownloader(threading.Thread):
 
                     # 상세 페이지로 직접 이동
                     logger.info(f"[Downloader] Navigating to detail page: {detail_url}")
-                    browser_manager.driver.get(detail_url)
-                    time.sleep(3)
+                    with browser_lock:
+                        browser_manager.driver.get(detail_url)
+                        time.sleep(3)
 
-                    # 상세 페이지 HTML 가져오기
-                    detail_html = browser_manager.get_source()
-                    logger.info(f"[Downloader] Retrieved detail page HTML ({len(detail_html)} bytes)")
+                        # 상세 페이지 HTML 가져오기
+                        detail_html = browser_manager.get_source()
+                        logger.info(f"[Downloader] Retrieved detail page HTML ({len(detail_html)} bytes)")
 
-                    # 목록 페이지로 복귀
-                    browser_manager.driver.get(original_url)
-                    time.sleep(2)
+                        # 목록 페이지로 복귀
+                        browser_manager.driver.get(original_url)
+                        time.sleep(2)
                     logger.info(f"[Downloader] Returned to list page")
 
                 except Exception as nav_error:
@@ -847,12 +910,21 @@ class AutoDownloader(threading.Thread):
 
                 logger.info(f"[Downloader] ✅ Saved {filepath}")
 
-                # Add to local history
+                # Add to local state (DOWNLOADED)
                 # Use UNIQUE key for history in unique filename mode
                 history_key = f"{order_no}_{button_id}"
-                if doc_type not in history: history[doc_type] = []
-                history[doc_type].append(history_key)
-                save_history(history)
+                state_manager.update_state(doc_type, history_key, state_manager.STATUS_DOWNLOADED)
+
+                # Parsing Success -> READY
+                # Try simple validation to move to READY
+                try:
+                    if len(detail_html) > 1000: # Basic check if HTML is retrieved
+                        state_manager.update_state(doc_type, history_key, state_manager.STATUS_READY)
+                    else:
+                        state_manager.update_state(doc_type, history_key, state_manager.STATUS_FAILED, error_msg="HTML context too small")
+                except Exception as parse_e:
+                    logger.error(f"[Downloader] Parsing error for {history_key}: {parse_e}")
+                    state_manager.update_state(doc_type, history_key, state_manager.STATUS_FAILED, error_msg=str(parse_e))
 
                 # V10: Update lock status to completed (only if distributed lock enabled)
                 # Use same order_no for lock (distributed lock uses order_no as ID)
@@ -892,24 +964,37 @@ def get_stats():
     ledger_history_set = set(history.get("ledger", []))
     estimate_history_set = set(history.get("estimate", []))
 
-    # Calculate pending based on existence vs history
-    # stem is now {order_no}_{button_id}
-    ledger_pending = ledger_ids - ledger_history_set
-    estimate_pending = estimate_ids - estimate_history_set
+    # Calculate pending based on READY status
+    ledger_pending_keys = state_manager.get_keys_by_status("ledger", state_manager.STATUS_READY)
+    estimate_pending_keys = state_manager.get_keys_by_status("estimate", state_manager.STATUS_READY)
 
-    # Also check if any older format files exist (without underscore)
-    # But for simplicity, we prioritize the new format
+    # Metrics for Dashboard
+    metrics = {
+        "ledger": {
+            "today_downloaded": state_manager.get_total_downloaded_today("ledger"),
+            "ready_to_upload": len(ledger_pending_keys),
+            "uploaded_today": state_manager.get_count_by_status("ledger", state_manager.STATUS_COMPLETED, today_only=True),
+            "failed": state_manager.get_count_by_status("ledger", state_manager.STATUS_FAILED)
+        },
+        "estimate": {
+            "today_downloaded": state_manager.get_total_downloaded_today("estimate"),
+            "ready_to_upload": len(estimate_pending_keys),
+            "uploaded_today": state_manager.get_count_by_status("estimate", state_manager.STATUS_COMPLETED, today_only=True),
+            "failed": state_manager.get_count_by_status("estimate", state_manager.STATUS_FAILED)
+        }
+    }
 
     return jsonify({
         "status": server_status,
         "pending": {
-            "ledger": len(ledger_pending),
-            "estimate": len(estimate_pending)
+            "ledger": len(ledger_pending_keys),
+            "estimate": len(estimate_pending_keys)
         },
         "history_count": {
-            "ledger": len(ledger_history_set),
-            "estimate": len(estimate_history_set)
-        }
+            "ledger": state_manager.get_count_by_status("ledger", state_manager.STATUS_COMPLETED),
+            "estimate": state_manager.get_count_by_status("estimate", state_manager.STATUS_COMPLETED)
+        },
+        "metrics": metrics
     })
 
 @app.route('/trigger_ledger', methods=['POST'])
@@ -936,10 +1021,8 @@ def trigger_ledger_upload():
                 ledger_dir = config.DOWNLOADS_DIR / "ledger"
                 html_files = list(ledger_dir.glob("*.html")) + list(ledger_dir.glob("*.mhtml"))
 
-                history = load_history()
-                history_set = set(history.get("ledger", []))
-
-                pending_files = [f for f in html_files if f.stem not in history_set]
+                pending_keys = state_manager.get_keys_by_status("ledger", state_manager.STATUS_READY)
+                pending_files = [f for f in html_files if f.stem in pending_keys]
 
                 if not pending_files:
                     logger.info("[Server] No pending ledger files to process")
@@ -948,44 +1031,69 @@ def trigger_ledger_upload():
                     ledger_lock.release()
                     return
 
-                # Process each file
+                # Accumulate all data from pending files
+                all_ledger_data = []
                 for html_file in pending_files:
                     order_id = html_file.stem
-
-                    # V10: Double-check distributed lock (only if enabled)
+                    
+                    # V10: Double-check distributed lock
                     if config.ENABLE_DISTRIBUTED_LOCK:
                         lock_status = distributed_lock.get_lock_status(order_id)
                         if lock_status and lock_status['status'] == DistributedLockManager.STATUS_COMPLETED:
                             logger.info(f"[V10] {order_id} already completed by another machine - skipping")
                             continue
 
-                    logger.info(f"[Server] Processing ledger file: {html_file.name}")
-
+                    logger.info(f"[Server] Parsing ledger file for bundling: {html_file.name}")
                     try:
-                        # Parse and process
                         with open(html_file, 'r', encoding='utf-8') as f:
                             html_content = f.read()
-
+                        
                         erp_data = local_file_processor.process_html_content(html_content, file_path_hint=html_file.name, target_type='ledger')
-
                         if erp_data:
-                            # Upload to ERP
-                            automation = ErpUploadAutomation()
-                            success = automation.run(direct_data=erp_data, auto_close=True, target_type='ledger')
-                            automation.close(keep_browser_open=True)
-
-                            if success:
-                                # Don't add to history yet - wait for save confirmation
-                                processed_files.append(order_id)
-                                logger.info(f"[Server] 📋 Pasted {order_id} - awaiting save confirmation")
-                            else:
-                                logger.error(f"[Server] ❌ Failed to upload {order_id}")
+                            all_ledger_data.extend(erp_data)
+                            processed_files.append(order_id)
                         else:
-                            logger.warning(f"[Server] No ERP data extracted from {order_id}")
-
+                            logger.warning(f"[Server] No data extracted from {order_id}")
                     except Exception as e:
-                        logger.error(f"[Server] Error processing {order_id}: {e}")
-                        continue
+                        logger.error(f"[Server] Error parsing {order_id}: {e}")
+
+                if all_ledger_data:
+                    logger.info(f"[Server] Bundled {len(all_ledger_data)} rows from {len(processed_files)} files. Starting upload...")
+                    
+                    # V10: Save to temporary JSON for subprocess transfer
+                    temp_dir = Path("data/temp")
+                    temp_dir.mkdir(parents=True, exist_ok=True)
+                    temp_json = temp_dir / f"upload_bundle_ledger_{datetime.datetime.now().strftime('%H%M%S')}.json"
+                    
+                    with open(temp_json, 'w', encoding='utf-8') as tf:
+                        json.dump(all_ledger_data, tf)
+
+                    # Upload to ERP (With browser lock and isolated process)
+                    with browser_lock:
+                        logger.info(f"[Server] 🔒 Acquired browser lock for Ledger Bundle")
+                        try:
+                            sub_env = os.environ.copy()
+                            sub_env["PYTHONIOENCODING"] = "utf-8"
+                            
+                            cmd = [sys.executable, "erp_upload_automation_v2.py", str(temp_json), "ledger"]
+                            result = subprocess.run(cmd, env=sub_env, capture_output=True, text=True, encoding='utf-8', cwd=os.getcwd())
+                            
+                            if result.returncode == 0:
+                                success = True
+                                logger.info(f"[Server] Bundle upload success")
+                            else:
+                                success = False
+                                logger.error(f"[Server] Bundle upload failed (Code: {result.returncode})")
+                                logger.error(f"[Subprocess STDERR]: {result.stderr}")
+                        finally:
+                            if temp_json.exists(): temp_json.unlink()
+                            logger.info(f"[Server] 🔓 Released browser lock for Ledger Bundle")
+                    
+                    if not success:
+                        # Clear processed_files if upload failed so pending_save doesn't trigger
+                        processed_files = [] 
+                else:
+                    logger.info("[Server] No valid data extracted from pending files")
 
                 # Set to pending_save state if any files were processed
                 if processed_files:
@@ -1040,10 +1148,8 @@ def trigger_estimate_upload():
                 estimate_dir = config.DOWNLOADS_DIR / "estimate"
                 html_files = list(estimate_dir.glob("*.html")) + list(estimate_dir.glob("*.mhtml"))
 
-                history = load_history()
-                history_set = set(history.get("estimate", []))
-
-                pending_files = [f for f in html_files if f.stem not in history_set]
+                pending_keys = state_manager.get_keys_by_status("estimate", state_manager.STATUS_READY)
+                pending_files = [f for f in html_files if f.stem in pending_keys]
 
                 if not pending_files:
                     logger.info("[Server] No pending estimate files to process")
@@ -1052,44 +1158,55 @@ def trigger_estimate_upload():
                     estimate_lock.release()
                     return
 
-                # Process each file
+                # Accumulate all data from pending files
+                all_estimate_data = []
                 for html_file in pending_files:
                     order_id = html_file.stem
-
-                    # V10: Double-check distributed lock (only if enabled)
+                    
+                    # V10: Double-check distributed lock
                     if config.ENABLE_DISTRIBUTED_LOCK:
                         lock_status = distributed_lock.get_lock_status(order_id)
                         if lock_status and lock_status['status'] == DistributedLockManager.STATUS_COMPLETED:
                             logger.info(f"[V10] {order_id} already completed by another machine - skipping")
                             continue
 
-                    logger.info(f"[Server] Processing estimate file: {html_file.name}")
-
+                    logger.info(f"[Server] Parsing estimate file for bundling: {html_file.name}")
                     try:
-                        # Parse and process
                         with open(html_file, 'r', encoding='utf-8') as f:
                             html_content = f.read()
-
+                        
                         erp_data = local_file_processor.process_html_content(html_content, file_path_hint=html_file.name, target_type='estimate')
-
                         if erp_data:
-                            # Upload to ERP
-                            automation = ErpUploadAutomation()
-                            success = automation.run(direct_data=erp_data, auto_close=True, target_type='estimate')
-                            automation.close(keep_browser_open=True)
-
-                            if success:
-                                # Don't add to history yet - wait for save confirmation
-                                processed_files.append(order_id)
-                                logger.info(f"[Server] 📋 Pasted {order_id} - awaiting save confirmation")
-                            else:
-                                logger.error(f"[Server] ❌ Failed to upload {order_id}")
+                            all_estimate_data.extend(erp_data)
+                            processed_files.append(order_id)
                         else:
-                            logger.warning(f"[Server] No ERP data extracted from {order_id}")
-
+                            logger.warning(f"[Server] No data extracted from {order_id}")
                     except Exception as e:
-                        logger.error(f"[Server] Error processing {order_id}: {e}")
-                        continue
+                        logger.error(f"[Server] Error parsing {order_id}: {e}")
+
+                if all_estimate_data:
+                    logger.info(f"[Server] Bundled {len(all_estimate_data)} rows from {len(processed_files)} files. Starting upload...")
+                    
+                    # Upload to ERP (Using Browser Lock)
+                    with browser_lock:
+                        logger.info("[Server] 🔒 Acquired browser lock for Estimate Bundle")
+                        try:
+                            automation = ErpUploadAutomation()
+                            success = automation.run(direct_data=all_estimate_data, auto_close=True, target_type='estimate')
+                            automation.close(keep_browser_open=True)
+                            
+                            if success:
+                                logger.info(f"[Server] Bundle upload success")
+                            else:
+                                logger.error(f"[Server] Bundle upload failed")
+                                # Mark each file as failed in state manager if the whole batch failed
+                                for fid in processed_files:
+                                    state_manager.update_state("estimate", fid, state_manager.STATUS_FAILED, error_msg="Batch upload failed")
+                                processed_files = [] # Reset so it doesn't go to pending_save
+                        finally:
+                            logger.info("[Server] 🔓 Released browser lock for Estimate Bundle")
+                else:
+                    logger.info("[Server] No valid data extracted from pending files")
 
                 # Set to pending_save state if any files were processed
                 if processed_files:
@@ -1242,9 +1359,10 @@ def confirm_save():
     if upload_state[doc_type]["status"] != "pending_save":
         return jsonify({"status": "error", "message": f"No pending save for {doc_type}"}), 400
 
-    # Move pending files to history
+    # Move pending files to history and update state to COMPLETED
     history = load_history()
     for file_id in upload_state[doc_type]["pending_files"]:
+        state_manager.update_state(doc_type, file_id, state_manager.STATUS_COMPLETED)
         if file_id not in history.get(doc_type, []):
             history[doc_type].append(file_id)
     save_history(history)
@@ -1276,8 +1394,10 @@ def mark_failed():
     if upload_state[doc_type]["status"] != "pending_save":
         return jsonify({"status": "error", "message": f"No pending save for {doc_type}"}), 400
 
-    # Don't add to history - files will be retried
+    # Don't add to history - files will be retried. Mark as FAILED in state.
     failed_count = len(upload_state[doc_type]["pending_files"])
+    for file_id in upload_state[doc_type]["pending_files"]:
+        state_manager.update_state(doc_type, file_id, state_manager.STATUS_FAILED, error_msg="Manual save rejection")
 
     # Update state
     upload_state[doc_type]["status"] = "idle"
@@ -1336,6 +1456,30 @@ def cleanup_port(port):
     except:
         pass
 
+def graceful_shutdown():
+    """Cleanup resources on exit."""
+    logger.info("[System] Shutting down gracefully...")
+    
+    # Stop downloader
+    try:
+        if 'downloader' in globals() and downloader:
+            downloader.running = False
+            logger.info("[System] Downloader stopped")
+    except:
+        pass
+        
+    # Close browser
+    try:
+        if browser_manager and browser_manager.driver:
+            logger.info("[System] Closing browser session...")
+            browser_manager.driver.quit()
+            logger.info("[System] Browser session closed")
+    except:
+        pass
+
+# Register shutdown handlers
+atexit.register(graceful_shutdown)
+
 if __name__ == "__main__":
     logger.info("=" * 60)
     logger.info("V10 Auto Server Starting - Distributed Lock Edition")
@@ -1355,10 +1499,19 @@ if __name__ == "__main__":
             logger.warning("[V10] ⚠️ Failed to connect to distributed lock manager - running in standalone mode")
             server_status["lock_manager_connected"] = False
     else:
-        logger.info("[V10] Distributed lock DISABLED - running in standalone mode")
+        logger.info("[V10] Distributed lock DISABLED (Default) - running in standalone mode")
         server_status["lock_manager_connected"] = False
 
-    # Start Auto Downloader
+    # V10: Check browser connection immediately
+    logger.info("[Server] Verifying browser connection...")
+    if browser_manager.ensure_connection():
+        server_status["browser_healthy"] = True
+        logger.info(" ✅ Browser connection verified")
+    else:
+        logger.warning(" ⚠️ Browser NOT detected. Please ensure Edge is running with start_edge_debug.bat")
+        server_status["browser_healthy"] = False
+
+    # V10: Auto Downloader activated for production
     downloader = AutoDownloader()
     downloader.start()
     downloader.activate()
@@ -1368,4 +1521,10 @@ if __name__ == "__main__":
     logger.info(f"[Server] Starting Flask on port {config.FLASK_PORT}")
     logger.info(f"[Server] Dashboard: http://localhost:{config.FLASK_PORT}")
 
-    app.run(host='0.0.0.0', port=config.FLASK_PORT, debug=config.FLASK_DEBUG, use_reloader=False)
+    try:
+        app.run(host='0.0.0.0', port=config.FLASK_PORT, debug=config.FLASK_DEBUG, use_reloader=False)
+    except Exception as e:
+        logger.critical(f"[Server] Flask server crashed: {e}")
+        traceback.print_exc()
+    finally:
+        graceful_shutdown()

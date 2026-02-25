@@ -47,6 +47,7 @@ class Config:
         self.LOGS_DIR = self.base_dir / "logs"
         self.UPLOADER_LOGS_DIR = self.LOGS_DIR / "uploader"
         self.HISTORY_FILE = self.base_dir / os.getenv("HISTORY_FILE", "v10_history.json")  # V10: Updated history file
+        self.STATE_FILE = self.base_dir / os.getenv("STATE_FILE", "v10_state.json")      # V10: New state tracking file
         self.GOOGLE_TOKEN_PATH = self.base_dir / "google_token.pickle"
         self.GOOGLE_CREDENTIALS_PATH = self.base_dir / "google_oauth_credentials.json"
         self.ECOUNT_SESSION_PATH = self.base_dir / "ecount_session.json"
@@ -71,6 +72,22 @@ class Config:
         self.LOCK_TIMEOUT_SEC = int(os.getenv("LOCK_TIMEOUT_SEC", 1800))  # 30 minutes default
         self.LOCK_SHEET_NAME = os.getenv("LOCK_SHEET_NAME", "processing_lock")
         self.ENABLE_DISTRIBUTED_LOCK = os.getenv("ENABLE_DISTRIBUTED_LOCK", "true").lower() == "true"
+
+        self.validate()
+
+    def validate(self):
+        """Validate critical configuration values."""
+        critical_vars = {
+            "ECOUNT_COMPANY_CODE": self.ECOUNT_COMPANY_CODE,
+            "ECOUNT_ID": self.ECOUNT_ID,
+            "ECOUNT_PASSWORD": self.ECOUNT_PASSWORD,
+            "GS_SPREADSHEET_ID": self.GS_SPREADSHEET_ID
+        }
+        
+        missing = [k for k, v in critical_vars.items() if not v]
+        if missing:
+            print(f"\n[WARNING] Missing critical environment variables in .env: {', '.join(missing)}")
+            print("Action: Please check your .env file or .env.v10.example\n")
 
     def __repr__(self):
         return f"<Config V10 Ports={self.FLASK_PORT} Interval={self.DOWNLOAD_INTERVAL_SEC} DistLock={self.ENABLE_DISTRIBUTED_LOCK}>"
