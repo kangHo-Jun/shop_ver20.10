@@ -19,10 +19,10 @@ if (-not (Test-Path $edgePath)) {
 Write-Host "[OK] Edge 경로: $edgePath" -ForegroundColor Green
 Write-Host ""
 
-# 설정 (Chrome 포트 9222 사용 - erp_upload_automation_v2.py와 호환)
+# 설정 (V10 표준 포트 9333 사용)
 $debugPort = 9333
-$userDataDir = "c:\Users\DS-Sales0\shop_ver20\edge_automation_profile"
-$profileDir = ""
+$userDataDir = "$env:LOCALAPPDATA\Microsoft\Edge\User Data"
+$profileDir = "Default"
 $url = "https://login.ecount.com/Login/KR/"
 
 Write-Host "브라우저 설정:" -ForegroundColor Yellow

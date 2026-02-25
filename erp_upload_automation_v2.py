@@ -9,7 +9,8 @@ Ecount ERP의 웹자료올리기 팝업에 붙여넣기
 
 import time
 import pyperclip
-from pathlib import Path
+import sys
+import json
 # Import centralized config
 from config import config
 
@@ -741,8 +742,22 @@ class ErpUploadAutomation:
 if __name__ == "__main__":
     automation = ErpUploadAutomation()
     try:
-        automation.run()
+        if len(sys.argv) > 1:
+            # Command line mode: python erp_upload_automation_v2.py [json_file] [type]
+            data_file = sys.argv[1]
+            target_type = sys.argv[2] if len(sys.argv) > 2 else 'ledger'
+            
+            with open(data_file, 'r', encoding='utf-8') as f:
+                direct_data = json.load(f)
+            
+            print(f" [Isolated] Starting upload for {len(direct_data)} rows of {target_type}")
+            automation.run(direct_data=direct_data, auto_close=True, target_type=target_type)
+        else:
+            # Interactive mode
+            automation.run()
     except KeyboardInterrupt:
         print("\n사용자가 중단했습니다.")
+    except Exception as e:
+        print(f"\n[CRITICAL] 실행 중 오류 발생: {e}")
     finally:
-        automation.close()
+        automation.close(keep_browser_open=True)

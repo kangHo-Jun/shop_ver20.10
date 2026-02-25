@@ -1,6 +1,6 @@
 @echo off
 chcp 65001 >nul
-cd /d "C:\Users\DS-Sales0\shop_ver20"
+cd /d "%~dp0"
 
 echo ============================================================
 echo   V10 서버 전체 시작
@@ -19,7 +19,7 @@ echo.
 echo [3/5] Edge 디버그 모드 실행 (영림 사이트 포함)...
 start "" "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" ^
   --remote-debugging-port=9333 ^
-  --user-data-dir="C:\Users\DS-Sales0\AppData\Local\Microsoft\Edge\User Data" ^
+  --user-data-dir="%LOCALAPPDATA%\Microsoft\Edge\User Data" ^
   --profile-directory="Default" ^
   http://door.yl.co.kr/oms/main.jsp
 

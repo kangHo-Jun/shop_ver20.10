@@ -27,7 +27,7 @@ class ErrorHandler:
         log_level = getattr(logging, severity.value)
         self.logger.log(log_level, msg, extra={"context": context} if context else None)
 
-        # For High/Critical, store in a separate structured error log
+        # For High/Critical, store in a separate structured error log AND ensure it goes to main logger
         if severity in [ErrorSeverity.HIGH, ErrorSeverity.CRITICAL]:
             self._save_to_error_log(error, context, severity)
 

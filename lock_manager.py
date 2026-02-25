@@ -15,13 +15,18 @@ import time
 import socket
 import platform
 import datetime
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Callable
 from pathlib import Path
+import functools
 
 # Import centralized config
 from config import config
 from logging_config import logger
 from error_handler import error_handler, ErrorSeverity
+
+class RetryExhaustedError(Exception):
+    """Exception raised when all retry attempts for an API call are exhausted."""
+    pass
 
 
 class DistributedLockManager:
@@ -37,6 +42,26 @@ class DistributedLockManager:
     STATUS_PROCESSING = "processing"
     STATUS_COMPLETED = "completed"
     STATUS_FAILED = "failed"
+
+    def retry_api(max_retries: int = 3, delay: int = 2):
+        """Decorator to retry API calls on transient errors"""
+        def decorator(func: Callable):
+            @functools.wraps(func)
+            def wrapper(*args, **kwargs):
+                last_error = None
+                for attempt in range(max_retries):
+                    try:
+                        return func(*args, **kwargs)
+                    except Exception as e:
+                        last_error = e
+                        logger.warning(f"[LockManager] API attempt {attempt+1} failed: {e}")
+                        if attempt < max_retries - 1:
+                            time.sleep(delay * (attempt + 1))
+                
+                logger.error(f"[LockManager] API retry exhausted for {func.__name__} after {max_retries} attempts.")
+                raise RetryExhaustedError(f"All {max_retries} attempts failed for {func.__name__}. Last error: {last_error}")
+            return wrapper
+        return decorator
 
     def __init__(self):
         """초기화"""
@@ -151,6 +176,7 @@ class DistributedLockManager:
             )
             return False
 
+    @retry_api()
     def _find_order_row(self, order_id: str) -> Optional[int]:
         """특정 order_id의 행 번호 찾기 (없으면 None 반환)"""
         try:
@@ -162,6 +188,43 @@ class DistributedLockManager:
         except Exception as e:
             logger.warning(f"Error finding order row: {e}")
             return None
+
+    @retry_api()
+    def _get_row_values(self, row_num: int) -> List[str]:
+        return self.lock_worksheet.row_values(row_num)
+
+    @retry_api()
+    def _update_lock_row(self, row_num: int, locked_by: str, locked_at: str, status: str, notes: str = ""):
+        self.lock_worksheet.update_cell(row_num, 2, locked_by)
+        self.lock_worksheet.update_cell(row_num, 3, locked_at)
+        self.lock_worksheet.update_cell(row_num, 4, status)
+        self.lock_worksheet.update_cell(row_num, 5, locked_by) # machine_id matches locked_by here
+        if notes:
+            self.lock_worksheet.update_cell(row_num, 6, notes)
+
+    @retry_api()
+    def _append_lock_row(self, row_data: List):
+        self.lock_worksheet.append_row(row_data)
+
+    @retry_api()
+    def _update_cell(self, row: int, col: int, value: any):
+        self.lock_worksheet.update_cell(row, col, value)
+
+    @retry_api()
+    def _get_cell_value(self, row: int, col: int):
+        return self.lock_worksheet.cell(row, col).value
+
+    @retry_api()
+    def _get_all_records(self):
+        return self.lock_worksheet.get_all_records()
+
+    @retry_api()
+    def _get_all_values(self):
+        return self.lock_worksheet.get_all_values()
+
+    @retry_api()
+    def _delete_row(self, row_num: int):
+        self.lock_worksheet.delete_rows(row_num)
 
     def acquire_lock(self, order_id: str, notes: str = "") -> bool:
         """
@@ -183,7 +246,7 @@ class DistributedLockManager:
 
             if existing_row:
                 # 기존 레코드가 있음
-                row_data = self.lock_worksheet.row_values(existing_row)
+                row_data = self._get_row_values(existing_row)
 
                 if len(row_data) < 4:
                     logger.warning(f"Invalid row data for {order_id}")
@@ -219,12 +282,7 @@ class DistributedLockManager:
 
                 # 기존 행 업데이트 (재처리)
                 current_time = datetime.datetime.now().isoformat()
-                self.lock_worksheet.update_cell(existing_row, 2, self.machine_id)  # locked_by
-                self.lock_worksheet.update_cell(existing_row, 3, current_time)      # locked_at
-                self.lock_worksheet.update_cell(existing_row, 4, self.STATUS_PROCESSING)  # status
-                self.lock_worksheet.update_cell(existing_row, 5, self.machine_id)  # machine_id
-                if notes:
-                    self.lock_worksheet.update_cell(existing_row, 6, notes)  # notes
+                self._update_lock_row(existing_row, self.machine_id, current_time, self.STATUS_PROCESSING, notes)
 
                 logger.info(f"Lock re-acquired for order {order_id}")
                 return True
@@ -241,7 +299,7 @@ class DistributedLockManager:
                     notes
                 ]
 
-                self.lock_worksheet.append_row(new_row)
+                self._append_lock_row(new_row)
                 logger.info(f"Lock acquired for new order {order_id}")
                 return True
 
@@ -275,11 +333,11 @@ class DistributedLockManager:
                 return False
 
             # 상태 업데이트
-            self.lock_worksheet.update_cell(row_num, 4, status)  # status
+            self._update_cell(row_num, 4, status)  # status
             if notes:
-                existing_notes = self.lock_worksheet.cell(row_num, 6).value or ""
+                existing_notes = self._get_cell_value(row_num, 6) or ""
                 updated_notes = f"{existing_notes} | {notes}" if existing_notes else notes
-                self.lock_worksheet.update_cell(row_num, 6, updated_notes)
+                self._update_cell(row_num, 6, updated_notes)
 
             logger.info(f"Lock released for order {order_id}")
             return True
@@ -302,7 +360,7 @@ class DistributedLockManager:
             if not row_num:
                 return None
 
-            row_data = self.lock_worksheet.row_values(row_num)
+            row_data = self._get_row_values(row_num)
             if len(row_data) < 5:
                 return None
 
@@ -325,7 +383,7 @@ class DistributedLockManager:
             if not self.lock_worksheet:
                 return []
 
-            all_records = self.lock_worksheet.get_all_records()
+            all_records = self._get_all_records()
             return all_records
 
         except Exception as e:
@@ -341,7 +399,7 @@ class DistributedLockManager:
             logger.info(f"Cleaning up locks older than {max_age_days} days")
 
             cutoff_time = datetime.datetime.now() - datetime.timedelta(days=max_age_days)
-            all_values = self.lock_worksheet.get_all_values()
+            all_values = self._get_all_values()
 
             rows_to_delete = []
             for idx, row in enumerate(all_values[1:], start=2):  # Skip header
@@ -362,7 +420,7 @@ class DistributedLockManager:
 
             # 역순으로 삭제 (인덱스 변화 방지)
             for row_num in sorted(rows_to_delete, reverse=True):
-                self.lock_worksheet.delete_rows(row_num)
+                self._delete_row(row_num)
 
             logger.info(f"Cleaned up {len(rows_to_delete)} old lock records")
             return len(rows_to_delete)
