@@ -113,8 +113,8 @@ function copySheet1() {
 
   ss.setActiveSheet(sheet);
   sheet.setActiveRange(sheet.getRange(SHEET_HUB.dataStartRowSheet1, 1, filledCount, numCols));
-  ss.toast('Ctrl+C 후 이카운트에 붙여넣기 하세요 (10초 후 자동 클리어)', '', 10);
-  Utilities.sleep(10000);
+  ss.toast('Ctrl+C 후 이카운트에 붙여넣기 하세요 (30초 후 자동 클리어)', '', 30);
+  Utilities.sleep(30000);
 
   // 백업 + 로그 + 클리어
   const meta = sheetHubReadMeta_();
@@ -166,8 +166,8 @@ function copySheet2() {
   ss.setActiveSheet(sheet);
   const dataRange = sheet.getRange(SHEET_HUB.dataStartRowSheet2, 1, lastRow - SHEET_HUB.dataStartRowSheet2 + 1, 2);
   sheet.setActiveRange(dataRange);
-  ss.toast('Ctrl+C 후 이카운트에 붙여넣기 하세요 (10초 후 자동 클리어)', '', 10);
-  Utilities.sleep(10000);
+  ss.toast('Ctrl+C 후 이카운트에 붙여넣기 하세요 (30초 후 자동 클리어)', '', 30);
+  Utilities.sleep(30000);
 
   // 백업 + 로그 + 클리어
   const meta = sheetHubReadMeta_();
