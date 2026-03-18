@@ -1,0 +1,1 @@
+import{b as r,j as e,R as t}from"./t-CrUv5W6q.js";import{M as n}from"./MinesweeperGame-Dp8bjNaM.js";import"./storage-BPEiTgs3.js";import"./canvasUtils-gve-wsf9.js";const o=document.getElementById("minesweeper-root");o?r.createRoot(o).render(e.jsx(t.StrictMode,{children:e.jsx(n,{})})):console.error("Root container not found for Minesweeper");

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="styles/popup.css" />
+  </head>
+
+  <body>
+    <div class="container">
+      <img
+        id="logo"
+        src="icons/logo-on.png"
+        alt="Cookie Consent Manager"
+        width="100"
+        height="100"
+      />
+      <div class="heading" id="extension-title">Cookie Consent Manager</div>
+      <div class="status">
+        <img src="icons/green-check.png" width="16" height="16" alt="Status" />
+        <span id="status-text">COOKIE BANNER RESOLVED</span>
+      </div>
+      <div class="toggle-section">
+        <div class="toggle-text">
+          <div class="toggle-text-title" id="toggle-title">
+            Cookie Consent Manager is ON
+          </div>
+          <div class="toggle-text-total" id="toggle-text-total">
+            Resolved cookie banners: 0
+          </div>
+        </div>
+
+        <label class="toggle-switch">
+          <input type="checkbox" id="cookie-blocker-toggle" checked />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <!-- Hidden button for options page access -->
+      <div id="go-to-options" style="display: none"></div>
+
+      <!-- <div class="feedback">
+      <span>Send feedback</span>
+      <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g id="Icon/24/Arrow">
+        <path id="Stroke" d="M18.1172 12L6.11719 12M18.1172 12L12.1172 6M18.1172 12L12.1172 18" stroke="#261C6A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+      </svg>        
+    </div>   -->
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,2706 @@
+/* roboto-cyrillic-ext-300-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/00203702bb6b8ff26323b4cbc37932ab.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/60c1c95885d06cc8cc9a9e2094bd79d8.woff) format('woff');
+  unicode-range: U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;
+}
+
+/* roboto-cyrillic-300-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/d06b462d0a0ce6e7e2c7a1324d9be593.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/288d744e9b6d63c1646b4a465015d210.woff) format('woff');
+  unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;
+}
+
+/* roboto-greek-ext-300-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/2b3276bd7adadd9f7e01ff2119cfe33d.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/988a6a57f05b2f5f4a484ef4c0ef0eb1.woff) format('woff');
+  unicode-range: U+1F00-1FFF;
+}
+
+/* roboto-greek-300-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/8cfd72171192d0c509895bfd0a9bc8cb.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/2ec1420cc2ae776123bbf341d5bb095c.woff) format('woff');
+  unicode-range: U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF;
+}
+
+/* roboto-math-300-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/80bd76ae7360b84084368803b94c67ee.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/2c7b0222a1ab59514288b3fb20d913c4.woff) format('woff');
+  unicode-range: U+0302-0303,U+0305,U+0307-0308,U+0310,U+0312,U+0315,U+031A,U+0326-0327,U+032C,U+032F-0330,U+0332-0333,U+0338,U+033A,U+0346,U+034D,U+0391-03A1,U+03A3-03A9,U+03B1-03C9,U+03D1,U+03D5-03D6,U+03F0-03F1,U+03F4-03F5,U+2016-2017,U+2034-2038,U+203C,U+2040,U+2043,U+2047,U+2050,U+2057,U+205F,U+2070-2071,U+2074-208E,U+2090-209C,U+20D0-20DC,U+20E1,U+20E5-20EF,U+2100-2112,U+2114-2115,U+2117-2121,U+2123-214F,U+2190,U+2192,U+2194-21AE,U+21B0-21E5,U+21F1-21F2,U+21F4-2211,U+2213-2214,U+2216-22FF,U+2308-230B,U+2310,U+2319,U+231C-2321,U+2336-237A,U+237C,U+2395,U+239B-23B7,U+23D0,U+23DC-23E1,U+2474-2475,U+25AF,U+25B3,U+25B7,U+25BD,U+25C1,U+25CA,U+25CC,U+25FB,U+266D-266F,U+27C0-27FF,U+2900-2AFF,U+2B0E-2B11,U+2B30-2B4C,U+2BFE,U+3030,U+FF5B,U+FF5D,U+1D400-1D7FF,U+1EE00-1EEFF;
+}
+
+/* roboto-symbols-300-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/c927994d8e03f8301e21d0bfe4d2a116.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/b7140d3e36410026d95ae03cd40090a7.woff) format('woff');
+  unicode-range: U+0001-000C,U+000E-001F,U+007F-009F,U+20DD-20E0,U+20E2-20E4,U+2150-218F,U+2190,U+2192,U+2194-2199,U+21AF,U+21E6-21F0,U+21F3,U+2218-2219,U+2299,U+22C4-22C6,U+2300-243F,U+2440-244A,U+2460-24FF,U+25A0-27BF,U+2800-28FF,U+2921-2922,U+2981,U+29BF,U+29EB,U+2B00-2BFF,U+4DC0-4DFF,U+FFF9-FFFB,U+10140-1018E,U+10190-1019C,U+101A0,U+101D0-101FD,U+102E0-102FB,U+10E60-10E7E,U+1D2C0-1D2D3,U+1D2E0-1D37F,U+1F000-1F0FF,U+1F100-1F1AD,U+1F1E6-1F1FF,U+1F30D-1F30F,U+1F315,U+1F31C,U+1F31E,U+1F320-1F32C,U+1F336,U+1F378,U+1F37D,U+1F382,U+1F393-1F39F,U+1F3A7-1F3A8,U+1F3AC-1F3AF,U+1F3C2,U+1F3C4-1F3C6,U+1F3CA-1F3CE,U+1F3D4-1F3E0,U+1F3ED,U+1F3F1-1F3F3,U+1F3F5-1F3F7,U+1F408,U+1F415,U+1F41F,U+1F426,U+1F43F,U+1F441-1F442,U+1F444,U+1F446-1F449,U+1F44C-1F44E,U+1F453,U+1F46A,U+1F47D,U+1F4A3,U+1F4B0,U+1F4B3,U+1F4B9,U+1F4BB,U+1F4BF,U+1F4C8-1F4CB,U+1F4D6,U+1F4DA,U+1F4DF,U+1F4E3-1F4E6,U+1F4EA-1F4ED,U+1F4F7,U+1F4F9-1F4FB,U+1F4FD-1F4FE,U+1F503,U+1F507-1F50B,U+1F50D,U+1F512-1F513,U+1F53E-1F54A,U+1F54F-1F5FA,U+1F610,U+1F650-1F67F,U+1F687,U+1F68D,U+1F691,U+1F694,U+1F698,U+1F6AD,U+1F6B2,U+1F6B9-1F6BA,U+1F6BC,U+1F6C6-1F6CF,U+1F6D3-1F6D7,U+1F6E0-1F6EA,U+1F6F0-1F6F3,U+1F6F7-1F6FC,U+1F700-1F7FF,U+1F800-1F80B,U+1F810-1F847,U+1F850-1F859,U+1F860-1F887,U+1F890-1F8AD,U+1F8B0-1F8BB,U+1F8C0-1F8C1,U+1F900-1F90B,U+1F93B,U+1F946,U+1F984,U+1F996,U+1F9E9,U+1FA00-1FA6F,U+1FA70-1FA7C,U+1FA80-1FA89,U+1FA8F-1FAC6,U+1FACE-1FADC,U+1FADF-1FAE9,U+1FAF0-1FAF8,U+1FB00-1FBFF;
+}
+
+/* roboto-vietnamese-300-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/b1798eea29f166167bd8d608223821ac.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/b8db0522e8a5f418b933fa92e49324ab.woff) format('woff');
+  unicode-range: U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;
+}
+
+/* roboto-latin-ext-300-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/885c8f2e2a18aa0913b3ee54c484cf73.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/5232917da8bf9cb4430f033c2cf04a53.woff) format('woff');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+
+/* roboto-latin-300-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/184504434817a57d4ad9374f3875f5d9.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/958e1562ae07a1f5bc329ac1d0cfa4c6.woff) format('woff');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}/* roboto-cyrillic-ext-400-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/30dde022715ae93a242ebfcd3ae28a88.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/63020989133d03b65d7cc5a776ef1e78.woff) format('woff');
+  unicode-range: U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;
+}
+
+/* roboto-cyrillic-400-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/a0f8baa16418514a286278c0a773d3a6.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/04638c52bae3a87eb2c7a8f08a55ee29.woff) format('woff');
+  unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;
+}
+
+/* roboto-greek-ext-400-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/b5d0ea0151ce57e3d8d3d2c31a996fe3.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/4ed71178279235547335ecfaeb39ef48.woff) format('woff');
+  unicode-range: U+1F00-1FFF;
+}
+
+/* roboto-greek-400-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/bb024613fed16187df15c7c0da75a423.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/b3c5596a9f9fa0ad04f0e75eec719ca8.woff) format('woff');
+  unicode-range: U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF;
+}
+
+/* roboto-math-400-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/819bbfbefdc5869939993f262df71cba.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/e23ce67e5c74148294e004fd65c80632.woff) format('woff');
+  unicode-range: U+0302-0303,U+0305,U+0307-0308,U+0310,U+0312,U+0315,U+031A,U+0326-0327,U+032C,U+032F-0330,U+0332-0333,U+0338,U+033A,U+0346,U+034D,U+0391-03A1,U+03A3-03A9,U+03B1-03C9,U+03D1,U+03D5-03D6,U+03F0-03F1,U+03F4-03F5,U+2016-2017,U+2034-2038,U+203C,U+2040,U+2043,U+2047,U+2050,U+2057,U+205F,U+2070-2071,U+2074-208E,U+2090-209C,U+20D0-20DC,U+20E1,U+20E5-20EF,U+2100-2112,U+2114-2115,U+2117-2121,U+2123-214F,U+2190,U+2192,U+2194-21AE,U+21B0-21E5,U+21F1-21F2,U+21F4-2211,U+2213-2214,U+2216-22FF,U+2308-230B,U+2310,U+2319,U+231C-2321,U+2336-237A,U+237C,U+2395,U+239B-23B7,U+23D0,U+23DC-23E1,U+2474-2475,U+25AF,U+25B3,U+25B7,U+25BD,U+25C1,U+25CA,U+25CC,U+25FB,U+266D-266F,U+27C0-27FF,U+2900-2AFF,U+2B0E-2B11,U+2B30-2B4C,U+2BFE,U+3030,U+FF5B,U+FF5D,U+1D400-1D7FF,U+1EE00-1EEFF;
+}
+
+/* roboto-symbols-400-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/67fbc9a89d34a66c10ce237de8543401.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/1cf5b6f6f26ed234703e5c31edf50516.woff) format('woff');
+  unicode-range: U+0001-000C,U+000E-001F,U+007F-009F,U+20DD-20E0,U+20E2-20E4,U+2150-218F,U+2190,U+2192,U+2194-2199,U+21AF,U+21E6-21F0,U+21F3,U+2218-2219,U+2299,U+22C4-22C6,U+2300-243F,U+2440-244A,U+2460-24FF,U+25A0-27BF,U+2800-28FF,U+2921-2922,U+2981,U+29BF,U+29EB,U+2B00-2BFF,U+4DC0-4DFF,U+FFF9-FFFB,U+10140-1018E,U+10190-1019C,U+101A0,U+101D0-101FD,U+102E0-102FB,U+10E60-10E7E,U+1D2C0-1D2D3,U+1D2E0-1D37F,U+1F000-1F0FF,U+1F100-1F1AD,U+1F1E6-1F1FF,U+1F30D-1F30F,U+1F315,U+1F31C,U+1F31E,U+1F320-1F32C,U+1F336,U+1F378,U+1F37D,U+1F382,U+1F393-1F39F,U+1F3A7-1F3A8,U+1F3AC-1F3AF,U+1F3C2,U+1F3C4-1F3C6,U+1F3CA-1F3CE,U+1F3D4-1F3E0,U+1F3ED,U+1F3F1-1F3F3,U+1F3F5-1F3F7,U+1F408,U+1F415,U+1F41F,U+1F426,U+1F43F,U+1F441-1F442,U+1F444,U+1F446-1F449,U+1F44C-1F44E,U+1F453,U+1F46A,U+1F47D,U+1F4A3,U+1F4B0,U+1F4B3,U+1F4B9,U+1F4BB,U+1F4BF,U+1F4C8-1F4CB,U+1F4D6,U+1F4DA,U+1F4DF,U+1F4E3-1F4E6,U+1F4EA-1F4ED,U+1F4F7,U+1F4F9-1F4FB,U+1F4FD-1F4FE,U+1F503,U+1F507-1F50B,U+1F50D,U+1F512-1F513,U+1F53E-1F54A,U+1F54F-1F5FA,U+1F610,U+1F650-1F67F,U+1F687,U+1F68D,U+1F691,U+1F694,U+1F698,U+1F6AD,U+1F6B2,U+1F6B9-1F6BA,U+1F6BC,U+1F6C6-1F6CF,U+1F6D3-1F6D7,U+1F6E0-1F6EA,U+1F6F0-1F6F3,U+1F6F7-1F6FC,U+1F700-1F7FF,U+1F800-1F80B,U+1F810-1F847,U+1F850-1F859,U+1F860-1F887,U+1F890-1F8AD,U+1F8B0-1F8BB,U+1F8C0-1F8C1,U+1F900-1F90B,U+1F93B,U+1F946,U+1F984,U+1F996,U+1F9E9,U+1FA00-1FA6F,U+1FA70-1FA7C,U+1FA80-1FA89,U+1FA8F-1FAC6,U+1FACE-1FADC,U+1FADF-1FAE9,U+1FAF0-1FAF8,U+1FB00-1FBFF;
+}
+
+/* roboto-vietnamese-400-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/ed88153e0e734ac1c23e62ca9059d570.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/e114920672b3016852e5a1dc01bbcdf6.woff) format('woff');
+  unicode-range: U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;
+}
+
+/* roboto-latin-ext-400-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/0ed27c0cc21140f52d29c938c6738a5b.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/4f5639212a7d65094808ba818469b66f.woff) format('woff');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+
+/* roboto-latin-400-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/b07da7aa3e4f363c5cdbc11312239e8c.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/b29ee82f804e7a35bd39c4a43959f5d6.woff) format('woff');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}/* roboto-cyrillic-ext-500-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/e05f9173cb94975510ccacf123b1dbd4.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/606ce45df0be9e9e1da58aa13dc1fd56.woff) format('woff');
+  unicode-range: U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;
+}
+
+/* roboto-cyrillic-500-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/bb240664dad86f07ccf485d7d9b98ade.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/a7be059bec0d97afebbeea9823fabde2.woff) format('woff');
+  unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;
+}
+
+/* roboto-greek-ext-500-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/ced24ab39455ff8adf9e1ae2d03d0343.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/cf6eeb57c67696f760c91f8c5a2e4c38.woff) format('woff');
+  unicode-range: U+1F00-1FFF;
+}
+
+/* roboto-greek-500-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/43364845d97dcde913b7a2bb271adaef.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/1f068846211aff11c418590648419609.woff) format('woff');
+  unicode-range: U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF;
+}
+
+/* roboto-math-500-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/e86ea35eecea70f74d0005c1a094114d.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/1aa6e510dd6f59af52ab94ebea93cfa9.woff) format('woff');
+  unicode-range: U+0302-0303,U+0305,U+0307-0308,U+0310,U+0312,U+0315,U+031A,U+0326-0327,U+032C,U+032F-0330,U+0332-0333,U+0338,U+033A,U+0346,U+034D,U+0391-03A1,U+03A3-03A9,U+03B1-03C9,U+03D1,U+03D5-03D6,U+03F0-03F1,U+03F4-03F5,U+2016-2017,U+2034-2038,U+203C,U+2040,U+2043,U+2047,U+2050,U+2057,U+205F,U+2070-2071,U+2074-208E,U+2090-209C,U+20D0-20DC,U+20E1,U+20E5-20EF,U+2100-2112,U+2114-2115,U+2117-2121,U+2123-214F,U+2190,U+2192,U+2194-21AE,U+21B0-21E5,U+21F1-21F2,U+21F4-2211,U+2213-2214,U+2216-22FF,U+2308-230B,U+2310,U+2319,U+231C-2321,U+2336-237A,U+237C,U+2395,U+239B-23B7,U+23D0,U+23DC-23E1,U+2474-2475,U+25AF,U+25B3,U+25B7,U+25BD,U+25C1,U+25CA,U+25CC,U+25FB,U+266D-266F,U+27C0-27FF,U+2900-2AFF,U+2B0E-2B11,U+2B30-2B4C,U+2BFE,U+3030,U+FF5B,U+FF5D,U+1D400-1D7FF,U+1EE00-1EEFF;
+}
+
+/* roboto-symbols-500-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/4659e39f06c04c93c6b6deca08147844.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/497f51b438d43a4ba1411fab780fcef9.woff) format('woff');
+  unicode-range: U+0001-000C,U+000E-001F,U+007F-009F,U+20DD-20E0,U+20E2-20E4,U+2150-218F,U+2190,U+2192,U+2194-2199,U+21AF,U+21E6-21F0,U+21F3,U+2218-2219,U+2299,U+22C4-22C6,U+2300-243F,U+2440-244A,U+2460-24FF,U+25A0-27BF,U+2800-28FF,U+2921-2922,U+2981,U+29BF,U+29EB,U+2B00-2BFF,U+4DC0-4DFF,U+FFF9-FFFB,U+10140-1018E,U+10190-1019C,U+101A0,U+101D0-101FD,U+102E0-102FB,U+10E60-10E7E,U+1D2C0-1D2D3,U+1D2E0-1D37F,U+1F000-1F0FF,U+1F100-1F1AD,U+1F1E6-1F1FF,U+1F30D-1F30F,U+1F315,U+1F31C,U+1F31E,U+1F320-1F32C,U+1F336,U+1F378,U+1F37D,U+1F382,U+1F393-1F39F,U+1F3A7-1F3A8,U+1F3AC-1F3AF,U+1F3C2,U+1F3C4-1F3C6,U+1F3CA-1F3CE,U+1F3D4-1F3E0,U+1F3ED,U+1F3F1-1F3F3,U+1F3F5-1F3F7,U+1F408,U+1F415,U+1F41F,U+1F426,U+1F43F,U+1F441-1F442,U+1F444,U+1F446-1F449,U+1F44C-1F44E,U+1F453,U+1F46A,U+1F47D,U+1F4A3,U+1F4B0,U+1F4B3,U+1F4B9,U+1F4BB,U+1F4BF,U+1F4C8-1F4CB,U+1F4D6,U+1F4DA,U+1F4DF,U+1F4E3-1F4E6,U+1F4EA-1F4ED,U+1F4F7,U+1F4F9-1F4FB,U+1F4FD-1F4FE,U+1F503,U+1F507-1F50B,U+1F50D,U+1F512-1F513,U+1F53E-1F54A,U+1F54F-1F5FA,U+1F610,U+1F650-1F67F,U+1F687,U+1F68D,U+1F691,U+1F694,U+1F698,U+1F6AD,U+1F6B2,U+1F6B9-1F6BA,U+1F6BC,U+1F6C6-1F6CF,U+1F6D3-1F6D7,U+1F6E0-1F6EA,U+1F6F0-1F6F3,U+1F6F7-1F6FC,U+1F700-1F7FF,U+1F800-1F80B,U+1F810-1F847,U+1F850-1F859,U+1F860-1F887,U+1F890-1F8AD,U+1F8B0-1F8BB,U+1F8C0-1F8C1,U+1F900-1F90B,U+1F93B,U+1F946,U+1F984,U+1F996,U+1F9E9,U+1FA00-1FA6F,U+1FA70-1FA7C,U+1FA80-1FA89,U+1FA8F-1FAC6,U+1FACE-1FADC,U+1FADF-1FAE9,U+1FAF0-1FAF8,U+1FB00-1FBFF;
+}
+
+/* roboto-vietnamese-500-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/8b2ca02fc0aa5d77ff3b11a897a9f28c.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/25f3dc4426f1e0f5cbd3dd8ec7fd044a.woff) format('woff');
+  unicode-range: U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;
+}
+
+/* roboto-latin-ext-500-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/af435fa45f0d9d9c82e07ff7d61e04a3.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/c09bb664e261c7698fb0cdf5c27be2a0.woff) format('woff');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+
+/* roboto-latin-500-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/02e18aa1a344f3345345384d3b3decaa.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/7e4f5a8991fe56922fd22c4a86c10ed5.woff) format('woff');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}/* roboto-cyrillic-ext-700-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/94b525f83a1ced4fb4b3256b7eec2084.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/eced0173ccffad12847a206e137d766f.woff) format('woff');
+  unicode-range: U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;
+}
+
+/* roboto-cyrillic-700-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/18fad40b32aa9666fad79c051a0cdee1.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/849c9517eefe273488ffd4142d7447c9.woff) format('woff');
+  unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;
+}
+
+/* roboto-greek-ext-700-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/07ba9058f37ccbd04c7f0212b4487aba.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/78d6bf937e6fee48ca44ca4a924064c8.woff) format('woff');
+  unicode-range: U+1F00-1FFF;
+}
+
+/* roboto-greek-700-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/7edb78c48243836f662d29407af88458.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/ca1db7f4b5ba80bebc0178d8fc121790.woff) format('woff');
+  unicode-range: U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF;
+}
+
+/* roboto-math-700-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/07e2e038c7ff4ccf72168afe999ecedd.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/15490ef54253975a1c96fc4792619334.woff) format('woff');
+  unicode-range: U+0302-0303,U+0305,U+0307-0308,U+0310,U+0312,U+0315,U+031A,U+0326-0327,U+032C,U+032F-0330,U+0332-0333,U+0338,U+033A,U+0346,U+034D,U+0391-03A1,U+03A3-03A9,U+03B1-03C9,U+03D1,U+03D5-03D6,U+03F0-03F1,U+03F4-03F5,U+2016-2017,U+2034-2038,U+203C,U+2040,U+2043,U+2047,U+2050,U+2057,U+205F,U+2070-2071,U+2074-208E,U+2090-209C,U+20D0-20DC,U+20E1,U+20E5-20EF,U+2100-2112,U+2114-2115,U+2117-2121,U+2123-214F,U+2190,U+2192,U+2194-21AE,U+21B0-21E5,U+21F1-21F2,U+21F4-2211,U+2213-2214,U+2216-22FF,U+2308-230B,U+2310,U+2319,U+231C-2321,U+2336-237A,U+237C,U+2395,U+239B-23B7,U+23D0,U+23DC-23E1,U+2474-2475,U+25AF,U+25B3,U+25B7,U+25BD,U+25C1,U+25CA,U+25CC,U+25FB,U+266D-266F,U+27C0-27FF,U+2900-2AFF,U+2B0E-2B11,U+2B30-2B4C,U+2BFE,U+3030,U+FF5B,U+FF5D,U+1D400-1D7FF,U+1EE00-1EEFF;
+}
+
+/* roboto-symbols-700-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/4b797bf23aa9c860435c138ee9329905.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/18642b6423f9c5c4a77e839d609f08cc.woff) format('woff');
+  unicode-range: U+0001-000C,U+000E-001F,U+007F-009F,U+20DD-20E0,U+20E2-20E4,U+2150-218F,U+2190,U+2192,U+2194-2199,U+21AF,U+21E6-21F0,U+21F3,U+2218-2219,U+2299,U+22C4-22C6,U+2300-243F,U+2440-244A,U+2460-24FF,U+25A0-27BF,U+2800-28FF,U+2921-2922,U+2981,U+29BF,U+29EB,U+2B00-2BFF,U+4DC0-4DFF,U+FFF9-FFFB,U+10140-1018E,U+10190-1019C,U+101A0,U+101D0-101FD,U+102E0-102FB,U+10E60-10E7E,U+1D2C0-1D2D3,U+1D2E0-1D37F,U+1F000-1F0FF,U+1F100-1F1AD,U+1F1E6-1F1FF,U+1F30D-1F30F,U+1F315,U+1F31C,U+1F31E,U+1F320-1F32C,U+1F336,U+1F378,U+1F37D,U+1F382,U+1F393-1F39F,U+1F3A7-1F3A8,U+1F3AC-1F3AF,U+1F3C2,U+1F3C4-1F3C6,U+1F3CA-1F3CE,U+1F3D4-1F3E0,U+1F3ED,U+1F3F1-1F3F3,U+1F3F5-1F3F7,U+1F408,U+1F415,U+1F41F,U+1F426,U+1F43F,U+1F441-1F442,U+1F444,U+1F446-1F449,U+1F44C-1F44E,U+1F453,U+1F46A,U+1F47D,U+1F4A3,U+1F4B0,U+1F4B3,U+1F4B9,U+1F4BB,U+1F4BF,U+1F4C8-1F4CB,U+1F4D6,U+1F4DA,U+1F4DF,U+1F4E3-1F4E6,U+1F4EA-1F4ED,U+1F4F7,U+1F4F9-1F4FB,U+1F4FD-1F4FE,U+1F503,U+1F507-1F50B,U+1F50D,U+1F512-1F513,U+1F53E-1F54A,U+1F54F-1F5FA,U+1F610,U+1F650-1F67F,U+1F687,U+1F68D,U+1F691,U+1F694,U+1F698,U+1F6AD,U+1F6B2,U+1F6B9-1F6BA,U+1F6BC,U+1F6C6-1F6CF,U+1F6D3-1F6D7,U+1F6E0-1F6EA,U+1F6F0-1F6F3,U+1F6F7-1F6FC,U+1F700-1F7FF,U+1F800-1F80B,U+1F810-1F847,U+1F850-1F859,U+1F860-1F887,U+1F890-1F8AD,U+1F8B0-1F8BB,U+1F8C0-1F8C1,U+1F900-1F90B,U+1F93B,U+1F946,U+1F984,U+1F996,U+1F9E9,U+1FA00-1FA6F,U+1FA70-1FA7C,U+1FA80-1FA89,U+1FA8F-1FAC6,U+1FACE-1FADC,U+1FADF-1FAE9,U+1FAF0-1FAF8,U+1FB00-1FBFF;
+}
+
+/* roboto-vietnamese-700-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/9e46e974dcaeb1a444c1fd7bf193a4ce.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/7adbe66227253bdc9177501420739051.woff) format('woff');
+  unicode-range: U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;
+}
+
+/* roboto-latin-ext-700-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/2b4fc14a12e01386f0e9743e5c19fa0e.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/9350f2c9a7b6ae43af77fe17bc28135f.woff) format('woff');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+
+/* roboto-latin-700-normal */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/47581e04640cdf48a696aa57a43f6592.woff2) format('woff2'), url(chrome-extension://__MSG_@@extension_id__/../fonts/91025a426642b551e6d15ce0aabd6b04.woff) format('woff');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}.avast-extension-topbar-promo b {
+  font-weight: bold !important;
+}
+.avast-extension-topbar-promo {
+  letter-spacing: 0.2px !important;
+  -webkit-box-sizing: content-box !important;
+  -moz-box-sizing: content-box !important;
+  box-sizing: content-box !important;
+  resize: none !important;
+  overflow: hidden !important;
+  z-index: 2147483647 !important;
+  height: 40px !important;
+  top: 0 !important;
+  position: fixed !important;
+  width: 100% !important;
+  transition: all 2.35s linear;
+  background-color: #fff;
+  cursor: default;
+}
+.avast-extension-topbar-promo .avast-extension-topbar {
+  margin: auto;
+  width: 100% !important;
+  height: 40px !important;
+  position: relative !important;
+  transition: all 2.35s linear;
+  background-color: #2d364c;
+  border-bottom: 0 !important;
+  border-left: 1px solid #000 !important;
+  border-right: 1px solid #000 !important;
+  overflow: hidden !important;
+}
+.avast-extension-topbar-promo .avast-extension-topbar button {
+  padding: 0 !important;
+  color: #fff !important;
+  font-weight: 500 !important;
+  font-size: 11px !important;
+}
+.avast-extension-topbar-promo .avast-extension-topbar button:focus {
+  border: 1px solid #fff !important;
+}
+.avast-extension-topbar-promo .avast-extension-topbar .avast-extension-topbar-icon {
+  margin: 0 8px 0 12px !important;
+  position: relative;
+  top: 12px;
+  float: left !important;
+  width: 17px !important;
+  height: 15px !important;
+  background-repeat: no-repeat;
+  background-position: center center;
+  cursor: default;
+}
+.avast-extension-topbar-promo .avast-extension-topbar .avast-extension-topbar-text {
+  overflow: hidden;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  float: left;
+  font-family: 'Roboto', sans-serif;
+  line-height: 30px;
+  text-align: center;
+  cursor: default;
+}
+.avast-extension-topbar-promo .avast-extension-topbar .avast-extension-topbar-text-principal {
+  overflow: hidden;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  float: left;
+  font-family: 'Roboto', sans-serif;
+  line-height: 30px;
+  font-size: 13px !important;
+  color: #fff !important;
+  font-weight: 400 !important;
+  padding: 5px !important;
+  height: 30px !important;
+  cursor: default !important;
+  text-align: left !important;
+  letter-spacing: normal !important;
+}
+.avast-extension-topbar-promo .avast-extension-topbar .avast-extension-topbar-button {
+  -webkit-box-sizing: content-box !important;
+  -moz-box-sizing: content-box !important;
+  box-sizing: content-box !important;
+  max-width: 400px;
+  height: 30px;
+  border-radius: 5px;
+  background-clip: padding-box;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden !important;
+}
+.avast-extension-topbar-promo .avast-extension-topbar .tb-b-basic {
+  -webkit-box-sizing: content-box !important;
+  -moz-box-sizing: content-box !important;
+  box-sizing: content-box !important;
+  max-width: 400px;
+  height: 30px;
+  border-radius: 5px;
+  background-clip: padding-box;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden !important;
+  float: right !important;
+  margin: 4px 16px 4px 0;
+  background-color: transparent;
+  border: 1px solid transparent;
+}
+.avast-extension-topbar-promo .avast-extension-topbar .tb-b-basic:hover {
+  background-color: transparent;
+  border: 1px solid transparent !important;
+  cursor: pointer !important;
+}
+.avast-extension-topbar-promo .avast-extension-topbar .tb-b-basic:hover label.tb-b-b-text {
+  cursor: pointer !important;
+}
+.avast-extension-topbar-promo .avast-extension-topbar .tb-b-basic:active {
+  background-color: transparent;
+  border: 1px solid transparent !important;
+  cursor: pointer !important;
+}
+.avast-extension-topbar-promo .avast-extension-topbar .tb-b-basic:active label.tb-b-b-text {
+  cursor: pointer !important;
+}
+.avast-extension-topbar-promo .avast-extension-topbar .tb-b-basic label.tb-b-b-text {
+  overflow: hidden;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  float: left;
+  font-family: 'Roboto', sans-serif;
+  line-height: 30px;
+  text-align: center;
+  font-weight: normal !important;
+  font-size: 11px !important;
+  padding: 0 !important;
+  height: 30px !important;
+  max-width: 400px !important;
+  color: #fff !important;
+  cursor: pointer !important;
+  letter-spacing: -0.2px !important;
+}
+.avast-extension-topbar-promo .avast-extension-topbar .tb-b-reopen {
+  z-index: 0 !important;
+  object-fit: contain;
+  outline: none;
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+  max-width: 400px;
+  height: 30px;
+  background-clip: padding-box;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  float: left;
+  margin: 4px 16px 4px 16px;
+  background-color: #09884c;
+  border: 1px solid #09884c;
+  border-radius: 2px;
+}
+.avast-extension-topbar-promo .avast-extension-topbar .tb-b-reopen:hover {
+  border: 1px solid #076d3d;
+  cursor: pointer !important;
+}
+.avast-extension-topbar-promo .avast-extension-topbar .tb-b-reopen:hover label.tb-b-r-text {
+  cursor: pointer !important;
+}
+.avast-extension-topbar-promo .avast-extension-topbar .tb-b-reopen label.tb-b-r-text {
+  cursor: pointer !important;
+  overflow: hidden;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  float: left;
+  font-family: 'Roboto', sans-serif;
+  line-height: 30px;
+  text-align: center;
+  font-weight: 500 !important;
+  font-size: 11px !important;
+  padding: 0 !important;
+  height: 30px !important;
+  max-width: 400px !important;
+  color: #fff !important;
+  padding: 0 24px 0 24px !important;
+  text-transform: uppercase;
+  letter-spacing: 0.1px !important;
+}
+.avast-extension-topbar-promo .avast-extension-topbar .tb-b-info {
+  -webkit-box-sizing: content-box !important;
+  -moz-box-sizing: content-box !important;
+  box-sizing: content-box !important;
+  max-width: 400px;
+  background-clip: padding-box;
+  position: relative;
+  overflow: hidden !important;
+  float: left !important;
+  width: 16px !important;
+  height: 16px !important;
+  border-radius: 50px !important;
+  margin: 11px 0 !important;
+  background-color: transparent;
+  border: 2px solid transparent !important;
+}
+.avast-extension-topbar-promo .avast-extension-topbar .tb-b-info:hover {
+  background-color: transparent;
+  color: transparent !important;
+  border-color: transparent !important;
+}
+.avast-extension-topbar-promo .avast-extension-topbar .tb-b-info:hover label.tb-b-i-text {
+  color: transparent !important;
+}
+.avast-extension-topbar-promo .avast-extension-topbar .tb-b-info:active {
+  background-color: transparent;
+  color: #2d364c !important;
+  border-color: #2d364c !important;
+}
+.avast-extension-topbar-promo .avast-extension-topbar .tb-b-info:active label.tb-b-i-text {
+  color: #2d364c !important;
+}
+.avast-extension-topbar-promo .avast-extension-topbar .tb-b-info label.tb-b-i-text {
+  overflow: hidden;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  float: left;
+  font-family: 'Roboto', sans-serif;
+  line-height: 30px;
+  text-align: center;
+  cursor: default;
+  color: #fff !important;
+  font-weight: 100 !important;
+  padding: 1px 0 0 0 !important;
+  line-height: 15px !important;
+  font-size: 13px !important;
+  height: 18px !important;
+  width: 18px !important;
+  text-align: left !important;
+  padding: 1px 0 0 4px !important;
+}
+.avast-extension-topbar-promo .avast-extension-topbar .tb-b-info label.tb-b-i-text label.tb-b-i-text:hover {
+  color: #2d364c !important;
+}
+.avast-extension-topbar-promo .avast-extension-topbar .tb-b-info label.tb-b-i-text label.tb-b-i-text:active {
+  color: #2d364c !important;
+}
+.avast-extension-topbar-promo .avast-extension-topbar img {
+  display: block;
+  margin: 0 auto;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.avast-extension-topbar-promo #avast-browser-never {
+  margin-right: 0 !important;
+}
+.avast-extension-topbar-promo #avast-browser-never #avast-browser-never-checkbox-hidden {
+  opacity: 0 !important;
+  margin: 0 !important;
+}
+.avast-extension-topbar-promo #avast-browser-never #avast-browser-never-checkbox-hidden:focus {
+  opacity: 0.8 !important;
+  width: unset !important;
+}
+.avast-extension-topbar-promo #avast-browser-never input {
+  opacity: 0 !important;
+  position: absolute;
+  top: 8px !important;
+}
+.avast-extension-topbar-promo #avast-browser-never input:focus {
+  opacity: 0.8 !important;
+}
+.avast-extension-topbar-promo #avast-browser-never .tb-b-b-text {
+  float: right !important;
+  margin-left: 5px !important;
+}
+.avast-extension-topbar-promo #avast-browser-never .avast-browser-never-img {
+  position: relative;
+  top: 9px !important;
+  height: 12px !important;
+  width: 12px !important;
+}
+.avast-extension-topbar-promo #avast-browser-never .avast-browser-never-img.noDisplay {
+  display: none !important;
+}
+.avast-extension-topbar-promo #avast-browser-hide.tb-b-basic {
+  margin-right: 12px !important;
+  margin-left: 10px !important;
+  margin-top: 0;
+  top: 12px;
+  height: 15px;
+  width: 15px;
+}
+.avast-extension-topbar-promo #avast-browser-hide .avast-browser-hide-img {
+  position: relative;
+  height: 10px;
+  width: 10px;
+  left: -9px;
+  top: -3px;
+}
+.avast-extension-topbar-promo #avast-browser-hide .avast-browser-hide-img:hover {
+  background-color: #121825;
+}
+.avast-extension-topbar-promo #avast-browser-hide .avast-browser-hide-img:active {
+  background-color: #0e131e;
+}
+.avast-extension-topbar-promo #avast-browser-hide .avast-browser-hide-background {
+  height: 22px;
+  width: 22px;
+  position: relative;
+  top: 5px;
+}
+.avast-extension-topbar-promo #avast-browser-hide .avast-browser-hide-background:hover {
+  background-color: #1f2636;
+  border-radius: 2px;
+  -webkit-animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+.avast-extension-topbar-promo #avast-browser-hide .avast-browser-hide-background:active {
+  background-color: #1a202f;
+  border-radius: 2px;
+}
+.avast-extension-topbar-promo #infoHoverDiv {
+  resize: none !important;
+  overflow: hidden !important;
+  display: none;
+  z-index: 2147483646 !important;
+  float: right !important;
+  margin-top: 0 !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
+  transition: all 2.35s linear !important;
+  background-color: transparent;
+  margin-left: 197px !important;
+}
+.avast-extension-topbar-promo #infoHoverDiv .topbar-info-arrow {
+  z-index: 3;
+  position: fixed !important;
+  top: 27px !important;
+  border: solid transparent !important;
+  height: 0 !important;
+  width: 0 !important;
+  border-bottom-color: #fff !important;
+  border-width: 7px !important;
+  margin-left: 296px !important;
+}
+.avast-extension-topbar-promo #infoHoverDiv .topbar-info-container {
+  -webkit-box-sizing: content-box !important;
+  -moz-box-sizing: content-box !important;
+  box-sizing: content-box !important;
+  overflow: hidden !important;
+  position: fixed;
+  background-color: #fff;
+  border-radius: 4px !important;
+  max-height: 83px !important;
+  top: 38px !important;
+  max-width: 449px !important;
+  padding: 20px 24px !important;
+  cursor: default !important;
+  box-shadow: 0 4px 7px 0 rgba(79,79,79,0.24) !important;
+  border: solid 1px #b8b8b8 !important;
+}
+.avast-extension-topbar-promo #infoHoverDiv .topbar-info-container .topbar-info-icon {
+  -webkit-box-sizing: content-box !important;
+  -moz-box-sizing: content-box !important;
+  box-sizing: content-box !important;
+  max-width: 400px;
+  height: 30px;
+  border-radius: 5px;
+  background-clip: padding-box;
+  position: relative;
+  overflow: hidden !important;
+  float: left !important;
+  width: 40px !important;
+  height: 40px !important;
+  margin: 2px 10px 0 0 !important;
+  background-color: #fff;
+  border-radius: 50px !important;
+  border: 2px solid #abadbb !important;
+  cursor: pointer !important;
+}
+.avast-extension-topbar-promo #infoHoverDiv .topbar-info-container .topbar-info-icon:hover {
+  background-color: #fff;
+  color: #abadbb !important;
+  border-color: #abadbb !important;
+}
+.avast-extension-topbar-promo #infoHoverDiv .topbar-info-container .topbar-info-icon:active {
+  background-color: #fff;
+  color: #abadbb !important;
+  border-color: #abadbb !important;
+}
+.avast-extension-topbar-promo #infoHoverDiv .topbar-info-container .topbar-info-icon label.tb-b-i-text {
+  overflow: hidden;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  float: left;
+  font-family: 'Roboto', sans-serif;
+  line-height: 30px;
+  text-align: center;
+  cursor: default;
+  color: #fff !important;
+  font-weight: 200 !important;
+  padding: 1px 0 0 0 !important;
+  max-width: 380px !important;
+  font-size: 35px !important;
+  line-height: 43px !important;
+  height: 43px !important;
+  width: 43px !important;
+  cursor: pointer !important;
+}
+.avast-extension-topbar-promo #infoHoverDiv .topbar-info-container .topbar-info-text {
+  overflow: hidden;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  float: left;
+  font-family: 'Roboto', sans-serif;
+  line-height: 30px;
+  text-align: center;
+  cursor: default;
+  text-align: left !important;
+  margin: 0 !important;
+  height: auto !important;
+  max-height: 140px;
+  max-width: 380px !important;
+  float: right !important;
+  position: relative !important;
+  color: #31323d !important;
+  cursor: pointer !important;
+  font-size: 13px !important;
+  font-weight: bold !important;
+}
+.avast-extension-topbar-promo #infoHoverDiv .topbar-info-container .topbar-info-text div.toolbar-text1 {
+  text-align: left !important;
+  margin: auto !important;
+  color: #ff7800 !important;
+  line-height: 20px !important;
+  cursor: pointer !important;
+  max-height: 140px !important;
+  font-weight: bold !important;
+}
+.avast-extension-topbar-promo #infoHoverDiv .topbar-info-container .topbar-info-text span.toolbar-text2 {
+  text-align: left !important;
+  margin: auto !important;
+  color: #2d364c !important;
+  line-height: 20px !important;
+  cursor: pointer !important;
+  font-weight: normal !important;
+}
+.avast-extension-topbar-promo #infoHoverDiv .topbar-info-container .toolbar-text {
+  margin: 0;
+  color: #242424 !important;
+  font-size: 13px !important;
+  line-height: 1.38 !important;
+  text-align: left;
+  font-family: 'Roboto', sans-serif;
+  height: 37px;
+  font-weight: 300;
+  font-style: normal;
+  font-stretch: normal;
+  letter-spacing: -0.2px;
+  width: 449px;
+}
+.avast-extension-topbar-promo #neverHoverDiv {
+  resize: none !important;
+  overflow: hidden !important;
+  display: none;
+  z-index: 2147483646 !important;
+  float: right !important;
+  margin-top: 0 !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 83px !important;
+  transition: all 2.35s linear !important;
+  background-color: transparent !important;
+  cursor: default !important;
+}
+.avast-extension-topbar-promo #neverHoverDiv .topbar-never-container {
+  overflow: hidden !important;
+  position: relative;
+  margin: auto !important;
+  width: 500px !important;
+  min-height: 300px !important;
+  max-height: 400px !important;
+  top: 20% !important;
+  background-color: #fff !important;
+  border-radius: 1px !important;
+  text-align: center !important;
+}
+.avast-extension-topbar-promo #neverHoverDiv .topbar-never-container .separator {
+  height: 15px !important;
+}
+.avast-extension-topbar-promo #neverHoverDiv .topbar-never-container .topbar-never-icon {
+  -webkit-box-sizing: content-box !important;
+  -moz-box-sizing: content-box !important;
+  box-sizing: content-box !important;
+  max-width: 400px;
+  height: 30px;
+  border-radius: 5px;
+  background-clip: padding-box;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden !important;
+  width: 70px !important;
+  height: 70px !important;
+  max-width: 470px !important;
+  margin: 30px auto 10px auto !important;
+  float: none !important;
+  background: no-repeat center center !important;
+  border-style: none !important;
+}
+.avast-extension-topbar-promo #neverHoverDiv .topbar-never-container .topbar-never-close {
+  -webkit-box-sizing: content-box !important;
+  -moz-box-sizing: content-box !important;
+  box-sizing: content-box !important;
+  max-width: 400px;
+  height: 30px;
+  border-radius: 5px;
+  background-clip: padding-box;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden !important;
+  max-width: 70px !important;
+  width: 30px !important;
+  height: 30px !important;
+  float: right !important;
+  margin: 10px 10px 0 0 !important;
+  border-style: none !important;
+  background: #fff no-repeat center center !important;
+  font-size: 25px !important;
+  line-height: 30px !important;
+  color: #818694 !important;
+  font-family: 'arial', 'segoe ui', 'Proxima Nova', 'Open Sans', 'Helvetica Neue', sans-serif !important;
+  font-weight: lighter !important;
+}
+.avast-extension-topbar-promo #neverHoverDiv .topbar-never-container .topbar-never-close:hover {
+  color: #2d364c !important;
+  border-style: none !important;
+}
+.avast-extension-topbar-promo #neverHoverDiv .topbar-never-container .topbar-never-close:active {
+  color: #2d364c !important;
+  border-style: none !important;
+}
+.avast-extension-topbar-promo #neverHoverDiv .topbar-never-container .topbar-never-text {
+  overflow: hidden;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  float: left;
+  font-family: 'Roboto', sans-serif;
+  line-height: 30px;
+  text-align: center;
+  cursor: default;
+  font-size: 13px !important;
+  color: #31323d !important;
+  font-weight: normal !important;
+  position: relative !important;
+  float: none !important;
+  margin: 0 15px !important;
+  line-height: 15px !important;
+  min-height: 15px !important;
+  max-height: 45px !important;
+}
+.avast-extension-topbar-promo #neverHoverDiv .topbar-never-container .never-text-title {
+  overflow: hidden;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  float: left;
+  font-family: 'Roboto', sans-serif;
+  line-height: 30px;
+  text-align: center;
+  cursor: default;
+  font-size: 13px !important;
+  color: #31323d !important;
+  font-weight: normal !important;
+  position: relative !important;
+  float: none !important;
+  margin: 0 15px !important;
+  line-height: 15px !important;
+  min-height: 15px !important;
+  max-height: 45px !important;
+  max-width: 470px !important;
+  color: #ff7800 !important;
+}
+.avast-extension-topbar-promo #neverHoverDiv .topbar-never-container .never-text-msg {
+  overflow: hidden;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  float: left;
+  font-family: 'Roboto', sans-serif;
+  line-height: 30px;
+  text-align: center;
+  cursor: default;
+  font-size: 13px !important;
+  color: #31323d !important;
+  font-weight: normal !important;
+  position: relative !important;
+  float: none !important;
+  margin: 0 15px !important;
+  line-height: 15px !important;
+  min-height: 15px !important;
+  max-height: 45px !important;
+  padding: 0 !important;
+  max-width: 470px !important;
+  color: #2d364c !important;
+  font-weight: normal !important;
+}
+.avast-extension-topbar-promo #neverHoverDiv .topbar-never-container .topbar-never-button {
+  box-shadow: 0 1px 2px 1px #09884c;
+  -moz-box-shadow: 0 1px 2px 1px #09884c;
+  -webkit-box-sizing: content-box !important;
+  -moz-box-sizing: content-box !important;
+  box-sizing: content-box !important;
+  max-width: 400px;
+  height: 30px;
+  border-radius: 5px;
+  background-clip: padding-box;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden !important;
+  max-width: 380px !important;
+  float: none !important;
+  margin: 25px auto 10px auto !important;
+  background-color: #09884c;
+  border: 1px solid #09884c !important;
+  display: inline-block !important;
+}
+.avast-extension-topbar-promo #neverHoverDiv .topbar-never-container .topbar-never-button:hover {
+  background-color: #09884c;
+  border: 1px solid #09884c !important;
+  cursor: pointer !important;
+}
+.avast-extension-topbar-promo #neverHoverDiv .topbar-never-container .topbar-never-button:hover .tb-b-r-text {
+  cursor: pointer !important;
+}
+.avast-extension-topbar-promo #neverHoverDiv .topbar-never-container .topbar-never-button:active {
+  box-shadow: none !important;
+  -moz-box-shadow: none !important;
+  background-color: #076d3d;
+  border: 1px solid #076d3d !important;
+  cursor: pointer !important;
+}
+.avast-extension-topbar-promo #neverHoverDiv .topbar-never-container .topbar-never-button:active .tb-b-r-text {
+  cursor: pointer !important;
+}
+.avast-extension-topbar-promo #neverHoverDiv .topbar-never-container .topbar-never-button .tb-b-r-text {
+  overflow: hidden;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  float: left;
+  font-family: 'Roboto', sans-serif;
+  line-height: 30px;
+  text-align: center;
+  cursor: default;
+  float: none !important;
+  color: #2d364c !important;
+  font-weight: normal !important;
+  font-size: 10px !important;
+  padding: 0 10px !important;
+  height: 30px !important;
+  max-width: 380px !important;
+}
+.avast-extension-topbar-promo #neverHoverDiv .topbar-never-container .topbar-never-link {
+  overflow: hidden;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  float: left;
+  font-family: 'Roboto', sans-serif;
+  line-height: 30px;
+  text-align: center;
+  cursor: default;
+  font-size: 13px !important;
+  color: #31323d !important;
+  font-weight: normal !important;
+  position: relative !important;
+  float: none !important;
+  margin: 0 15px !important;
+  line-height: 15px !important;
+  min-height: 15px !important;
+  max-height: 45px !important;
+  color: #818694 !important;
+  text-decoration: underline;
+  max-width: 470px !important;
+  font-size: 11px !important;
+}
+.avast-extension-topbar-promo #neverHoverDiv .topbar-never-container .topbar-never-link:hover {
+  color: #2d364c !important;
+}
+.avast-extension-topbar-promo #neverHoverDiv .topbar-never-container .topbar-never-link:active {
+  color: #2d364c !important;
+}
+.avast-extension-topbar-promo #avast-browser-info:focus {
+  border: dashed #fff 1px !important;
+}
+.avast-extension-topbar-promo #avast-browser-info .noDisplay {
+  display: none !important;
+}
+.avast-extension-topbar-promo .avast-extension-topbar .tb-b-info .avast-extension-topbar-button-info-image,
+.avast-extension-topbar-promo .avast-extension-topbar .tb-b-info .avast-extension-topbar-button-info-image-hover {
+  cursor: default !important;
+}
+.avast-extension-topbar-promo .avast-extension-topbar .tb-b-info .avast-extension-topbar-button-info-image:hover,
+.avast-extension-topbar-promo .avast-extension-topbar .tb-b-info .avast-extension-topbar-button-info-image-hover:hover {
+  cursor: default !important;
+}
+@font-face {
+  font-family: 'ProximaNova';
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/66c21e717d305259c466bccd7229ac03.woff) format('woff'), url(chrome-extension://__MSG_@@extension_id__/../fonts/1db429db8bb535bb03d4cb1188d2fa72.ttf) format('truetype');
+}
+.bm-buttonBar {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  color: #fff;
+  text-align: center;
+  bottom: 13px;
+  padding: 5px;
+}
+.bm-buttonBar .bm-desktopButton {
+  width: 216px;
+  height: 46px;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px 0 rgba(22,27,38,0.22);
+  border: solid 2px #0cb754;
+  background-color: #143232;
+  margin-right: 4px;
+  font-family: ProximaNova;
+  font-size: 14px;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: normal;
+  letter-spacing: normal;
+  color: #fff;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+.bm-buttonBar .bm-bankmodeButton {
+  width: 216px;
+  height: 46px;
+  box-shadow: 0 4px 12px 0 rgba(22,27,38,0.22);
+  border: solid 1px #4a5570;
+  background-color: #161b28;
+  border-radius: 4px;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  font-family: ProximaNova, Roboto, sans-serif;
+  font-size: 14px;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: normal;
+  letter-spacing: normal;
+  color: #fff;
+  cursor: pointer !important;
+}
+.bm-buttonBar .bm-bankmodeButton:hover {
+  background-color: #143232;
+}
+.bm-row {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  margin-right: -15px;
+  margin-left: -15px;
+  height: 100%;
+}
+.bm-col-sm {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 1px;
+  -ms-flex-preferred-size: 0;
+  flex-basis: 0;
+  -webkit-box-flex: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  max-width: 100%;
+}
+.bm-col-sm-2 {
+  position: relative;
+  height: 100%;
+  min-height: 1px;
+  padding-right: 15px;
+  padding-left: 15px;
+  -ms-flex-preferred-size: 0;
+  flex-basis: 0;
+  -webkit-box-flex: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  max-width: 10%;
+}
+.avast-extension-overlay {
+  line-height: 1;
+  direction: ltr;
+  position: fixed;
+  z-index: 2147483646;
+  background-color: rgba(30,36,52,0.8);
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+.bm-center {
+  position: relative;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.bm-center * {
+  box-sizing: border-box;
+}
+.bm-center .modal-overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.avast-extension-topbar {
+  margin: auto;
+  width: 100% !important;
+  height: 50px !important;
+  position: relative !important;
+  background-color: #2d364c;
+  border-bottom: 0 !important;
+  border-left: 1px solid #000 !important;
+  border-right: 1px solid #000 !important;
+  overflow: hidden !important;
+  z-index: 2147483647;
+}
+.bm-switched-modal {
+  position: fixed;
+  top: 0;
+  width: 617px;
+  height: 179px;
+  border-radius: 2px;
+  background-color: #1e2434;
+  box-shadow: 0 6px 14px 0 rgba(0,0,0,0.22);
+}
+.bm-switched-modal .bm-switched-wrapper {
+  margin: 30px 46px;
+  display: grid;
+  grid-template-rows: minmax(35px, min-content) minmax(17px, min-content) minmax(36px, min-content);
+  grid-template-columns: 100%;
+  width: 521px;
+  height: 119px;
+}
+.bm-switched-modal .bm-switched-top-row {
+  display: inline-block;
+  text-align: center;
+  width: 100%;
+}
+.bm-secure-icon {
+  width: 22px;
+  height: 20px;
+  margin-right: 16px;
+  object-fit: contain;
+  float: left;
+  margin-top: 14px;
+}
+.bm-secure-button-icon {
+  width: 20px;
+  height: 18px;
+  margin-right: 12px;
+  object-fit: contain;
+}
+.bm-desktop-button-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 12px;
+  object-fit: contain;
+}
+.bm-switched-title {
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: 1.11;
+  letter-spacing: normal;
+  color: #fff !important;
+  clear: right;
+  float: left;
+  margin-top: 16px;
+}
+.bm-switched-link {
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: 1.11;
+  letter-spacing: normal;
+  color: #fff !important;
+  clear: right;
+  float: left;
+  margin-top: 16px;
+  margin-left: 5px;
+  text-decoration: underline !important;
+  cursor: pointer !important;
+}
+.avast-browser-hide-img {
+  position: relative;
+  height: 10px !important;
+  width: 10px !important;
+  margin: 19px;
+  float: right;
+}
+.avast-browser-hide-img:hover {
+  background-color: #121825;
+}
+.bm-switched-bottom-row {
+  display: grid;
+  grid-row-start: 3;
+  grid-row-end: 3;
+  grid-template-rows: 1fr;
+  grid-template-columns: 12px 8px auto 101px;
+  grid-template-areas: "checkbox label space button";
+  align-items: center;
+  height: 100%;
+}
+.bm-switched-bottom-row .bm-switched-always-checkbox {
+  grid-area: checkbox;
+  height: 12px;
+  width: 12px;
+  cursor: pointer;
+}
+.bm-switched-bottom-row .bm-switched-always-text {
+  grid-area: label;
+  width: 252px;
+  height: 18px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 12px;
+  font-weight: normal;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: 1.5;
+  letter-spacing: -0.2px;
+  text-align: left;
+  color: #c0c6d5;
+  margin-left: 8px;
+  cursor: pointer;
+}
+.bm-switched-bottom-row .bm-switched-button {
+  grid-area: button;
+  position: relative;
+  width: 101px;
+  height: 36px;
+  object-fit: contain;
+  border-radius: 2px;
+  border: solid 1px #8b93a7;
+  background-color: transparent;
+  float: right;
+  outline: none;
+  overflow: hidden;
+  z-index: 0;
+  font-family: 'Roboto', sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: 36px;
+  letter-spacing: 0.1px;
+  text-align: center;
+  color: #1ec865;
+  cursor: pointer;
+}
+.bm-switched-bottom-row .bm-switched-button:hover {
+  background-color: #0a9746;
+  border-color: transparent;
+  color: #fff;
+}
+.ripple-avast {
+  position: absolute;
+  background-color: #087e3a;
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  animation: ripple 0.6s linear;
+  transform: scale(0);
+}
+.ripple {
+  background-position: center;
+  transition: background 0.8s;
+}
+.ripple:hover {
+  background: #0a9746 radial-gradient(circle, transparent 1%, #0a9746 1%) center/15000%;
+}
+.ripple:active {
+  background-color: #087e3a;
+  background-size: 100%;
+  transition: background 0s;
+}
+.avast-extension {
+  font-size: medium;
+  line-height: 1;
+  direction: ltr;
+  text-align: left;
+  font-style: normal;
+  font-weight: normal;
+  text-decoration: none;
+  list-style-type: disc;
+}
+.avast-extension h1,
+.avast-extension h2,
+.avast-extension h3,
+.avast-extension h4,
+.avast-extension h5,
+.avast-extension h6,
+.avast-extension p,
+.avast-extension td,
+.avast-extension dl,
+.avast-extension tr,
+.avast-extension dt,
+.avast-extension ol,
+.avast-extension form,
+.avast-extension select,
+.avast-extension option,
+.avast-extension pre,
+.avast-extension div,
+.avast-extension table,
+.avast-extension th,
+.avast-extension tbody,
+.avast-extension tfoot,
+.avast-extension caption,
+.avast-extension thead,
+.avast-extension ul,
+.avast-extension li,
+.avast-extension address,
+.avast-extension blockquote,
+.avast-extension dd,
+.avast-extension fieldset,
+.avast-extension iframe,
+.avast-extension strong,
+.avast-extension legend,
+.avast-extension em,
+.avast-extension s,
+.avast-extension cite,
+.avast-extension span,
+.avast-extension input,
+.avast-extension sup,
+.avast-extension label,
+.avast-extension dfn,
+.avast-extension object,
+.avast-extension big,
+.avast-extension q,
+.avast-extension font,
+.avast-extension samp,
+.avast-extension acronym,
+.avast-extension small,
+.avast-extension img,
+.avast-extension strike,
+.avast-extension code,
+.avast-extension sub,
+.avast-extension ins,
+.avast-extension textarea,
+.avast-extension var,
+.avast-extension a,
+.avast-extension abbr,
+.avast-extension applet,
+.avast-extension del,
+.avast-extension kbd,
+.avast-extension tt,
+.avast-extension b,
+.avast-extension i,
+.avast-extension hr,
+.avast-extension article,
+.avast-extension aside,
+.avast-extension dialog,
+.avast-extension figure,
+.avast-extension footer,
+.avast-extension header,
+.avast-extension hgroup,
+.avast-extension menu,
+.avast-extension nav,
+.avast-extension section,
+.avast-extension time,
+.avast-extension mark,
+.avast-extension audio,
+.avast-extension video {
+  background-attachment: scroll;
+  background-color: transparent;
+  background-image: none;
+  background-position: 0 0;
+  background-repeat: repeat;
+  border-color: #000;
+  border-color: currentColor;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  border-style: none;
+  border-width: medium;
+  bottom: auto;
+  clear: none;
+  clip: auto;
+  color: inherit;
+  counter-increment: none;
+  counter-reset: none;
+  cursor: auto;
+  direction: inherit;
+  display: inline;
+  float: none;
+  font-family: inherit;
+  font-size: inherit;
+  font-style: inherit;
+  font-variant: normal;
+  font-weight: inherit;
+  height: auto;
+  left: auto;
+  letter-spacing: normal;
+  line-height: inherit;
+  list-style-type: inherit;
+  list-style-position: outside;
+  list-style-image: none;
+  margin: 0;
+  max-height: none;
+  max-width: none;
+  min-height: 0;
+  min-width: 0;
+  opacity: 1;
+  outline: invert none medium;
+  overflow: visible;
+  padding: 0;
+  position: static;
+  quotes: "" "";
+  right: auto;
+  table-layout: auto;
+  text-align: inherit;
+  text-decoration: inherit;
+  text-indent: 0;
+  text-shadow: none;
+  text-transform: none;
+  top: auto;
+  unicode-bidi: normal;
+  vertical-align: baseline;
+  visibility: inherit;
+  white-space: normal;
+  width: auto;
+  word-spacing: normal;
+  z-index: auto;
+}
+.avast-extension textarea {
+  display: inline-block;
+}
+.avast-extension table {
+  display: table;
+}
+.avast-extension thead {
+  display: table-header-group;
+}
+.avast-extension tbody {
+  display: table-row-group;
+}
+.avast-extension tfoot {
+  display: table-footer-group;
+}
+.avast-extension tr {
+  display: table-row;
+}
+.avast-extension th,
+.avast-extension td {
+  display: table-cell;
+  vertical-align: middle;
+}
+.avast-extension td[valign=top] {
+  vertical-align: top;
+}
+.avast-extension td[valign=bottom] {
+  vertical-align: bottom;
+}
+.avast-extension ul {
+  list-style-type: disc;
+}
+.avast-extension ol {
+  list-style-type: decimal;
+}
+.avast-extension li {
+  display: list-item;
+  min-height: auto;
+  min-width: auto;
+}
+.avast-extension strong {
+  font-weight: bold;
+}
+.avast-extension em {
+  font-style: italic;
+}
+.avast-extension kbd,
+.avast-extension samp,
+.avast-extension code {
+  font-family: monospace;
+}
+.avast-extension a,
+.avast-extension input[type=radio],
+.avast-extension input[type=checkbox] {
+  cursor: pointer;
+}
+.avast-extension blockquote,
+.avast-extension q {
+  quotes: none;
+}
+.avast-extension blockquote:before,
+.avast-extension q:before,
+.avast-extension blockquote:after,
+.avast-extension q:after {
+  content: '';
+}
+.avast-extension table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+@font-face {
+  font-family: "icons";
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/023d3cd1346708e926f0c19c7ada20cf.ttf) format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+.avast-extension .icon {
+  font-family: "icons";
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 1;
+  font-weight: normal;
+  font-style: normal;
+  speak: none;
+  text-decoration: inherit;
+  text-transform: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+.avast-extension .icon {
+  content: "\F101";
+}
+.avast-extension .icon:before {
+  font-family: "icons" !important;
+}
+.avast-extension .icon-adblock:before {
+  content: "\F101";
+}
+.avast-extension .icon-audio:before {
+  content: "\F102";
+}
+.avast-extension .icon-avast:before {
+  content: "\F103";
+}
+.avast-extension .icon-blocked:before {
+  content: "\F104";
+}
+.avast-extension .icon-bookmark:before {
+  content: "\F105";
+}
+.avast-extension .icon-bookmarks:before {
+  content: "\F106";
+}
+.avast-extension .icon-books:before {
+  content: "\F107";
+}
+.avast-extension .icon-checked-input:before {
+  content: "\F108";
+}
+.avast-extension .icon-checkmark:before {
+  content: "\F109";
+}
+.avast-extension .icon-chevron-down:before {
+  content: "\F10A";
+}
+.avast-extension .icon-chevron-up:before {
+  content: "\F10B";
+}
+.avast-extension .icon-circle:before {
+  content: "\F10C";
+}
+.avast-extension .icon-clock:before {
+  content: "\F10D";
+}
+.avast-extension .icon-close:before {
+  content: "\F10E";
+}
+.avast-extension .icon-cog:before {
+  content: "\F10F";
+}
+.avast-extension .icon-creditcard:before {
+  content: "\F110";
+}
+.avast-extension .icon-cross-thin:before {
+  content: "\F111";
+}
+.avast-extension .icon-cross:before {
+  content: "\F112";
+}
+.avast-extension .icon-detach:before {
+  content: "\F113";
+}
+.avast-extension .icon-download:before {
+  content: "\F114";
+}
+.avast-extension .icon-eye:before {
+  content: "\F115";
+}
+.avast-extension .icon-folder-shared:before {
+  content: "\F116";
+}
+.avast-extension .icon-folder:before {
+  content: "\F117";
+}
+.avast-extension .icon-history:before {
+  content: "\F118";
+}
+.avast-extension .icon-key:before {
+  content: "\F119";
+}
+.avast-extension .icon-left-arrow:before {
+  content: "\F11A";
+}
+.avast-extension .icon-maximize-thin:before {
+  content: "\F11B";
+}
+.avast-extension .icon-menu:before {
+  content: "\F11C";
+}
+.avast-extension .icon-minimize-thin:before {
+  content: "\F11D";
+}
+.avast-extension .icon-music:before {
+  content: "\F11E";
+}
+.avast-extension .icon-newwindow:before {
+  content: "\F11F";
+}
+.avast-extension .icon-online-security:before {
+  content: "\F120";
+}
+.avast-extension .icon-pencil:before {
+  content: "\F121";
+}
+.avast-extension .icon-plus:before {
+  content: "\F122";
+}
+.avast-extension .icon-reattachwindow:before {
+  content: "\F123";
+}
+.avast-extension .icon-refresh:before {
+  content: "\F124";
+}
+.avast-extension .icon-remove:before {
+  content: "\F125";
+}
+.avast-extension .icon-restore-down-thin:before {
+  content: "\F126";
+}
+.avast-extension .icon-right-arrow:before {
+  content: "\F127";
+}
+.avast-extension .icon-safe:before {
+  content: "\F128";
+}
+.avast-extension .icon-search:before {
+  content: "\F129";
+}
+.avast-extension .icon-settings:before {
+  content: "\F12A";
+}
+.avast-extension .icon-tag:before {
+  content: "\F12B";
+}
+.avast-extension .icon-th:before {
+  content: "\F12C";
+}
+.avast-extension .icon-thumbs-down:before {
+  content: "\F12D";
+}
+.avast-extension .icon-transparent:before {
+  content: "\F12E";
+}
+.avast-extension .icon-umbrella:before {
+  content: "\F12F";
+}
+.avast-extension .icon-unchecked-input:before {
+  content: "\F130";
+}
+.avast-extension .icon-video:before {
+  content: "\F131";
+}
+@font-face {
+  font-family: 'Roboto Condensed Light';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Roboto Condensed Light'), local('RobotoCondensed-Light'), url(chrome-extension://__MSG_@@extension_id__/../fonts/10de31607e2027fd1ccce9c6fcbec5f2.ttf) format('truetype');
+  unicode-range: U+0460-052F, U+20B4, U+2DE0-2DFF, U+A640-A69F;
+}
+@font-face {
+  font-family: 'Roboto Condensed Light';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Roboto Condensed Light'), local('RobotoCondensed-Light'), url(chrome-extension://__MSG_@@extension_id__/../fonts/10de31607e2027fd1ccce9c6fcbec5f2.ttf) format('truetype');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Roboto Condensed Light';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Roboto Condensed Light'), local('RobotoCondensed-Light'), url(chrome-extension://__MSG_@@extension_id__/../fonts/10de31607e2027fd1ccce9c6fcbec5f2.ttf) format('truetype');
+  unicode-range: U+1F00-1FFF;
+}
+@font-face {
+  font-family: 'Roboto Condensed Light';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Roboto Condensed Light'), local('RobotoCondensed-Light'), url(chrome-extension://__MSG_@@extension_id__/../fonts/10de31607e2027fd1ccce9c6fcbec5f2.ttf) format('truetype');
+  unicode-range: U+0370-03FF;
+}
+@font-face {
+  font-family: 'Roboto Condensed Light';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Roboto Condensed Light'), local('RobotoCondensed-Light'), url(chrome-extension://__MSG_@@extension_id__/../fonts/10de31607e2027fd1ccce9c6fcbec5f2.ttf) format('truetype');
+  unicode-range: U+0102-0103, U+1EA0-1EF1, U+20AB;
+}
+@font-face {
+  font-family: 'Roboto Condensed Light';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Roboto Condensed Light'), local('RobotoCondensed-Light'), url(chrome-extension://__MSG_@@extension_id__/../fonts/10de31607e2027fd1ccce9c6fcbec5f2.ttf) format('truetype');
+  unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Roboto Condensed Light';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Roboto Condensed Light'), local('RobotoCondensed-Light'), url(chrome-extension://__MSG_@@extension_id__/../fonts/10de31607e2027fd1ccce9c6fcbec5f2.ttf) format('truetype');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+@font-face {
+  font-family: 'Roboto Condensed';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Condensed'), local('RobotoCondensed-Regular'), url(chrome-extension://__MSG_@@extension_id__/../fonts/b0b1845ecce8ab6a503971e808a8409c.ttf) format('truetype');
+  unicode-range: U+0460-052F, U+20B4, U+2DE0-2DFF, U+A640-A69F;
+}
+@font-face {
+  font-family: 'Roboto Condensed';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Condensed'), local('RobotoCondensed-Regular'), url(chrome-extension://__MSG_@@extension_id__/../fonts/b0b1845ecce8ab6a503971e808a8409c.ttf) format('truetype');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Roboto Condensed';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Condensed'), local('RobotoCondensed-Regular'), url(chrome-extension://__MSG_@@extension_id__/../fonts/b0b1845ecce8ab6a503971e808a8409c.ttf) format('truetype');
+  unicode-range: U+1F00-1FFF;
+}
+@font-face {
+  font-family: 'Roboto Condensed';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Condensed'), local('RobotoCondensed-Regular'), url(chrome-extension://__MSG_@@extension_id__/../fonts/b0b1845ecce8ab6a503971e808a8409c.ttf) format('truetype');
+  unicode-range: U+0370-03FF;
+}
+@font-face {
+  font-family: 'Roboto Condensed';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Condensed'), local('RobotoCondensed-Regular'), url(chrome-extension://__MSG_@@extension_id__/../fonts/b0b1845ecce8ab6a503971e808a8409c.ttf) format('truetype');
+  unicode-range: U+0102-0103, U+1EA0-1EF1, U+20AB;
+}
+@font-face {
+  font-family: 'Roboto Condensed';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Condensed'), local('RobotoCondensed-Regular'), url(chrome-extension://__MSG_@@extension_id__/../fonts/b0b1845ecce8ab6a503971e808a8409c.ttf) format('truetype');
+  unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Roboto Condensed';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Condensed'), local('RobotoCondensed-Regular'), url(chrome-extension://__MSG_@@extension_id__/../fonts/b0b1845ecce8ab6a503971e808a8409c.ttf) format('truetype');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+@font-face {
+  font-family: 'Roboto Condensed Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Roboto Condensed Bold'), local('RobotoCondensed-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/4b8b4b377e8cb358cf886d13c7bb287c.ttf) format('truetype');
+  unicode-range: U+0460-052F, U+20B4, U+2DE0-2DFF, U+A640-A69F;
+}
+@font-face {
+  font-family: 'Roboto Condensed Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Roboto Condensed Bold'), local('RobotoCondensed-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/4b8b4b377e8cb358cf886d13c7bb287c.ttf) format('truetype');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Roboto Condensed Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Roboto Condensed Bold'), local('RobotoCondensed-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/4b8b4b377e8cb358cf886d13c7bb287c.ttf) format('truetype');
+  unicode-range: U+1F00-1FFF;
+}
+@font-face {
+  font-family: 'Roboto Condensed Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Roboto Condensed Bold'), local('RobotoCondensed-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/4b8b4b377e8cb358cf886d13c7bb287c.ttf) format('truetype');
+  unicode-range: U+0370-03FF;
+}
+@font-face {
+  font-family: 'Roboto Condensed Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Roboto Condensed Bold'), local('RobotoCondensed-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/4b8b4b377e8cb358cf886d13c7bb287c.ttf) format('truetype');
+  unicode-range: U+0102-0103, U+1EA0-1EF1, U+20AB;
+}
+@font-face {
+  font-family: 'Roboto Condensed Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Roboto Condensed Bold'), local('RobotoCondensed-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/4b8b4b377e8cb358cf886d13c7bb287c.ttf) format('truetype');
+  unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Roboto Condensed Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Roboto Condensed Bold'), local('RobotoCondensed-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/4b8b4b377e8cb358cf886d13c7bb287c.ttf) format('truetype');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url(chrome-extension://__MSG_@@extension_id__/../fonts/629a55a7e793da068dc580d184cc0e31.ttf) format('truetype');
+  unicode-range: U+0460-052F, U+20B4, U+2DE0-2DFF, U+A640-A69F;
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url(chrome-extension://__MSG_@@extension_id__/../fonts/629a55a7e793da068dc580d184cc0e31.ttf) format('truetype');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url(chrome-extension://__MSG_@@extension_id__/../fonts/629a55a7e793da068dc580d184cc0e31.ttf) format('truetype');
+  unicode-range: U+1F00-1FFF;
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url(chrome-extension://__MSG_@@extension_id__/../fonts/629a55a7e793da068dc580d184cc0e31.ttf) format('truetype');
+  unicode-range: U+0370-03FF;
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url(chrome-extension://__MSG_@@extension_id__/../fonts/629a55a7e793da068dc580d184cc0e31.ttf) format('truetype');
+  unicode-range: U+0102-0103, U+1EA0-1EF1, U+20AB;
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url(chrome-extension://__MSG_@@extension_id__/../fonts/629a55a7e793da068dc580d184cc0e31.ttf) format('truetype');
+  unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url(chrome-extension://__MSG_@@extension_id__/../fonts/629a55a7e793da068dc580d184cc0e31.ttf) format('truetype');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+@font-face {
+  font-family: 'Open Sans Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Open Sans Bold'), local('OpenSans-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/50145685042b4df07a1fd19957275b81.ttf) format('truetype');
+  unicode-range: U+0460-052F, U+20B4, U+2DE0-2DFF, U+A640-A69F;
+}
+@font-face {
+  font-family: 'Open Sans Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Open Sans Bold'), local('OpenSans-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/50145685042b4df07a1fd19957275b81.ttf) format('truetype');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Open Sans Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Open Sans Bold'), local('OpenSans-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/50145685042b4df07a1fd19957275b81.ttf) format('truetype');
+  unicode-range: U+1F00-1FFF;
+}
+@font-face {
+  font-family: 'Open Sans Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Open Sans Bold'), local('OpenSans-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/50145685042b4df07a1fd19957275b81.ttf) format('truetype');
+  unicode-range: U+0370-03FF;
+}
+@font-face {
+  font-family: 'Open Sans Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Open Sans Bold'), local('OpenSans-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/50145685042b4df07a1fd19957275b81.ttf) format('truetype');
+  unicode-range: U+0102-0103, U+1EA0-1EF1, U+20AB;
+}
+@font-face {
+  font-family: 'Open Sans Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Open Sans Bold'), local('OpenSans-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/50145685042b4df07a1fd19957275b81.ttf) format('truetype');
+  unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Open Sans Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Open Sans Bold'), local('OpenSans-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/50145685042b4df07a1fd19957275b81.ttf) format('truetype');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+.avast-extension {
+  position: relative;
+  display: block;
+  margin: 0;
+  color: #545454;
+  background-color: #fff;
+  box-sizing: border-box;
+  font-family: 'Roboto Condensed', sans-serif;
+  font-size: 14px;
+  z-index: 2147483646;
+}
+.avast-extension *,
+.avast-extension *:before,
+.avast-extension *:after {
+  box-sizing: border-box;
+}
+.avast-extension[hidden] {
+  display: none !important;
+}
+.avast-extension a {
+  text-decoration: underline;
+  color: #359eb9;
+}
+.avast-extension a:hover,
+.avast-extension a:active,
+.avast-extension a:focus,
+.avast-extension a.active {
+  text-decoration: none;
+}
+.avast-extension section {
+  display: block;
+}
+.avast-extension input {
+  font-family: 'Roboto Condensed', sans-serif;
+  font-size: 14px;
+}
+.avast-extension label {
+  position: relative;
+  display: inline-block;
+  min-height: 26px;
+  line-height: 18px;
+  padding: 3px 0;
+  word-break: break-all;
+}
+.avast-extension input[type=checkbox],
+.avast-extension input[type=radio] {
+  display: none;
+}
+.avast-extension input[type=checkbox] + label,
+.avast-extension input[type=radio] + label {
+  padding: 3px 0 3px 28px;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: pointer;
+  line-height: 18px;
+}
+.avast-extension input[type=checkbox] + label:before,
+.avast-extension input[type=radio] + label:before {
+  display: block;
+  content: '';
+  width: 18px;
+  height: 18px;
+  border: 1px solid #ccc;
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  transition: border-color 0.2s ease-in-out;
+  cursor: pointer;
+  position: absolute;
+  left: 0;
+}
+.avast-extension input[type=checkbox] + label:focus:before,
+.avast-extension input[type=radio] + label:focus:before,
+.avast-extension input[type=checkbox] + label:hover:before,
+.avast-extension input[type=radio] + label:hover:before {
+  border-color: #359eb9;
+}
+.avast-extension input[type=radio] + label:before {
+  border-radius: 100%;
+  background-size: 10px auto;
+}
+.avast-extension input[type=checkbox] + label:before {
+  border-radius: 3px;
+  background-size: 12px auto;
+}
+.avast-extension input[type=checkbox]:checked + label:before {
+  background-image: url(chrome-extension://__MSG_@@extension_id__/../images/ab2dd88998a54382bc526184f9f031d7.svg);
+}
+.avast-extension input[type=radio]:checked + label:before {
+  background-image: url(chrome-extension://__MSG_@@extension_id__/../images/1f17dad477117b8b064d379e21f4272c.svg);
+}
+.avast-extension input[type=text],
+.avast-extension select {
+  min-height: 26px;
+  padding: 3px 10px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  transition: border-color 0.2s ease-in-out;
+  min-width: 100px;
+}
+.avast-extension input[type=text]:focus,
+.avast-extension select:focus,
+.avast-extension input[type=text]:hover,
+.avast-extension select:hover {
+  border-color: #359eb9;
+}
+.avast-extension input[type=text] {
+  line-height: 18px;
+}
+.avast-extension input[type=checkbox].switcher + label {
+  padding-left: 60px;
+  line-height: 26px;
+}
+.avast-extension input[type=checkbox].switcher + label:before {
+  width: 50px;
+  height: 26px;
+  border: 0;
+  background: #e6e6e6;
+  transition: background 0.2s ease-in-out;
+}
+.avast-extension input[type=checkbox].switcher + label:hover:before,
+.avast-extension input[type=checkbox].switcher + label:focus:before {
+  border: 0;
+  background-color: #ccc;
+}
+.avast-extension input[type=checkbox].switcher + label:after {
+  display: block;
+  content: '';
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  left: 3px;
+  top: 6px;
+  background-color: #c93838;
+  transition: left 0.2s ease-in-out;
+  border-radius: 2px;
+}
+.avast-extension input[type=checkbox].switcher:checked + label:after {
+  left: 27px;
+  background-color: #3bb151;
+}
+.avast-extension input[type=checkbox].switcher:disabled + label:after {
+  background-color: #808080;
+}
+.avast-extension input[type=checkbox].switcher--right + label {
+  padding-left: 0;
+  padding-right: 60px;
+}
+.avast-extension input[type=checkbox].switcher--right + label:before {
+  right: 0;
+  left: auto;
+}
+.avast-extension input[type=checkbox].switcher--right + label:after {
+  left: auto;
+  right: 27px;
+  transition-property: right;
+}
+.avast-extension input[type=checkbox].switcher--right:checked + label:after {
+  left: auto;
+  right: 3px;
+}
+.avast-extension .select-wrap,
+.avast-extension select-wrap {
+  display: inline-block;
+  position: relative;
+  max-width: 100%;
+  min-width: 100px;
+}
+.avast-extension .select-wrap select,
+.avast-extension select-wrap select {
+  padding-right: 36px;
+  position: relative;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  max-width: 100%;
+}
+.avast-extension .select-wrap:after,
+.avast-extension select-wrap:after {
+  display: block;
+  content: '';
+  width: 26px;
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  bottom: 1px;
+  background-color: #ccc;
+  pointer-events: none;
+  background-image: url(chrome-extension://__MSG_@@extension_id__/../images/a28584d70ef78ecc53fe4ca6afcb80da.svg);
+  background-repeat: no-repeat;
+  background-position: 50%;
+  background-size: 10px auto;
+}
+.avast-extension .select-wrap--fake {
+  width: 28px;
+  max-width: 28px;
+  min-width: 0;
+  color: transparent;
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: top;
+}
+.avast-extension .select-wrap--fake select {
+  border: 0;
+}
+.avast-extension .select-wrap--fake:after {
+  right: auto;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background-color: #359eb9;
+  background-image: url(chrome-extension://__MSG_@@extension_id__/../images/9727c59ba448710a7d8bbc2300cf198a.svg);
+  background-size: 14px auto;
+  border-radius: 0 3px 3px 0;
+  border-left: solid 1px #268095;
+  width: 28px;
+  transition: background-color 0.2s ease-in-out;
+}
+.avast-extension .select-wrap--fake:hover:after,
+.avast-extension .select-wrap--fake:focus:after {
+  background-color: #268095;
+}
+.avast-extension grid-row {
+  font-size: 0;
+  display: block;
+  clear: both;
+  position: relative;
+  padding: 5px 0;
+}
+.avast-extension grid-row:after,
+.avast-extension grid-row:before {
+  content: '';
+  display: table;
+}
+.avast-extension grid-row:after {
+  clear: both;
+}
+.avast-extension grid-row grid-row,
+.avast-extension grid-row:empty {
+  padding: 0;
+}
+.avast-extension grid-row > * {
+  font-size: 14px;
+}
+.avast-extension grid-row select-wrap:not(:last-child),
+.avast-extension grid-row input:not(:last-child) {
+  margin-bottom: 5px;
+}
+.avast-extension grid-cell {
+  display: inline-block;
+  float: left;
+  max-width: 100%;
+}
+.avast-extension grid-cell:after,
+.avast-extension grid-cell:before {
+  content: '';
+  display: table;
+}
+.avast-extension grid-cell:after {
+  clear: both;
+}
+.avast-extension grid-cell:not(:last-child) {
+  margin-right: 12px;
+  margin-bottom: 3px;
+}
+.avast-extension grid-separator {
+  display: block;
+  height: 1px;
+  padding: 0;
+  margin: 40px 0;
+  border-bottom: 1px solid #e6e6e6;
+}
+.avast-extension grid-separator:after,
+.avast-extension grid-separator:before {
+  content: '';
+  display: table;
+}
+.avast-extension grid-separator:after {
+  clear: both;
+}
+.avast-extension .h1,
+.avast-extension .h2,
+.avast-extension .h3,
+.avast-extension .h4,
+.avast-extension .h5,
+.avast-extension .h6 {
+  font-family: 'Roboto Condensed', sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  display: block;
+  clear: both;
+  padding: 30px 0 15px;
+}
+.avast-extension .h1:first-child,
+.avast-extension .h2:first-child,
+.avast-extension .h3:first-child,
+.avast-extension .h4:first-child,
+.avast-extension .h5:first-child,
+.avast-extension .h6:first-child {
+  padding-top: 0;
+}
+.avast-extension .h1 {
+  font-size: 20px;
+  font-family: 'Roboto Condensed Bold', sans-serif;
+  color: #282828;
+}
+.avast-extension .h2 {
+  font-size: 18px;
+}
+.avast-extension .h3 {
+  font-size: 16px;
+  text-transform: uppercase;
+}
+.avast-extension .h4 {
+  font-size: 16px;
+}
+.avast-extension .p {
+  font-size: 14px;
+  font-family: 'Open Sans', Helvetica, Arial, sans-serif;
+  line-height: 1.4;
+  padding: 5px 0;
+  display: block;
+}
+.avast-extension .text-color--red {
+  color: #c93838;
+}
+.avast-extension .button {
+  background: none;
+  background-color: #359eb9;
+  min-height: 26px;
+  line-height: 18px;
+  border-radius: 3px;
+  border: 0;
+  outline: 0;
+  display: inline-block;
+  color: #fff;
+  text-decoration: none;
+  padding: 4px 10px;
+  font-family: 'Roboto Condensed', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  vertical-align: top;
+}
+.avast-extension .button .icon {
+  margin-right: 6px;
+  font-size: 16px;
+  line-height: 18px;
+  vertical-align: top;
+  cursor: pointer;
+}
+.avast-extension .button.button--icon {
+  padding-left: 6px;
+  padding-right: 7px;
+  vertical-align: initial;
+}
+.avast-extension .button:focus,
+.avast-extension .button:hover {
+  background: none;
+  background-color: #268095;
+}
+.avast-extension .button--link {
+  background-color: transparent;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #359eb9;
+  text-decoration: underline;
+}
+.avast-extension .button--link--inherit {
+  color: inherit;
+}
+.avast-extension .button--link:focus,
+.avast-extension .button--link:hover {
+  text-decoration: none;
+  background-color: transparent;
+}
+.avast-extension .button--orange {
+  background-color: #f4982e;
+}
+.avast-extension .button--orange:focus,
+.avast-extension .button--orange:hover {
+  background-color: #e3871d;
+}
+.avast-extension .button--green {
+  background-color: #40d968;
+}
+.avast-extension .button--green:focus,
+.avast-extension .button--green:hover {
+  background-color: #2fc857;
+}
+.avast-extension .button--large {
+  line-height: 22px;
+  min-height: 30px;
+  font-size: 18px;
+  font-family: 'Roboto Condensed Bold', sans-serif;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+.avast-extension .button--invert {
+  background-color: #f1f1f1;
+  color: #545454;
+}
+.avast-extension .button--invert:focus,
+.avast-extension .button--invert:hover {
+  background-color: #ccc;
+}
+.avast-extension .button--action {
+  padding: 10px 30px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 22px;
+}
+.avast-extension .button--open-sans {
+  font-family: 'Open Sans', Helvetica, Arial, sans-serif;
+}
+.avast-extension .button--group {
+  display: inline-block;
+  font-size: 0;
+  position: relative;
+  vertical-align: top;
+}
+.avast-extension .button--group .button {
+  border-left: solid 1px rgba(0,0,0,0.25);
+}
+.avast-extension .button--group--fake {
+  display: inline-block;
+  font-size: 0;
+  vertical-align: top;
+}
+.avast-extension .button--group--fake select {
+  right: 0;
+}
+.avast-extension .button--group--fake option {
+  font-size: 14px;
+  color: initial;
+}
+.avast-extension .button--group--first,
+.avast-extension .button--group .button:first-of-type {
+  border-radius: 3px 0 0 3px;
+  border-left: 0;
+}
+.avast-extension .button--group--last,
+.avast-extension .button--group .button:last-of-type {
+  border-radius: 0 3px 3px 0;
+}
+.avast-extension .button--drop {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 100%;
+  background-color: #fff;
+  border-radius: 0 0 3px 3px;
+  border: solid 1px #e6e6e6;
+  overflow: hidden;
+  display: none;
+}
+.avast-extension .button--drop--item {
+  display: block;
+  width: 100%;
+  white-space: nowrap;
+  border: 0;
+  background-color: transparent;
+  line-height: 18px;
+  padding: 4px 10px;
+  font-family: 'Roboto Condensed', sans-serif;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+.avast-extension .button--drop--item:hover,
+.avast-extension .button--drop--item:focus {
+  background-color: #e5e5e5;
+  outline: 0;
+}
+.avast-extension .button--group.on .button:first-of-type {
+  border-radius: 3px 0 0 0;
+}
+.avast-extension .button--group.on .button:last-of-type {
+  border-radius: 0 3px 0 0;
+}
+.avast-extension .button--group.on .button:first-of-type:last-of-type {
+  border-radius: 3px;
+}
+.avast-extension .button--group.on .button--icon {
+  background-color: #268095;
+}
+.avast-extension .button--group.on .button--icon.button--invert {
+  background-color: #f9f9f9;
+}
+.avast-extension .button--group.on .button--drop {
+  display: block;
+}
+.avast-extension button-wrap,
+.avast-extension .button-wrap {
+  cursor: pointer;
+}
+.avast-extension button-wrap .icon,
+.avast-extension .button-wrap .icon {
+  margin: 6px 0;
+  cursor: pointer;
+  transition: color 0.2s ease-in-out;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.avast-extension button-wrap:focus .icon,
+.avast-extension .button-wrap:focus .icon,
+.avast-extension button-wrap:hover .icon,
+.avast-extension .button-wrap:hover .icon {
+  color: #359eb9;
+}
+.avast-extension button-wrap .icon-remove,
+.avast-extension .button-wrap .icon-remove {
+  color: #c93838;
+}
+.avast-extension button-wrap:focus .icon-remove,
+.avast-extension .button-wrap:focus .icon-remove,
+.avast-extension button-wrap:hover .icon-remove,
+.avast-extension .button-wrap:hover .icon-remove {
+  color: #b03031;
+}
+.avast-extension button-wrap.is-disabled .icon,
+.avast-extension .button-wrap.is-disabled .icon,
+.avast-extension button-wrap.is-disabled:hover .icon,
+.avast-extension .button-wrap.is-disabled:hover .icon {
+  opacity: 0.5;
+  color: #545454;
+}
+.avast-extension .logo {
+  background: transparent url(chrome-extension://__MSG_@@extension_id__/../images/6b87a84dbfc31845e7419ee2f0458a4d.svg) center center/contain no-repeat;
+}
+.avast-extension .margin--top--20 {
+  margin-top: 20px;
+}
+.avast-extension .margin--right--20 {
+  margin-right: 20px;
+}
+.avast-extension .margin--right--10 {
+  margin-right: 10px;
+}
+.avast-extension .margin--left--20 {
+  margin-left: 20px;
+}
+.avast-extension .margin--left--10 {
+  margin-left: 10px;
+}
+.avast-extension .margin--bottom--20 {
+  margin-bottom: 20px;
+}
+.avast-extension .margin--bottom--10 {
+  margin-bottom: 10px;
+}
+.avast-extension.v-center--wrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  text-align: center;
+  min-height: 400px;
+}
+.avast-extension .v-center {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0 auto;
+}
+.avast-extension .splash--icon {
+  font-size: 70px;
+}
+.avast-extension .splash--title {
+  font-size: 30px;
+  padding: 20px 0;
+  display: block;
+  font-family: 'Open Sans', Helvetica, Arial, sans-serif;
+}
+.avast-extension .splash--desc {
+  font-size: 20px;
+  padding: 0 0 40px;
+}
+.avast-extension .splash--popup .splash--icon {
+  display: none;
+}
+.avast-extension .splash--popup .splash--title {
+  padding: 15px 0;
+  font-size: 20px;
+}
+.avast-extension .splash--popup .splash--desc {
+  font-size: 14px;
+  padding: 0 0 30px;
+}
+.avast-extension .splash--popup .splash--trust {
+  display: none;
+}
+.avast-extension .modal {
+  display: block;
+  width: 90%;
+  max-width: 500px;
+  min-height: 200px;
+  background-color: #f9f9f9;
+  border-radius: 3px;
+  box-shadow: 0 3px 20px 0 rgba(0,0,0,0.3);
+  padding: 40px 20px;
+  text-align: center;
+  border-color: #3bb151;
+  position: relative;
+}
+.avast-extension .modal--green {
+  background-color: #3bb151;
+  color: #fff;
+  border-color: #fff;
+}
+.avast-extension .modal--overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255,255,255,0.9);
+}
+.avast-extension .modal--close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  border: 0;
+  border-radius: 30px;
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+  text-align: center;
+  line-height: 1;
+  padding: 6px;
+  background-color: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.avast-extension .modal--close:hover,
+.avast-extension .modal--close:focus {
+  background-color: rgba(50,50,50,0.3);
+  outline: 0;
+}
+.avast-extension .modal--icon {
+  padding: 25px;
+  width: 80px;
+  height: 80px;
+  font-size: 30px;
+  line-height: 1;
+  border: solid 1px #fff;
+  border-color: inherit;
+  border-radius: 100px;
+  display: block;
+  margin: 0 auto;
+}
+.avast-extension .modal--actions {
+  padding-top: 20px;
+  display: block;
+}
+
+/*# sourceMappingURL=content.css.map*/

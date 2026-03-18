@@ -11,6 +11,7 @@ V10 주요 기능:
 - PC 식별 (hostname + IP)
 """
 
+import json
 import time
 import socket
 import platform
@@ -91,8 +92,27 @@ class DistributedLockManager:
             import pickle
             from google.auth.transport.requests import Request
             from google_auth_oauthlib.flow import InstalledAppFlow
+            from google.oauth2.service_account import Credentials as ServiceAccountCredentials
 
             SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+            credentials_path = config.GOOGLE_CREDENTIALS_PATH
+
+            if not credentials_path.exists():
+                logger.error(f"credentials.json not found: {credentials_path}")
+                return None
+
+            credentials_payload = json.loads(credentials_path.read_text(encoding='utf-8'))
+            if credentials_payload.get("type") == "service_account":
+                logger.info("Using Google service account credentials")
+                return ServiceAccountCredentials.from_service_account_file(
+                    str(credentials_path),
+                    scopes=SCOPES,
+                )
+
+            if 'installed' not in credentials_payload and 'web' not in credentials_payload:
+                logger.error(f"Unsupported Google credentials format: {credentials_path}")
+                return None
+
             creds = None
 
             # 저장된 토큰이 있으면 로드
@@ -106,13 +126,9 @@ class DistributedLockManager:
                     logger.info("Refreshing Google token...")
                     creds.refresh(Request())
                 else:
-                    if not config.GOOGLE_CREDENTIALS_PATH.exists():
-                        logger.error(f"credentials.json not found: {config.GOOGLE_CREDENTIALS_PATH}")
-                        return None
-
                     logger.info("Starting Google OAuth flow...")
                     flow = InstalledAppFlow.from_client_secrets_file(
-                        str(config.GOOGLE_CREDENTIALS_PATH), SCOPES)
+                        str(credentials_path), SCOPES)
                     creds = flow.run_local_server(port=0)
 
                 # 토큰 저장

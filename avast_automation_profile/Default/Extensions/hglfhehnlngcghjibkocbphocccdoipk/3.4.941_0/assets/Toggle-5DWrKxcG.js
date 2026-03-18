@@ -1,0 +1,1 @@
+import{j as s}from"./t-CrUv5W6q.js";const a=({checked:o,onChange:e})=>{const l=()=>{e(!o)};return s.jsx("button",{type:"button",className:`Toggle ${o?"Toggle--on":"Toggle--off"}`,onClick:l,"aria-checked":o,role:"switch",children:s.jsx("div",{className:"Toggle__track",children:s.jsx("div",{className:"Toggle__knob"})})})};export{a as T};

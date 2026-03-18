@@ -20,11 +20,13 @@ from logging_config import logger
 from error_handler import error_handler, ErrorSeverity
 
 from lock_manager import DistributedLockManager, RetryExhaustedError
+from google_sheet_hub import GoogleSheetHub
 
 # Import existing logic
 try:
     import local_file_processor
-    from erp_upload_automation_v2 import ErpUploadAutomation
+    # Legacy ERP auto-upload path retained for rollback/reference only.
+    # from erp_upload_automation_v2 import ErpUploadAutomation
     from state_manager import state_manager
 except ImportError as e:
     logger.critical(f"Error importing modules: {e}")
@@ -39,6 +41,7 @@ browser_lock = threading.Lock()  # V10: 브라우저 포트(9333) 경합 방지�
 
 # V10: Initialize distributed lock manager
 distributed_lock = DistributedLockManager()
+sheet_hub = GoogleSheetHub()
 
 # Status tracking
 server_status = {
@@ -76,8 +79,8 @@ upload_state = {
     }
 }
 
-# Timeout for pending_save state (30 minutes)
-PENDING_SAVE_TIMEOUT_SEC = 1800
+# Timeout for pending_save state
+PENDING_SAVE_TIMEOUT_SEC = config.SHEET_HUB_LOCK_TIMEOUT_SEC
 
 # HTML Template for V10 UI
 HTML_TEMPLATE = """
@@ -453,6 +456,282 @@ HTML_TEMPLATE = """
 </html>
 """
 
+SHEET_HUB_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <title>V10 Sheet Hub Dashboard</title>
+    <style>
+        :root {
+            --bg: #08131a;
+            --panel: #0f2230;
+            --line: #27556d;
+            --text: #f2f7fb;
+            --muted: #9ab4c4;
+            --accent: #4dd0e1;
+            --ok: #4fd18b;
+            --warn: #f5c451;
+            --danger: #ff7d6b;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 24px; background: radial-gradient(circle at top, #143247 0%, var(--bg) 55%); color: var(--text); font-family: "Segoe UI", sans-serif; }
+        .container { max-width: 960px; margin: 0 auto; }
+        .header { margin-bottom: 18px; }
+        h1 { margin: 0; color: var(--accent); }
+        .sub { margin-top: 6px; color: var(--muted); }
+        .card { margin-bottom: 18px; padding: 22px; background: linear-gradient(180deg, rgba(21,56,75,.96), rgba(15,34,48,.98)); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 14px 40px rgba(0,0,0,.22); }
+        .card h2 { margin: 0 0 14px; font-size: 18px; color: var(--accent); }
+        .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; }
+        .status-box { padding: 14px; background: rgba(6,19,26,.55); border: 1px solid rgba(77,208,225,.14); border-radius: 12px; }
+        .label { color: var(--muted); margin-right: 8px; }
+        .val-ok { color: var(--ok); }
+        .val-warn { color: var(--warn); }
+        .val-error { color: var(--danger); }
+        .btn-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+        .btn { flex: 1; min-width: 120px; border: 0; border-radius: 12px; padding: 13px 16px; color: white; font-size: 14px; font-weight: 700; cursor: pointer; transition: transform .15s ease, opacity .15s ease; }
+        .btn:hover:not(:disabled) { transform: translateY(-1px); }
+        .btn:disabled { opacity: .45; cursor: not-allowed; }
+        .btn-blue { background: linear-gradient(135deg, #00a7c2, #1976d2); }
+        .btn-orange { background: linear-gradient(135deg, #ff8f3d, #f45d48); }
+        .btn-green { background: linear-gradient(135deg, #12b77c, #42d392); }
+        .btn-gray { background: linear-gradient(135deg, #4c6a79, #31454f); }
+        .notice { margin-bottom: 16px; padding: 14px 16px; border-radius: 12px; display: none; font-weight: 700; }
+        .notice.warn { background: rgba(245,196,81,.18); border: 1px solid rgba(245,196,81,.5); color: #ffe7a4; }
+        .notice.error { background: rgba(255,125,107,.14); border: 1px solid rgba(255,125,107,.5); color: #ffd0c8; }
+        .mini { margin-top: 10px; color: var(--muted); font-size: 13px; }
+        .footer { text-align: center; color: #7f95a3; font-size: 12px; margin-top: 28px; }
+        @media (max-width: 760px) {
+            body { padding: 16px; }
+            .grid { grid-template-columns: 1fr; }
+            .btn { min-width: 100%; }
+        }
+    </style>
+    <script>
+        async function postJson(url, body) {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: body ? JSON.stringify(body) : null
+            });
+            const payload = await response.json();
+            if (!response.ok || payload.status === 'error') {
+                throw new Error(payload.message || '요청 처리 중 오류가 발생했습니다.');
+            }
+            return payload;
+        }
+
+        function setButtonBusy(btn, busyText) {
+            btn.dataset.originalText = btn.dataset.originalText || btn.innerText;
+            btn.innerText = busyText;
+            btn.disabled = true;
+        }
+
+        function restoreButton(btn) {
+            if (btn.dataset.originalText) {
+                btn.innerText = btn.dataset.originalText;
+            }
+        }
+
+        async function triggerAction(url, btn, body) {
+            setButtonBusy(btn, '처리중...');
+            try {
+                const payload = await postJson(url, body);
+                if (payload.message) {
+                    showNotice(payload.message, 'warn');
+                }
+                await updateStats();
+            } catch (error) {
+                showNotice(error.message, 'error');
+            } finally {
+                restoreButton(btn);
+            }
+        }
+
+        function statusText(ok, okText, failText) {
+            return `<span class="${ok ? 'val-ok' : 'val-error'}">${ok ? okText : failText}</span>`;
+        }
+
+        function showNotice(text, tone) {
+            const notice = document.getElementById('notice');
+            notice.innerText = text;
+            notice.className = `notice ${tone}`;
+            notice.style.display = 'block';
+        }
+
+        function hideNotice() {
+            const notice = document.getElementById('notice');
+            notice.style.display = 'none';
+        }
+
+        function updateUploadCard(type, stats, uploadState, hubState) {
+            const prefix = type === 'ledger' ? 'l' : 'e';
+            document.getElementById(`${prefix}-pending`).innerText = stats.pending[type];
+            document.getElementById(`${prefix}-history`).innerText = stats.history_count[type];
+            document.getElementById(`${prefix}-ready`).innerText = stats.metrics[type].ready_to_upload;
+            document.getElementById(`${prefix}-copied`).innerText = uploadState.pending_files.length;
+
+            const copyBtn = document.getElementById(`btn-${prefix}-copy`);
+            const completeBtn = document.getElementById(`btn-${prefix}-complete`);
+            const isRunning = uploadState.status === 'running';
+            const isAwaitingComplete = uploadState.status === 'pending_save';
+            const lockedByOther = hubState.locked && !hubState.locked_by_me;
+            const hasPending = stats.pending[type] > 0;
+
+            copyBtn.disabled = isRunning || isAwaitingComplete || lockedByOther || !hasPending;
+            completeBtn.disabled = !isAwaitingComplete;
+
+            copyBtn.innerText = isRunning
+                ? '복사 준비중...'
+                : lockedByOther
+                    ? '다른 처리자 사용중'
+                    : hasPending
+                        ? `복사 (${stats.pending[type]}건)`
+                        : '복사할 항목 없음';
+
+            completeBtn.innerText = isAwaitingComplete ? '완료' : '완료 대기중';
+        }
+
+        async function updateStats() {
+            try {
+                const [statsRes, healthRes, uploadRes, hubRes] = await Promise.all([
+                    fetch('/api/stats'),
+                    fetch('/api/health'),
+                    fetch('/api/upload_state'),
+                    fetch('/api/hub_status')
+                ]);
+
+                const stats = await statsRes.json();
+                const health = await healthRes.json();
+                const uploadState = await uploadRes.json();
+                const hubState = await hubRes.json();
+
+                document.getElementById('machine-id').innerText = hubState.machine_id || stats.status.machine_id || 'local';
+                document.getElementById('hub-status').innerHTML = hubState.locked
+                    ? `<span class="val-warn">${hubState.status}</span>`
+                    : `<span class="val-ok">${hubState.status}</span>`;
+                document.getElementById('hub-processor').innerText = hubState.processor || '-';
+                document.getElementById('hub-started').innerText = hubState.started_at || '-';
+                document.getElementById('hub-doc-type').innerText = hubState.doc_type || '-';
+                document.getElementById('hub-files').innerText = hubState.file_names || '-';
+                document.getElementById('hub-archived').innerText = hubState.archived_at || '-';
+
+                document.getElementById('health-browser').innerHTML = statusText(health.browser_healthy, '연결됨', '연결 안됨');
+                document.getElementById('health-login').innerHTML = statusText(health.youngrim_logged_in === true, '로그인됨', health.youngrim_logged_in === false ? '로그인 필요' : '확인 안됨');
+                document.getElementById('health-stuck').innerHTML = statusText(!health.downloader_stuck, '정상', '응답 없음');
+                document.getElementById('health-uptime').innerText = `${Math.floor(health.uptime_seconds / 60)}분`;
+                document.getElementById('dl-status').innerText = stats.status.downloader_status;
+                document.getElementById('dl-last').innerText = stats.status.downloader_last_run || '-';
+
+                updateUploadCard('ledger', stats, uploadState.ledger, hubState);
+                updateUploadCard('estimate', stats, uploadState.estimate, hubState);
+
+                if (!health.browser_healthy) {
+                    showNotice('브라우저 연결이 끊어져 있습니다. Edge 디버그 브라우저 상태를 확인해 주세요.', 'error');
+                } else if (health.youngrim_logged_in === false) {
+                    showNotice('영림 OMS 로그인이 필요합니다.', 'warn');
+                } else if (hubState.locked && !hubState.locked_by_me) {
+                    showNotice(`시트 허브 사용중: ${hubState.processor}`, 'warn');
+                } else {
+                    hideNotice();
+                }
+            } catch (error) {
+                showNotice(`상태 갱신 실패: ${error.message}`, 'error');
+            }
+        }
+
+        setInterval(updateStats, 3000);
+        window.onload = updateStats;
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>V10 Google Sheet Hub</h1>
+            <div class="sub">ERP 자동업로드 대신 Sheet1 / Sheet2 / Sheet3 허브 흐름으로 동작합니다.</div>
+            <div class="sub">처리자: <span id="machine-id">-</span></div>
+        </div>
+
+        <div id="notice" class="notice warn"></div>
+
+        <div class="card">
+            <h2>시트 허브 상태</h2>
+            <div class="grid">
+                <div class="status-box"><span class="label">상태</span><span id="hub-status">-</span></div>
+                <div class="status-box"><span class="label">처리자</span><span id="hub-processor">-</span></div>
+                <div class="status-box"><span class="label">처리시작시간</span><span id="hub-started">-</span></div>
+                <div class="status-box"><span class="label">문서종류</span><span id="hub-doc-type">-</span></div>
+                <div class="status-box"><span class="label">파일명</span><span id="hub-files">-</span></div>
+                <div class="status-box"><span class="label">시트2 이동시간</span><span id="hub-archived">-</span></div>
+            </div>
+            <div class="mini">처리중 상태가 1분 이상 유지되면 자동으로 락이 풀립니다.</div>
+        </div>
+
+        <div class="card">
+            <h2>시스템 상태</h2>
+            <div class="grid">
+                <div class="status-box"><span class="label">브라우저</span><span id="health-browser">-</span></div>
+                <div class="status-box"><span class="label">영림 로그인</span><span id="health-login">-</span></div>
+                <div class="status-box"><span class="label">다운로더</span><span id="health-stuck">-</span></div>
+                <div class="status-box"><span class="label">가동시간</span><span id="health-uptime">-</span></div>
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-gray" onclick="triggerAction('/check_login', this)">로그인 확인</button>
+                <button class="btn btn-gray" onclick="triggerAction('/restart_downloader', this)">다운로더 재시작</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>자동 다운로드</h2>
+            <div class="grid">
+                <div class="status-box"><span class="label">상태</span><span id="dl-status">-</span></div>
+                <div class="status-box"><span class="label">마지막 실행</span><span id="dl-last">-</span></div>
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-blue" onclick="triggerAction('/trigger_download', this)">수동 다운로드</button>
+                <button class="btn btn-orange" onclick="triggerAction('/trigger_download_force', this)">강제 동기화</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Ledger 허브</h2>
+            <div class="grid">
+                <div class="status-box"><span class="label">READY</span><span id="l-pending">0</span></div>
+                <div class="status-box"><span class="label">완료 이력</span><span id="l-history">0</span></div>
+                <div class="status-box"><span class="label">시트 대상</span><span id="l-ready">0</span></div>
+                <div class="status-box"><span class="label">대기 완료건</span><span id="l-copied">0</span></div>
+            </div>
+            <div class="btn-row">
+                <button id="btn-l-copy" class="btn btn-blue" onclick="triggerAction('/sheet_hub/copy/ledger', this)">복사</button>
+                <button id="btn-l-complete" class="btn btn-green" onclick="triggerAction('/sheet_hub/complete', this, { type: 'ledger' })">완료</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Estimate 허브</h2>
+            <div class="grid">
+                <div class="status-box"><span class="label">READY</span><span id="e-pending">0</span></div>
+                <div class="status-box"><span class="label">완료 이력</span><span id="e-history">0</span></div>
+                <div class="status-box"><span class="label">시트 대상</span><span id="e-ready">0</span></div>
+                <div class="status-box"><span class="label">대기 완료건</span><span id="e-copied">0</span></div>
+            </div>
+            <div class="btn-row">
+                <button id="btn-e-copy" class="btn btn-orange" onclick="triggerAction('/sheet_hub/copy/estimate', this)">복사</button>
+                <button id="btn-e-complete" class="btn btn-green" onclick="triggerAction('/sheet_hub/complete', this, { type: 'estimate' })">완료</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>서버 제어</h2>
+            <button class="btn btn-gray" onclick="triggerAction('/reset_status', this)">상태 초기화</button>
+        </div>
+
+        <div class="footer">Shop Automation V10 | Google Sheet Hub | 2026</div>
+    </div>
+</body>
+</html>
+"""
+
 class DoorBrowser:
     """Browser controller for scraping"""
     def __init__(self):
@@ -619,6 +898,63 @@ def save_history(history_dict):
     except Exception as e:
         logger.error(f"[History] Failed to save history: {e}")
 
+
+def collect_pending_data(doc_type):
+    """Collect READY files and convert them into ERP row bundles for Sheet Hub."""
+    doc_dir = config.DOWNLOADS_DIR / doc_type
+    html_files = list(doc_dir.glob("*.html")) + list(doc_dir.glob("*.mhtml"))
+    pending_keys = set(state_manager.get_keys_by_status(doc_type, state_manager.STATUS_READY))
+
+    rows = []
+    processed_files = []
+
+    for html_file in html_files:
+        order_id = html_file.stem
+        if order_id not in pending_keys:
+            continue
+
+        logger.info(f"[SheetHub] Parsing {doc_type} file: {html_file.name}")
+        try:
+            with open(html_file, 'r', encoding='utf-8') as handle:
+                html_content = handle.read()
+
+            erp_data = local_file_processor.process_html_content(
+                html_content,
+                file_path_hint=html_file.name,
+                target_type=doc_type,
+            )
+
+            if erp_data:
+                rows.extend(erp_data)
+                processed_files.append(order_id)
+            else:
+                logger.warning(f"[SheetHub] No ERP rows extracted from {order_id}")
+        except Exception as exc:
+            logger.error(f"[SheetHub] Failed to parse {order_id}: {exc}")
+
+    return rows, processed_files
+
+
+def finalize_sheet_hub_upload(doc_type):
+    """Mark pending files as completed locally after the operator finishes Sheet Hub work."""
+    history = load_history()
+    pending_files = list(upload_state[doc_type]["pending_files"])
+
+    for file_id in pending_files:
+        state_manager.update_state(doc_type, file_id, state_manager.STATUS_COMPLETED)
+        if file_id not in history.get(doc_type, []):
+            history[doc_type].append(file_id)
+
+    save_history(history)
+    sheet_hub.complete()
+
+    upload_state[doc_type]["status"] = "idle"
+    upload_state[doc_type]["last_completed"] = datetime.datetime.now().isoformat()
+    upload_state[doc_type]["pending_files"] = []
+    upload_state[doc_type]["pending_since"] = None
+
+    return len(pending_files)
+
 class AutoDownloader(threading.Thread):
     """Background thread to download files from both ledger and estimate pages"""
     def __init__(self):
@@ -719,11 +1055,13 @@ class AutoDownloader(threading.Thread):
                 time.sleep(3)
 
             # 2. Download from Ledger Lists (multiple pages: 산업/임업)
-            logger.info("[Downloader] Processing Ledger Lists...")
             l_new = 0
-            for idx, ledger_url in enumerate(config.YOUNGRIM_LEDGER_URLS, 1):
-                logger.info(f"[Downloader] Processing Ledger page {idx}/{len(config.YOUNGRIM_LEDGER_URLS)}")
-                l_new += self.download_from_page(ledger_url, config.DOWNLOADS_DIR / "ledger", "ledger", force_mode=force_mode)
+            logger.info("[Downloader] Ledger download is disabled. Skipping ledger pages.")
+            # Legacy ledger download flow retained for rollback/reference only.
+            # logger.info("[Downloader] Processing Ledger Lists...")
+            # for idx, ledger_url in enumerate(config.YOUNGRIM_LEDGER_URLS, 1):
+            #     logger.info(f"[Downloader] Processing Ledger page {idx}/{len(config.YOUNGRIM_LEDGER_URLS)}")
+            #     l_new += self.download_from_page(ledger_url, config.DOWNLOADS_DIR / "ledger", "ledger", force_mode=force_mode)
 
             # 3. Download from Estimate Lists (multiple pages: 산업/임업)
             logger.info("[Downloader] Processing Estimate Lists...")
@@ -737,7 +1075,7 @@ class AutoDownloader(threading.Thread):
                 logger.info("[Downloader] No new files downloaded this cycle.")
             else:
                 server_status["empty_cycle_count"] = 0
-                logger.info(f"[Downloader] Downloaded {l_new} ledger + {e_new} estimate files.")
+                logger.info(f"[Downloader] Downloaded {e_new} estimate files. Ledger download is disabled.")
         
         except RetryExhaustedError as e:
             logger.error(f"[V10] Critical Lock Manager failure: {e}")
@@ -947,7 +1285,7 @@ class AutoDownloader(threading.Thread):
 # Flask Routes
 @app.route('/')
 def index():
-    return render_template_string(HTML_TEMPLATE)
+    return render_template_string(SHEET_HUB_TEMPLATE)
 
 @app.route('/api/stats')
 def get_stats():
@@ -1000,6 +1338,8 @@ def get_stats():
 @app.route('/trigger_ledger', methods=['POST'])
 def trigger_ledger_upload():
     """Trigger ledger upload with lock awareness and pending_save state"""
+    return sheet_hub_copy("ledger")
+
     if not ledger_lock.acquire(blocking=False):
         return jsonify({"status": "error", "message": "Ledger upload already running"}), 409
 
@@ -1127,6 +1467,8 @@ def trigger_ledger_upload():
 @app.route('/trigger_estimate', methods=['POST'])
 def trigger_estimate_upload():
     """Trigger estimate upload with lock awareness and pending_save state"""
+    return sheet_hub_copy("estimate")
+
     if not estimate_lock.acquire(blocking=False):
         return jsonify({"status": "error", "message": "Estimate upload already running"}), 409
 
@@ -1237,6 +1579,76 @@ def trigger_estimate_upload():
         upload_state["estimate"]["status"] = "idle"
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/sheet_hub/copy/<doc_type>', methods=['POST'])
+def sheet_hub_copy(doc_type):
+    """Stage READY data into Sheet1 and copy it to the local clipboard."""
+    if doc_type not in {"ledger", "estimate"}:
+        return jsonify({"status": "error", "message": "Invalid document type"}), 400
+
+    route_lock = ledger_lock if doc_type == "ledger" else estimate_lock
+    status_key = f"{doc_type}_uploader_status"
+
+    if not route_lock.acquire(blocking=False):
+        return jsonify({"status": "error", "message": f"{doc_type} copy already running"}), 409
+
+    if upload_state[doc_type]["status"] == "pending_save":
+        route_lock.release()
+        return jsonify({"status": "error", "message": f"{doc_type} 작업이 아직 완료 처리되지 않았습니다."}), 409
+
+    try:
+        server_status[status_key] = "Running"
+        upload_state[doc_type]["status"] = "running"
+
+        def run_copy():
+            try:
+                rows, processed_files = collect_pending_data(doc_type)
+                if not processed_files:
+                    logger.info("[SheetHub] No READY files for %s", doc_type)
+                    upload_state[doc_type]["status"] = "idle"
+                    return
+
+                result = sheet_hub.stage_and_copy(doc_type, rows, processed_files)
+                upload_state[doc_type]["status"] = "pending_save"
+                upload_state[doc_type]["pending_files"] = processed_files
+                upload_state[doc_type]["pending_since"] = result["started_at"]
+                logger.info("[SheetHub] %s copied to Sheet1 (%s files / %s rows)", doc_type, len(processed_files), len(rows))
+            except Exception as exc:
+                logger.error("[SheetHub] %s copy failed: %s", doc_type, exc)
+                upload_state[doc_type]["status"] = "idle"
+                upload_state[doc_type]["last_error"] = str(exc)
+            finally:
+                server_status[status_key] = "Idle"
+                route_lock.release()
+
+        threading.Thread(target=run_copy, daemon=True).start()
+        return jsonify({"status": "success", "message": f"{doc_type} 데이터를 시트 허브로 복사합니다."})
+    except Exception as exc:
+        route_lock.release()
+        server_status[status_key] = "Idle"
+        upload_state[doc_type]["status"] = "idle"
+        return jsonify({"status": "error", "message": str(exc)}), 500
+
+
+@app.route('/sheet_hub/complete', methods=['POST'])
+def sheet_hub_complete():
+    """Clear Sheet1, mark completion locally, and release the Sheet Hub lock."""
+    data = request.get_json() or {}
+    doc_type = data.get("type", "ledger")
+
+    if doc_type not in {"ledger", "estimate"}:
+        return jsonify({"status": "error", "message": "Invalid type"}), 400
+
+    if upload_state[doc_type]["status"] != "pending_save":
+        return jsonify({"status": "error", "message": f"No pending Sheet Hub work for {doc_type}"}), 400
+
+    completed_count = finalize_sheet_hub_upload(doc_type)
+    return jsonify({
+        "status": "success",
+        "message": f"{completed_count}건 완료 처리 후 Sheet1을 비우고 락을 해제했습니다.",
+        "completed_count": completed_count,
+    })
+
+
 @app.route('/trigger_download', methods=['POST'])
 def trigger_download():
     """Manual download trigger"""
@@ -1281,8 +1693,14 @@ def reset_status():
     # Reset upload states
     upload_state["ledger"]["status"] = "idle"
     upload_state["ledger"]["pending_files"] = []
+    upload_state["ledger"]["pending_since"] = None
     upload_state["estimate"]["status"] = "idle"
     upload_state["estimate"]["pending_files"] = []
+    upload_state["estimate"]["pending_since"] = None
+    try:
+        sheet_hub.complete()
+    except Exception as exc:
+        logger.warning("[SheetHub] Reset could not clear Sheet1: %s", exc)
     return jsonify({"status": "success"})
 
 @app.route('/api/health')
@@ -1347,17 +1765,47 @@ def get_upload_state():
     """Get current upload state for pending_save tracking"""
     return jsonify(upload_state)
 
+
+@app.route('/api/hub_status')
+def get_hub_status():
+    """Expose current Sheet Hub lock/metadata state to the dashboard."""
+    try:
+        return jsonify(sheet_hub.get_status())
+    except Exception as exc:
+        logger.error("[SheetHub] Failed to load hub status: %s", exc)
+        return jsonify({
+            "locked": False,
+            "locked_by_me": False,
+            "machine_id": sheet_hub.machine_id,
+            "status": "대기중",
+            "processor": "",
+            "started_at": "",
+            "doc_type": "",
+            "file_names": "",
+            "row_count": "0",
+            "archived_at": "",
+            "error": str(exc),
+        })
+
 @app.route('/confirm_save', methods=['POST'])
 def confirm_save():
-    """Confirm that ERP save was clicked successfully"""
+    """Backward-compatible completion endpoint; now finalizes Sheet Hub work."""
     data = request.get_json() or {}
-    doc_type = data.get("type", "ledger")  # ledger or estimate
+    doc_type = data.get("type", "ledger")
 
     if doc_type not in ["ledger", "estimate"]:
         return jsonify({"status": "error", "message": "Invalid type"}), 400
 
     if upload_state[doc_type]["status"] != "pending_save":
         return jsonify({"status": "error", "message": f"No pending save for {doc_type}"}), 400
+
+    completed_count = finalize_sheet_hub_upload(doc_type)
+    logger.info("[SheetHub] Completion confirmed for %s (%s files)", doc_type, completed_count)
+    return jsonify({
+        "status": "success",
+        "message": f"{completed_count}건 완료 처리 후 Sheet1을 정리했습니다.",
+        "completed_count": completed_count
+    })
 
     # Move pending files to history and update state to COMPLETED
     history = load_history()

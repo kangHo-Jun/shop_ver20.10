@@ -38,8 +38,10 @@ class Config:
         self.ECOUNT_PASSWORD = os.getenv("ECOUNT_PASSWORD", "")
         
         # Google Sheets Settings
-        self.GS_SPREADSHEET_ID = os.getenv("GS_SPREADSHEET_ID", "1qEbhwGw4mstuMkhAJyFMK4QiIrZR_Gw3bFMR1wb2Las")
+        self.GS_SPREADSHEET_ID = os.getenv("GS_SPREADSHEET_ID", "1oEyPMkRxIOKZ8DTS7KnwwSpxftgYO4HSIR1S06Pl2Kk")
         self.GS_SHEET_NAME = os.getenv("GS_SHEET_NAME", "erp")
+        self.SHEET_HUB_LOCK_TIMEOUT_SEC = int(os.getenv("SHEET_HUB_LOCK_TIMEOUT_SEC", 60))
+        self.SHEET_HUB_ARCHIVE_DELAY_SEC = int(os.getenv("SHEET_HUB_ARCHIVE_DELAY_SEC", 5))
         
         # Paths
         self.DATA_DIR = self.base_dir / os.getenv("DATA_DIR", "data") # Keep this line if DATA_DIR is still needed as a separate concept

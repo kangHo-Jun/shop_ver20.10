@@ -1,0 +1,1444 @@
+.avast-extension {
+  font-size: medium;
+  line-height: 1;
+  direction: ltr;
+  text-align: left;
+  font-style: normal;
+  font-weight: normal;
+  text-decoration: none;
+  list-style-type: disc;
+}
+.avast-extension h1,
+.avast-extension h2,
+.avast-extension h3,
+.avast-extension h4,
+.avast-extension h5,
+.avast-extension h6,
+.avast-extension p,
+.avast-extension td,
+.avast-extension dl,
+.avast-extension tr,
+.avast-extension dt,
+.avast-extension ol,
+.avast-extension form,
+.avast-extension select,
+.avast-extension option,
+.avast-extension pre,
+.avast-extension div,
+.avast-extension table,
+.avast-extension th,
+.avast-extension tbody,
+.avast-extension tfoot,
+.avast-extension caption,
+.avast-extension thead,
+.avast-extension ul,
+.avast-extension li,
+.avast-extension address,
+.avast-extension blockquote,
+.avast-extension dd,
+.avast-extension fieldset,
+.avast-extension iframe,
+.avast-extension strong,
+.avast-extension legend,
+.avast-extension em,
+.avast-extension s,
+.avast-extension cite,
+.avast-extension span,
+.avast-extension input,
+.avast-extension sup,
+.avast-extension label,
+.avast-extension dfn,
+.avast-extension object,
+.avast-extension big,
+.avast-extension q,
+.avast-extension font,
+.avast-extension samp,
+.avast-extension acronym,
+.avast-extension small,
+.avast-extension img,
+.avast-extension strike,
+.avast-extension code,
+.avast-extension sub,
+.avast-extension ins,
+.avast-extension textarea,
+.avast-extension var,
+.avast-extension a,
+.avast-extension abbr,
+.avast-extension applet,
+.avast-extension del,
+.avast-extension kbd,
+.avast-extension tt,
+.avast-extension b,
+.avast-extension i,
+.avast-extension hr,
+.avast-extension article,
+.avast-extension aside,
+.avast-extension dialog,
+.avast-extension figure,
+.avast-extension footer,
+.avast-extension header,
+.avast-extension hgroup,
+.avast-extension menu,
+.avast-extension nav,
+.avast-extension section,
+.avast-extension time,
+.avast-extension mark,
+.avast-extension audio,
+.avast-extension video {
+  background-attachment: scroll;
+  background-color: transparent;
+  background-image: none;
+  background-position: 0 0;
+  background-repeat: repeat;
+  border-color: #000;
+  border-color: currentColor;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  border-style: none;
+  border-width: medium;
+  bottom: auto;
+  clear: none;
+  clip: auto;
+  color: inherit;
+  counter-increment: none;
+  counter-reset: none;
+  cursor: auto;
+  direction: inherit;
+  display: inline;
+  float: none;
+  font-family: inherit;
+  font-size: inherit;
+  font-style: inherit;
+  font-variant: normal;
+  font-weight: inherit;
+  height: auto;
+  left: auto;
+  letter-spacing: normal;
+  line-height: inherit;
+  list-style-type: inherit;
+  list-style-position: outside;
+  list-style-image: none;
+  margin: 0;
+  max-height: none;
+  max-width: none;
+  min-height: 0;
+  min-width: 0;
+  opacity: 1;
+  outline: invert none medium;
+  overflow: visible;
+  padding: 0;
+  position: static;
+  quotes: "" "";
+  right: auto;
+  table-layout: auto;
+  text-align: inherit;
+  text-decoration: inherit;
+  text-indent: 0;
+  text-shadow: none;
+  text-transform: none;
+  top: auto;
+  unicode-bidi: normal;
+  vertical-align: baseline;
+  visibility: inherit;
+  white-space: normal;
+  width: auto;
+  word-spacing: normal;
+  z-index: auto;
+}
+.avast-extension textarea {
+  display: inline-block;
+}
+.avast-extension table {
+  display: table;
+}
+.avast-extension thead {
+  display: table-header-group;
+}
+.avast-extension tbody {
+  display: table-row-group;
+}
+.avast-extension tfoot {
+  display: table-footer-group;
+}
+.avast-extension tr {
+  display: table-row;
+}
+.avast-extension th,
+.avast-extension td {
+  display: table-cell;
+  vertical-align: middle;
+}
+.avast-extension td[valign=top] {
+  vertical-align: top;
+}
+.avast-extension td[valign=bottom] {
+  vertical-align: bottom;
+}
+.avast-extension ul {
+  list-style-type: disc;
+}
+.avast-extension ol {
+  list-style-type: decimal;
+}
+.avast-extension li {
+  display: list-item;
+  min-height: auto;
+  min-width: auto;
+}
+.avast-extension strong {
+  font-weight: bold;
+}
+.avast-extension em {
+  font-style: italic;
+}
+.avast-extension kbd,
+.avast-extension samp,
+.avast-extension code {
+  font-family: monospace;
+}
+.avast-extension a,
+.avast-extension input[type=radio],
+.avast-extension input[type=checkbox] {
+  cursor: pointer;
+}
+.avast-extension blockquote,
+.avast-extension q {
+  quotes: none;
+}
+.avast-extension blockquote:before,
+.avast-extension q:before,
+.avast-extension blockquote:after,
+.avast-extension q:after {
+  content: '';
+}
+.avast-extension table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+@font-face {
+  font-family: "icons";
+  src: url(chrome-extension://__MSG_@@extension_id__/../fonts/023d3cd1346708e926f0c19c7ada20cf.ttf) format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+.avast-extension .icon {
+  font-family: "icons";
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 1;
+  font-weight: normal;
+  font-style: normal;
+  speak: none;
+  text-decoration: inherit;
+  text-transform: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+.avast-extension .icon {
+  content: "\F101";
+}
+.avast-extension .icon:before {
+  font-family: "icons" !important;
+}
+.avast-extension .icon-adblock:before {
+  content: "\F101";
+}
+.avast-extension .icon-audio:before {
+  content: "\F102";
+}
+.avast-extension .icon-avast:before {
+  content: "\F103";
+}
+.avast-extension .icon-blocked:before {
+  content: "\F104";
+}
+.avast-extension .icon-bookmark:before {
+  content: "\F105";
+}
+.avast-extension .icon-bookmarks:before {
+  content: "\F106";
+}
+.avast-extension .icon-books:before {
+  content: "\F107";
+}
+.avast-extension .icon-checked-input:before {
+  content: "\F108";
+}
+.avast-extension .icon-checkmark:before {
+  content: "\F109";
+}
+.avast-extension .icon-chevron-down:before {
+  content: "\F10A";
+}
+.avast-extension .icon-chevron-up:before {
+  content: "\F10B";
+}
+.avast-extension .icon-circle:before {
+  content: "\F10C";
+}
+.avast-extension .icon-clock:before {
+  content: "\F10D";
+}
+.avast-extension .icon-close:before {
+  content: "\F10E";
+}
+.avast-extension .icon-cog:before {
+  content: "\F10F";
+}
+.avast-extension .icon-creditcard:before {
+  content: "\F110";
+}
+.avast-extension .icon-cross-thin:before {
+  content: "\F111";
+}
+.avast-extension .icon-cross:before {
+  content: "\F112";
+}
+.avast-extension .icon-detach:before {
+  content: "\F113";
+}
+.avast-extension .icon-download:before {
+  content: "\F114";
+}
+.avast-extension .icon-eye:before {
+  content: "\F115";
+}
+.avast-extension .icon-folder-shared:before {
+  content: "\F116";
+}
+.avast-extension .icon-folder:before {
+  content: "\F117";
+}
+.avast-extension .icon-history:before {
+  content: "\F118";
+}
+.avast-extension .icon-key:before {
+  content: "\F119";
+}
+.avast-extension .icon-left-arrow:before {
+  content: "\F11A";
+}
+.avast-extension .icon-maximize-thin:before {
+  content: "\F11B";
+}
+.avast-extension .icon-menu:before {
+  content: "\F11C";
+}
+.avast-extension .icon-minimize-thin:before {
+  content: "\F11D";
+}
+.avast-extension .icon-music:before {
+  content: "\F11E";
+}
+.avast-extension .icon-newwindow:before {
+  content: "\F11F";
+}
+.avast-extension .icon-online-security:before {
+  content: "\F120";
+}
+.avast-extension .icon-pencil:before {
+  content: "\F121";
+}
+.avast-extension .icon-plus:before {
+  content: "\F122";
+}
+.avast-extension .icon-reattachwindow:before {
+  content: "\F123";
+}
+.avast-extension .icon-refresh:before {
+  content: "\F124";
+}
+.avast-extension .icon-remove:before {
+  content: "\F125";
+}
+.avast-extension .icon-restore-down-thin:before {
+  content: "\F126";
+}
+.avast-extension .icon-right-arrow:before {
+  content: "\F127";
+}
+.avast-extension .icon-safe:before {
+  content: "\F128";
+}
+.avast-extension .icon-search:before {
+  content: "\F129";
+}
+.avast-extension .icon-settings:before {
+  content: "\F12A";
+}
+.avast-extension .icon-tag:before {
+  content: "\F12B";
+}
+.avast-extension .icon-th:before {
+  content: "\F12C";
+}
+.avast-extension .icon-thumbs-down:before {
+  content: "\F12D";
+}
+.avast-extension .icon-transparent:before {
+  content: "\F12E";
+}
+.avast-extension .icon-umbrella:before {
+  content: "\F12F";
+}
+.avast-extension .icon-unchecked-input:before {
+  content: "\F130";
+}
+.avast-extension .icon-video:before {
+  content: "\F131";
+}
+.avast-extension {
+  width: 100%;
+  height: 100%;
+}
+.avast-extension .page--container {
+  position: relative;
+  top: 50%;
+  margin: 0px auto;
+  width: 90%;
+  max-height: 90%;
+  max-width: 500px;
+  transform: translateY(-50%);
+  overflow: auto;
+  display: block;
+  opacity: 1;
+  transition: opacity 300ms ease-in-out;
+}
+.avast-extension .page--container.centered {
+  text-align: center;
+}
+.avast-extension .page--container.centered button {
+  margin-left: auto;
+  margin-right: auto;
+}
+.avast-extension .page--container.t-hide {
+  opacity: 0;
+  transition: opacity 300ms ease-in-out;
+}
+.avast-extension .page--image {
+  width: 70px;
+  height: 70px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  background-size: contain;
+  opacity: 1;
+  transition: opacity 300ms ease-in-out;
+}
+.avast-extension .page--image.t-hide {
+  opacity: 0;
+  transition: opacity 300ms ease-in-out;
+}
+.avast-extension .page--icon {
+  font-size: 30px;
+  margin-right: 15px;
+  color: $colorOrange;
+  width: 30px;
+  height: 30px;
+  display: inline-block;
+  vertical-align: middle;
+}
+.avast-extension .page--text {
+  margin-bottom: 30px;
+  display: block;
+  opacity: 1;
+  transition: opacity 300ms ease-in-out;
+}
+.avast-extension .page--text p {
+  font-size: $fontSize;
+  font-family: $fontOpenSans;
+  line-height: 1.4;
+  padding: 5px 0;
+  display: block;
+}
+.avast-extension .page--text.t-hide {
+  opacity: 0;
+  transition: opacity 300ms ease-in-out;
+}
+.avast-extension .button {
+  opacity: 1;
+  transition: opacity 300ms ease-in-out;
+}
+.avast-extension .button.t-hide {
+  opacity: 0;
+  transition: opacity 300ms ease-in-out;
+}
+.avast-extension .button-on {
+  display: block;
+}
+.avast-extension .button-off {
+  display: none;
+}
+.avast-extension .page--loader {
+  height: 10px;
+  width: 100px;
+  margin-left: auto;
+  margin-right: auto;
+  display: none;
+  background: url(data:image/gif;base64,R0lGODlhZAAKAPeAAOrq8f39/efn8PHx9vLy9v7+/uPj41FRUmpqaqGhofv7+0pKSoiIiIyMjO7u7m1tbaysrGdnZ1BQUFJSUv7+//39/u/v8+jo8evr8v///4WFh/Hx9FVVVejo8PPz9+7u9PDw9e/v9PPz81NTU0tLS0xMS3Bwcfb29mVlZouLi1RUU/X19mdnaKOjpa2tsFpaW/f390lJSUVFRFlZWXl5fLm5vOjo6Orq6rCwsXh4e2xsbY2NjktLSufn6KysrkxMTIKChJGRkvX19WBgYODg4FpaWvj4+H9/gE9PTmpqa2FhYkREQ5ubnPz8/E5OTsjIy3d3d0ZGRIaGh+3t7UJCQcDAwkNDQ9vb3Pr6+qioqfHx8YODhHx8fdfX16SkpU9PT5+fofLy8llZWmlpatXV1ldXWXd3eUNDQlFRUJubnVFRUUNDQcXFx05OTdra3Nvb219fYHR0dL6+vsnJyZiYm5WVlnd3eGNjY6enptra2tHR1a6usFhYWF1dXlRUVOfn7////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh/wtYTVAgRGF0YVhNUDw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMDY3IDc5LjE1Nzc0NywgMjAxNS8wMy8zMC0yMzo0MDo0MiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTUgKE1hY2ludG9zaCkiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NEUzRkI5RkQ4QjcyMTFFNUJGMzRFODc5NkU0RTM4RTIiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NEUzRkI5RkU4QjcyMTFFNUJGMzRFODc5NkU0RTM4RTIiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo0RTNGQjlGQjhCNzIxMUU1QkYzNEU4Nzk2RTRFMzhFMiIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo0RTNGQjlGQzhCNzIxMUU1QkYzNEU4Nzk2RTRFMzhFMiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PgH//v38+/r5+Pf29fTz8vHw7+7t7Ovq6ejn5uXk4+Lh4N/e3dzb2tnY19bV1NPS0dDPzs3My8rJyMfGxcTDwsHAv769vLu6ubi3trW0s7KxsK+urayrqqmop6alpKOioaCfnp2cm5qZmJeWlZSTkpGQj46NjIuKiYiHhoWEg4KBgH9+fXx7enl4d3Z1dHNycXBvbm1sa2ppaGdmZWRjYmFgX15dXFtaWVhXVlVUU1JRUE9OTUxLSklIR0ZFRENCQUA/Pj08Ozo5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) bottom center no-repeat;
+  background-size: contain;
+  opacity: 1;
+  transition: opacity height 300ms ease-in-out;
+}
+.avast-extension .page--loader.on {
+  display: block;
+}
+.avast-extension .page--loader.off {
+  display: none;
+}
+.avast-extension .page--loader.t-hide {
+  opacity: 0;
+  transition: opacity height 300ms ease-in-out;
+}
+/* RobotoCondensed Light */
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Roboto Condensed Light';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Roboto Condensed Light'), local('RobotoCondensed-Light'), url(chrome-extension://__MSG_@@extension_id__/../fonts/10de31607e2027fd1ccce9c6fcbec5f2.ttf) format('truetype');
+  unicode-range: U+0460-052F, U+20B4, U+2DE0-2DFF, U+A640-A69F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Roboto Condensed Light';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Roboto Condensed Light'), local('RobotoCondensed-Light'), url(chrome-extension://__MSG_@@extension_id__/../fonts/10de31607e2027fd1ccce9c6fcbec5f2.ttf) format('truetype');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Roboto Condensed Light';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Roboto Condensed Light'), local('RobotoCondensed-Light'), url(chrome-extension://__MSG_@@extension_id__/../fonts/10de31607e2027fd1ccce9c6fcbec5f2.ttf) format('truetype');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Roboto Condensed Light';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Roboto Condensed Light'), local('RobotoCondensed-Light'), url(chrome-extension://__MSG_@@extension_id__/../fonts/10de31607e2027fd1ccce9c6fcbec5f2.ttf) format('truetype');
+  unicode-range: U+0370-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Roboto Condensed Light';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Roboto Condensed Light'), local('RobotoCondensed-Light'), url(chrome-extension://__MSG_@@extension_id__/../fonts/10de31607e2027fd1ccce9c6fcbec5f2.ttf) format('truetype');
+  unicode-range: U+0102-0103, U+1EA0-1EF1, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Roboto Condensed Light';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Roboto Condensed Light'), local('RobotoCondensed-Light'), url(chrome-extension://__MSG_@@extension_id__/../fonts/10de31607e2027fd1ccce9c6fcbec5f2.ttf) format('truetype');
+  unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Roboto Condensed Light';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Roboto Condensed Light'), local('RobotoCondensed-Light'), url(chrome-extension://__MSG_@@extension_id__/../fonts/10de31607e2027fd1ccce9c6fcbec5f2.ttf) format('truetype');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+/* RobotoCondensed Regular */
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Roboto Condensed';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Condensed'), local('RobotoCondensed-Regular'), url(chrome-extension://__MSG_@@extension_id__/../fonts/b0b1845ecce8ab6a503971e808a8409c.ttf) format('truetype');
+  unicode-range: U+0460-052F, U+20B4, U+2DE0-2DFF, U+A640-A69F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Roboto Condensed';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Condensed'), local('RobotoCondensed-Regular'), url(chrome-extension://__MSG_@@extension_id__/../fonts/b0b1845ecce8ab6a503971e808a8409c.ttf) format('truetype');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Roboto Condensed';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Condensed'), local('RobotoCondensed-Regular'), url(chrome-extension://__MSG_@@extension_id__/../fonts/b0b1845ecce8ab6a503971e808a8409c.ttf) format('truetype');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Roboto Condensed';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Condensed'), local('RobotoCondensed-Regular'), url(chrome-extension://__MSG_@@extension_id__/../fonts/b0b1845ecce8ab6a503971e808a8409c.ttf) format('truetype');
+  unicode-range: U+0370-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Roboto Condensed';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Condensed'), local('RobotoCondensed-Regular'), url(chrome-extension://__MSG_@@extension_id__/../fonts/b0b1845ecce8ab6a503971e808a8409c.ttf) format('truetype');
+  unicode-range: U+0102-0103, U+1EA0-1EF1, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Roboto Condensed';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Condensed'), local('RobotoCondensed-Regular'), url(chrome-extension://__MSG_@@extension_id__/../fonts/b0b1845ecce8ab6a503971e808a8409c.ttf) format('truetype');
+  unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Roboto Condensed';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Condensed'), local('RobotoCondensed-Regular'), url(chrome-extension://__MSG_@@extension_id__/../fonts/b0b1845ecce8ab6a503971e808a8409c.ttf) format('truetype');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+/* RobotoCondensed Bold */
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Roboto Condensed Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Roboto Condensed Bold'), local('RobotoCondensed-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/4b8b4b377e8cb358cf886d13c7bb287c.ttf) format('truetype');
+  unicode-range: U+0460-052F, U+20B4, U+2DE0-2DFF, U+A640-A69F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Roboto Condensed Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Roboto Condensed Bold'), local('RobotoCondensed-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/4b8b4b377e8cb358cf886d13c7bb287c.ttf) format('truetype');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Roboto Condensed Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Roboto Condensed Bold'), local('RobotoCondensed-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/4b8b4b377e8cb358cf886d13c7bb287c.ttf) format('truetype');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Roboto Condensed Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Roboto Condensed Bold'), local('RobotoCondensed-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/4b8b4b377e8cb358cf886d13c7bb287c.ttf) format('truetype');
+  unicode-range: U+0370-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Roboto Condensed Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Roboto Condensed Bold'), local('RobotoCondensed-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/4b8b4b377e8cb358cf886d13c7bb287c.ttf) format('truetype');
+  unicode-range: U+0102-0103, U+1EA0-1EF1, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Roboto Condensed Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Roboto Condensed Bold'), local('RobotoCondensed-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/4b8b4b377e8cb358cf886d13c7bb287c.ttf) format('truetype');
+  unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Roboto Condensed Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Roboto Condensed Bold'), local('RobotoCondensed-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/4b8b4b377e8cb358cf886d13c7bb287c.ttf) format('truetype');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+/* OpenSans Regular */
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url(chrome-extension://__MSG_@@extension_id__/../fonts/629a55a7e793da068dc580d184cc0e31.ttf) format('truetype');
+  unicode-range: U+0460-052F, U+20B4, U+2DE0-2DFF, U+A640-A69F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url(chrome-extension://__MSG_@@extension_id__/../fonts/629a55a7e793da068dc580d184cc0e31.ttf) format('truetype');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url(chrome-extension://__MSG_@@extension_id__/../fonts/629a55a7e793da068dc580d184cc0e31.ttf) format('truetype');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url(chrome-extension://__MSG_@@extension_id__/../fonts/629a55a7e793da068dc580d184cc0e31.ttf) format('truetype');
+  unicode-range: U+0370-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url(chrome-extension://__MSG_@@extension_id__/../fonts/629a55a7e793da068dc580d184cc0e31.ttf) format('truetype');
+  unicode-range: U+0102-0103, U+1EA0-1EF1, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url(chrome-extension://__MSG_@@extension_id__/../fonts/629a55a7e793da068dc580d184cc0e31.ttf) format('truetype');
+  unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url(chrome-extension://__MSG_@@extension_id__/../fonts/629a55a7e793da068dc580d184cc0e31.ttf) format('truetype');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+/* OpenSans Bold */
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Open Sans Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Open Sans Bold'), local('OpenSans-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/50145685042b4df07a1fd19957275b81.ttf) format('truetype');
+  unicode-range: U+0460-052F, U+20B4, U+2DE0-2DFF, U+A640-A69F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Open Sans Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Open Sans Bold'), local('OpenSans-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/50145685042b4df07a1fd19957275b81.ttf) format('truetype');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Open Sans Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Open Sans Bold'), local('OpenSans-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/50145685042b4df07a1fd19957275b81.ttf) format('truetype');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Open Sans Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Open Sans Bold'), local('OpenSans-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/50145685042b4df07a1fd19957275b81.ttf) format('truetype');
+  unicode-range: U+0370-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Open Sans Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Open Sans Bold'), local('OpenSans-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/50145685042b4df07a1fd19957275b81.ttf) format('truetype');
+  unicode-range: U+0102-0103, U+1EA0-1EF1, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Open Sans Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Open Sans Bold'), local('OpenSans-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/50145685042b4df07a1fd19957275b81.ttf) format('truetype');
+  unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Open Sans Bold';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Open Sans Bold'), local('OpenSans-Bold'), url(chrome-extension://__MSG_@@extension_id__/../fonts/50145685042b4df07a1fd19957275b81.ttf) format('truetype');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+.avast-extension {
+  position: relative;
+  display: block;
+  margin: 0;
+  color: #545454;
+  background-color: #fff;
+  box-sizing: border-box;
+  font-family: 'Roboto Condensed', sans-serif;
+  font-size: 14px;
+  z-index: 2147483646;
+}
+.avast-extension *,
+.avast-extension *:before,
+.avast-extension *:after {
+  box-sizing: border-box;
+}
+.avast-extension[hidden] {
+  display: none !important;
+}
+.avast-extension a {
+  text-decoration: underline;
+  color: #359eb9;
+}
+.avast-extension a:hover,
+.avast-extension a:active,
+.avast-extension a:focus,
+.avast-extension a.active {
+  text-decoration: none;
+}
+.avast-extension section {
+  display: block;
+}
+.avast-extension input {
+  font-family: 'Roboto Condensed', sans-serif;
+  font-size: 14px;
+}
+.avast-extension label {
+  position: relative;
+  display: inline-block;
+  min-height: 26px;
+  line-height: 18px;
+  padding: 3px 0;
+  word-break: break-all;
+}
+.avast-extension input[type=checkbox],
+.avast-extension input[type=radio] {
+  display: none;
+}
+.avast-extension input[type=checkbox] + label,
+.avast-extension input[type=radio] + label {
+  padding: 3px 0 3px 28px;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: pointer;
+  line-height: 18px;
+}
+.avast-extension input[type=checkbox] + label:before,
+.avast-extension input[type=radio] + label:before {
+  display: block;
+  content: '';
+  width: 18px;
+  height: 18px;
+  border: 1px solid #ccc;
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  transition: border-color 0.2s ease-in-out;
+  cursor: pointer;
+  position: absolute;
+  left: 0;
+}
+.avast-extension input[type=checkbox] + label:focus:before,
+.avast-extension input[type=radio] + label:focus:before,
+.avast-extension input[type=checkbox] + label:hover:before,
+.avast-extension input[type=radio] + label:hover:before {
+  border-color: #359eb9;
+}
+.avast-extension input[type=radio] + label:before {
+  border-radius: 100%;
+  background-size: 10px auto;
+}
+.avast-extension input[type=checkbox] + label:before {
+  border-radius: 3px;
+  background-size: 12px auto;
+}
+.avast-extension input[type=checkbox]:checked + label:before {
+  background-image: url(chrome-extension://__MSG_@@extension_id__/../images/ab2dd88998a54382bc526184f9f031d7.svg);
+}
+.avast-extension input[type=radio]:checked + label:before {
+  background-image: url(chrome-extension://__MSG_@@extension_id__/../images/1f17dad477117b8b064d379e21f4272c.svg);
+}
+.avast-extension input[type=text],
+.avast-extension select {
+  min-height: 26px;
+  padding: 3px 10px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  transition: border-color 0.2s ease-in-out;
+  min-width: 100px;
+}
+.avast-extension input[type=text]:focus,
+.avast-extension select:focus,
+.avast-extension input[type=text]:hover,
+.avast-extension select:hover {
+  border-color: #359eb9;
+}
+.avast-extension input[type=text] {
+  line-height: 18px;
+}
+.avast-extension input[type=checkbox].switcher + label {
+  padding-left: 60px;
+  line-height: 26px;
+}
+.avast-extension input[type=checkbox].switcher + label:before {
+  width: 50px;
+  height: 26px;
+  border: 0;
+  background: #e6e6e6;
+  transition: background 0.2s ease-in-out;
+}
+.avast-extension input[type=checkbox].switcher + label:hover:before,
+.avast-extension input[type=checkbox].switcher + label:focus:before {
+  border: 0;
+  background-color: #ccc;
+}
+.avast-extension input[type=checkbox].switcher + label:after {
+  display: block;
+  content: '';
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  left: 3px;
+  top: 6px;
+  background-color: #c93838;
+  transition: left 0.2s ease-in-out;
+  border-radius: 2px;
+}
+.avast-extension input[type=checkbox].switcher:checked + label:after {
+  left: 27px;
+  background-color: #3bb151;
+}
+.avast-extension input[type=checkbox].switcher:disabled + label:after {
+  background-color: #808080;
+}
+.avast-extension input[type=checkbox].switcher--right + label {
+  padding-left: 0;
+  padding-right: 60px;
+}
+.avast-extension input[type=checkbox].switcher--right + label:before {
+  right: 0;
+  left: auto;
+}
+.avast-extension input[type=checkbox].switcher--right + label:after {
+  left: auto;
+  right: 27px;
+  transition-property: right;
+}
+.avast-extension input[type=checkbox].switcher--right:checked + label:after {
+  left: auto;
+  right: 3px;
+}
+.avast-extension .select-wrap,
+.avast-extension select-wrap {
+  display: inline-block;
+  position: relative;
+  max-width: 100%;
+  min-width: 100px;
+}
+.avast-extension .select-wrap select,
+.avast-extension select-wrap select {
+  padding-right: 36px;
+  position: relative;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  max-width: 100%;
+}
+.avast-extension .select-wrap:after,
+.avast-extension select-wrap:after {
+  display: block;
+  content: '';
+  width: 26px;
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  bottom: 1px;
+  background-color: #ccc;
+  pointer-events: none;
+  background-image: url(chrome-extension://__MSG_@@extension_id__/../images/a28584d70ef78ecc53fe4ca6afcb80da.svg);
+  background-repeat: no-repeat;
+  background-position: 50%;
+  background-size: 10px auto;
+}
+.avast-extension .select-wrap--fake {
+  width: 28px;
+  max-width: 28px;
+  min-width: 0;
+  color: transparent;
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: top;
+}
+.avast-extension .select-wrap--fake select {
+  border: 0;
+}
+.avast-extension .select-wrap--fake:after {
+  right: auto;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background-color: #359eb9;
+  background-image: url(chrome-extension://__MSG_@@extension_id__/../images/9727c59ba448710a7d8bbc2300cf198a.svg);
+  background-size: 14px auto;
+  border-radius: 0 3px 3px 0;
+  border-left: solid 1px #268095;
+  width: 28px;
+  transition: background-color 0.2s ease-in-out;
+}
+.avast-extension .select-wrap--fake:hover:after,
+.avast-extension .select-wrap--fake:focus:after {
+  background-color: #268095;
+}
+.avast-extension grid-row {
+  font-size: 0;
+  display: block;
+  clear: both;
+  position: relative;
+  padding: 5px 0;
+}
+.avast-extension grid-row:after,
+.avast-extension grid-row:before {
+  content: '';
+  display: table;
+}
+.avast-extension grid-row:after {
+  clear: both;
+}
+.avast-extension grid-row grid-row,
+.avast-extension grid-row:empty {
+  padding: 0;
+}
+.avast-extension grid-row > * {
+  font-size: 14px;
+}
+.avast-extension grid-row select-wrap:not(:last-child),
+.avast-extension grid-row input:not(:last-child) {
+  margin-bottom: 5px;
+}
+.avast-extension grid-cell {
+  display: inline-block;
+  float: left;
+  max-width: 100%;
+}
+.avast-extension grid-cell:after,
+.avast-extension grid-cell:before {
+  content: '';
+  display: table;
+}
+.avast-extension grid-cell:after {
+  clear: both;
+}
+.avast-extension grid-cell:not(:last-child) {
+  margin-right: 12px;
+  margin-bottom: 3px;
+}
+.avast-extension grid-separator {
+  display: block;
+  height: 1px;
+  padding: 0;
+  margin: 40px 0;
+  border-bottom: 1px solid #e6e6e6;
+}
+.avast-extension grid-separator:after,
+.avast-extension grid-separator:before {
+  content: '';
+  display: table;
+}
+.avast-extension grid-separator:after {
+  clear: both;
+}
+.avast-extension .h1,
+.avast-extension .h2,
+.avast-extension .h3,
+.avast-extension .h4,
+.avast-extension .h5,
+.avast-extension .h6 {
+  font-family: 'Roboto Condensed', sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  display: block;
+  clear: both;
+  padding: 30px 0 15px;
+}
+.avast-extension .h1:first-child,
+.avast-extension .h2:first-child,
+.avast-extension .h3:first-child,
+.avast-extension .h4:first-child,
+.avast-extension .h5:first-child,
+.avast-extension .h6:first-child {
+  padding-top: 0;
+}
+.avast-extension .h1 {
+  font-size: 20px;
+  font-family: 'Roboto Condensed Bold', sans-serif;
+  color: #282828;
+}
+.avast-extension .h2 {
+  font-size: 18px;
+}
+.avast-extension .h3 {
+  font-size: 16px;
+  text-transform: uppercase;
+}
+.avast-extension .h4 {
+  font-size: 16px;
+}
+.avast-extension .p {
+  font-size: 14px;
+  font-family: 'Open Sans', Helvetica, Arial, sans-serif;
+  line-height: 1.4;
+  padding: 5px 0;
+  display: block;
+}
+.avast-extension .text-color--red {
+  color: #c93838;
+}
+.avast-extension .button {
+  background: none;
+  background-color: #359eb9;
+  min-height: 26px;
+  line-height: 18px;
+  border-radius: 3px;
+  border: 0;
+  outline: 0;
+  display: inline-block;
+  color: #fff;
+  text-decoration: none;
+  padding: 4px 10px;
+  font-family: 'Roboto Condensed', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  vertical-align: top;
+}
+.avast-extension .button .icon {
+  margin-right: 6px;
+  font-size: 16px;
+  line-height: 18px;
+  vertical-align: top;
+  cursor: pointer;
+}
+.avast-extension .button.button--icon {
+  padding-left: 6px;
+  padding-right: 7px;
+  vertical-align: initial;
+}
+.avast-extension .button:focus,
+.avast-extension .button:hover {
+  background: none;
+  background-color: #268095;
+}
+.avast-extension .button--link {
+  background-color: transparent;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #359eb9;
+  text-decoration: underline;
+}
+.avast-extension .button--link--inherit {
+  color: inherit;
+}
+.avast-extension .button--link:focus,
+.avast-extension .button--link:hover {
+  text-decoration: none;
+  background-color: transparent;
+}
+.avast-extension .button--orange {
+  background-color: #f4982e;
+}
+.avast-extension .button--orange:focus,
+.avast-extension .button--orange:hover {
+  background-color: #e3871d;
+}
+.avast-extension .button--green {
+  background-color: #40d968;
+}
+.avast-extension .button--green:focus,
+.avast-extension .button--green:hover {
+  background-color: #2fc857;
+}
+.avast-extension .button--large {
+  line-height: 22px;
+  min-height: 30px;
+  font-size: 18px;
+  font-family: 'Roboto Condensed Bold', sans-serif;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+.avast-extension .button--invert {
+  background-color: #f1f1f1;
+  color: #545454;
+}
+.avast-extension .button--invert:focus,
+.avast-extension .button--invert:hover {
+  background-color: #ccc;
+}
+.avast-extension .button--action {
+  padding: 10px 30px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 22px;
+}
+.avast-extension .button--open-sans {
+  font-family: 'Open Sans', Helvetica, Arial, sans-serif;
+}
+.avast-extension .button--group {
+  display: inline-block;
+  font-size: 0;
+  position: relative;
+  vertical-align: top;
+}
+.avast-extension .button--group .button {
+  border-left: solid 1px rgba(0,0,0,0.25);
+}
+.avast-extension .button--group--fake {
+  display: inline-block;
+  font-size: 0;
+  vertical-align: top;
+}
+.avast-extension .button--group--fake select {
+  right: 0;
+}
+.avast-extension .button--group--fake option {
+  font-size: 14px;
+  color: initial;
+}
+.avast-extension .button--group--first,
+.avast-extension .button--group .button:first-of-type {
+  border-radius: 3px 0 0 3px;
+  border-left: 0;
+}
+.avast-extension .button--group--last,
+.avast-extension .button--group .button:last-of-type {
+  border-radius: 0 3px 3px 0;
+}
+.avast-extension .button--drop {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 100%;
+  background-color: #fff;
+  border-radius: 0 0 3px 3px;
+  border: solid 1px #e6e6e6;
+  overflow: hidden;
+  display: none;
+}
+.avast-extension .button--drop--item {
+  display: block;
+  width: 100%;
+  white-space: nowrap;
+  border: 0;
+  background-color: transparent;
+  line-height: 18px;
+  padding: 4px 10px;
+  font-family: 'Roboto Condensed', sans-serif;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+.avast-extension .button--drop--item:hover,
+.avast-extension .button--drop--item:focus {
+  background-color: #e5e5e5;
+  outline: 0;
+}
+.avast-extension .button--group.on .button:first-of-type {
+  border-radius: 3px 0 0 0;
+}
+.avast-extension .button--group.on .button:last-of-type {
+  border-radius: 0 3px 0 0;
+}
+.avast-extension .button--group.on .button:first-of-type:last-of-type {
+  border-radius: 3px;
+}
+.avast-extension .button--group.on .button--icon {
+  background-color: #268095;
+}
+.avast-extension .button--group.on .button--icon.button--invert {
+  background-color: #f9f9f9;
+}
+.avast-extension .button--group.on .button--drop {
+  display: block;
+}
+.avast-extension button-wrap,
+.avast-extension .button-wrap {
+  cursor: pointer;
+}
+.avast-extension button-wrap .icon,
+.avast-extension .button-wrap .icon {
+  margin: 6px 0;
+  cursor: pointer;
+  transition: color 0.2s ease-in-out;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.avast-extension button-wrap:focus .icon,
+.avast-extension .button-wrap:focus .icon,
+.avast-extension button-wrap:hover .icon,
+.avast-extension .button-wrap:hover .icon {
+  color: #359eb9;
+}
+.avast-extension button-wrap .icon-remove,
+.avast-extension .button-wrap .icon-remove {
+  color: #c93838;
+}
+.avast-extension button-wrap:focus .icon-remove,
+.avast-extension .button-wrap:focus .icon-remove,
+.avast-extension button-wrap:hover .icon-remove,
+.avast-extension .button-wrap:hover .icon-remove {
+  color: #b03031;
+}
+.avast-extension button-wrap.is-disabled .icon,
+.avast-extension .button-wrap.is-disabled .icon,
+.avast-extension button-wrap.is-disabled:hover .icon,
+.avast-extension .button-wrap.is-disabled:hover .icon {
+  opacity: 0.5;
+  color: #545454;
+}
+.avast-extension .logo {
+  background: transparent url(chrome-extension://__MSG_@@extension_id__/../images/6b87a84dbfc31845e7419ee2f0458a4d.svg) center center/contain no-repeat;
+}
+.avast-extension .margin--top--20 {
+  margin-top: 20px;
+}
+.avast-extension .margin--right--20 {
+  margin-right: 20px;
+}
+.avast-extension .margin--right--10 {
+  margin-right: 10px;
+}
+.avast-extension .margin--left--20 {
+  margin-left: 20px;
+}
+.avast-extension .margin--left--10 {
+  margin-left: 10px;
+}
+.avast-extension .margin--bottom--20 {
+  margin-bottom: 20px;
+}
+.avast-extension .margin--bottom--10 {
+  margin-bottom: 10px;
+}
+.avast-extension.v-center--wrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  text-align: center;
+  min-height: 400px;
+}
+.avast-extension .v-center {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0 auto;
+}
+.avast-extension .splash--icon {
+  font-size: 70px;
+}
+.avast-extension .splash--title {
+  font-size: 30px;
+  padding: 20px 0;
+  display: block;
+  font-family: 'Open Sans', Helvetica, Arial, sans-serif;
+}
+.avast-extension .splash--desc {
+  font-size: 20px;
+  padding: 0 0 40px;
+}
+.avast-extension .splash--popup .splash--icon {
+  display: none;
+}
+.avast-extension .splash--popup .splash--title {
+  padding: 15px 0;
+  font-size: 20px;
+}
+.avast-extension .splash--popup .splash--desc {
+  font-size: 14px;
+  padding: 0 0 30px;
+}
+.avast-extension .splash--popup .splash--trust {
+  display: none;
+}
+.avast-extension .modal {
+  display: block;
+  width: 90%;
+  max-width: 500px;
+  min-height: 200px;
+  background-color: #f9f9f9;
+  border-radius: 3px;
+  box-shadow: 0 3px 20px 0 rgba(0,0,0,0.3);
+  padding: 40px 20px;
+  text-align: center;
+  border-color: #3bb151;
+  position: relative;
+}
+.avast-extension .modal--green {
+  background-color: #3bb151;
+  color: #fff;
+  border-color: #fff;
+}
+.avast-extension .modal--overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255,255,255,0.9);
+}
+.avast-extension .modal--close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  border: 0;
+  border-radius: 30px;
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+  text-align: center;
+  line-height: 1;
+  padding: 6px;
+  background-color: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.avast-extension .modal--close:hover,
+.avast-extension .modal--close:focus {
+  background-color: rgba(50,50,50,0.3);
+  outline: 0;
+}
+.avast-extension .modal--icon {
+  padding: 25px;
+  width: 80px;
+  height: 80px;
+  font-size: 30px;
+  line-height: 1;
+  border: solid 1px #fff;
+  border-color: inherit;
+  border-radius: 100px;
+  display: block;
+  margin: 0 auto;
+}
+.avast-extension .modal--actions {
+  padding-top: 20px;
+  display: block;
+}
+
+/*# sourceMappingURL=landing.css.map*/

@@ -1,108 +1,57 @@
-# 🛒 영림 발주서 자동화 시스템 V8.1
+# 영림 주문 자동화 시스템 V10
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-Web%20UI-green.svg)](https://flask.palletsprojects.com/)
-[![Selenium](https://img.shields.io/badge/Selenium-Automation-yellow.svg)](https://www.selenium.dev/)
-[![JSON Logging](https://img.shields.io/badge/Logging-JSON%20Structured-lightgrey.svg)](#)
+[![Google%20Sheets](https://img.shields.io/badge/Google%20Sheets-Hub-brightgreen.svg)](#)
 
-영림 발주서(HTML/MHTML)를 자동으로 다운로드하고 이카운트(Ecount) ERP에 업로드하는 **엔터프라이즈급 하이브리드 웹 자동화 시스템**입니다.
-
----
-
-## 💎 V8.1 주요 개선 사항 (New)
-
-### 🛡️ 기반 시스템 강화 (Foundation)
-- **중앙 설정 관리**: `.env` 파일과 `config.py`를 도입하여 모든 환경 설정 및 경로를 체계적으로 관리합니다.
-- **구조화된 로깅**: 모든 로그를 JSON 형식으로 보관하며, 일자별 로테이션 및 에러 심각도 분류를 지원합니다.
-- **강력한 에러 핸들링**: 치명적 에러를 별도로 수집하며 지수 백오프(Exponential Backoff) 기반의 재시도 로직을 적용했습니다.
-
-### ⚙️ 코어 로직 최적화 (Core Logic)
-- **Early Stop**: 처리할 데이터가 없을 경우 브라우저를 실행하지 않고 즉시 응답하여 리소스를 절약합니다.
-- **Intelligent Wait**: 신규 주문이 발견되지 않을 경우 감시 주기를 점진적으로 늘려 서버 부하를 최소화합니다.
-- **Retry Mechanism**: ERP 업로드 중 발생하는 일시적인 네트워크 오류 등에 대해 자동 재시도를 수행합니다.
-
-### 📊 사용자 경험 고도화 (UX/UI)
-- **실시간 대시보드**: 웹 UI에서 대기 중인 주문 수와 시스템 상태를 3초마다 자동으로 갱신하여 표시합니다.
-- **간편 설치 도구**: `setup_env.bat`을 통해 가상 환경 구축부터 라이브러리 설치까지 한 번에 완료할 수 있습니다.
+영림 주문서 HTML/MHTML 데이터를 수집하고 변환한 뒤, **Google Sheet Hub** 방식으로 운영하는 자동화 시스템입니다.
 
 ---
 
-## 🖥️ 시스템 요구사항
-
-- **OS**: Windows 10/11
-- **Python**: 3.10 이상 권장
-- **브라우저**: Avast Secure Browser 및 Chrome (최신 버전)
-- **네트워크**: 영림 OMS 및 이카운트 ERP 접속 권한 필수
-
----
-
-## 📥 설치 방법
-
-### 1. 저장소 클론 및 이동
-```powershell
-git clone https://github.com/kangHo-Jun/Shop_Automation.git
-cd Shop_Automation
-```
-
-### 2. 자동 환경 제팅
-`setup_env.bat` 파일을 더블 클릭하여 실행하면 가상 환경 구축 및 필수 패키지 설치가 자동으로 진행됩니다.
-
-### 3. 설정 완료
-`.env.example` 파일을 복사하여 `.env`를 만들고, 본인의 환경에 맞게 내용을 수정하세요.
+## 핵심 특징
+- 영림 OMS 주문/견적 자동 수집
+- `local_file_processor.process_html_content()` 기반 변환
+- `Sheet1` 자동 저장
+- `Sheet2` append-only 누적 이력
+- `Sheet3` 날짜/건수/파일명 로그
+- 대시보드 `복사` / `완료` 버튼
+- 1분 락 타임아웃 자동 해제
 
 ---
 
-## 🚀 사용 방법
-
-### 서버 실행
-`run_v8_server.bat` 실행 시 서버(Flask)와 다운로더가 동시에 시작됩니다.
-
-### 웹 UI 접속
-브라우저에서 `http://localhost:5080` 접속 (기본 포트)
-
----
-
-## 📂 프로젝트 구조
-
-```
-Shop_Automation/
-├── v8_auto_server.py              # 메인 제어 서버 (Flask)
-├── local_file_processor.py        # HTML 파싱 및 품목 코드 생성
-├── erp_upload_automation_v1.py    # ERP 브라우저 업로드 엔진
-├── config.py                      # 중앙 설정 관리 모듈
-├── logging_config.py              # JSON 구조화 로깅 설정
-├── error_handler.py               # 에러 관리 및 알림 모듈
-├── setup_env.bat                  # 자동 환경 구축 스크립트
-├── run_v8_server.bat              # 서버 실행 스크립트
-├── requirements.txt               # Python 패키지 목록
-├── .env.example                   # 환경 변수 설정 템플릿
-│
-├── GAS_Source/                    # Google Apps Script 원본 (참고용)
-├── data/                          # 데이터 저장 (다운로드된 주문서 등)
-├── logs/                          # 구조화된 로그 저장 (JSON)
-└── docs/                          # 상세 가이드 문서
-```
+## 현재 운영 흐름
+1. 주문 데이터를 다운로드합니다.
+2. HTML/MHTML을 ERP 형식 행 데이터로 변환합니다.
+3. 결과를 Google Sheets `Sheet1`에 자동 저장합니다.
+4. 운영자가 대시보드에서 `복사`를 실행합니다.
+5. 5초 뒤 `Sheet2`에 append-only 이력이 저장됩니다.
+6. `완료` 실행 시 `Sheet1`이 비워지고 락이 해제됩니다.
 
 ---
 
-## 📖 문서 시스템
-
-- [**설치/실행 가이드**](가이드.md): 입문자를 위한 상세 단계별 안내
-- [**V8.1 워크스루**](docs/walkthrough.md): 주요 개선 사항 및 검증 결과
-- [**사용자 매뉴얼**](docs/USER_MANUAL.md): 상세 기능 활용법
-
----
-
-## 🔒 보안 주의사항
-
-> [!CAUTION]
-> `.env` 파일과 `logs/`, `data/` 폴더에는 본인의 계정 정보 및 실제 주문 정보가 포함되어 있습니다.  
-> 이 파일들이 **GitHub 등 외부에 공유되지 않도록 각별히 주의**하세요. (기본적으로 `.gitignore`에 등록되어 있습니다.)
+## 주요 파일
+- `v10_auto_server.py`: Flask 서버와 대시보드
+- `local_file_processor.py`: HTML 파싱 및 변환 로직
+- `google_sheet_hub.py`: 시트 허브 저장/이력/로그/락 처리
+- `lock_manager.py`: 분산 락 보조 모듈
+- `erp_upload_automation_v1.py`, `erp_upload_automation_v2.py`: 레거시 ERP 자동업로드 경로
 
 ---
 
-## 📝 라이선스 및 작성자
+## 실행 전 준비
+- Python 3.10+
+- Google OAuth 인증 파일
+- `.env` 설정
+- 영림 OMS 접속 가능한 브라우저 환경
 
-- **License**: Internal Use Only (내부 전용)
-- **Author**: Antigravity AI (Senior Engineer)
-- **Last Updated**: 2026-01-05
+---
+
+## 문서
+- `docs/PROJECT.md`
+- `docs/process.md`
+- `docs/USER_MANUAL.md`
+- `docs/기능.md`
+
+---
+
+최종 업데이트: 2026-03-17

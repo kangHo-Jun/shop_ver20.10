@@ -601,7 +601,10 @@ def process_html_content(html_content: str, file_path_hint: str = "", target_typ
             # Q열(16): 수량, R열(17): 단가, S열(18): 공급가액, T열(19): 부가세
             # U열(20): 합계, V열(21): 비고
             erp_row = [''] * 22  # ← 22열로 변경!
-            erp_row[3] = today           # 일자 (D)
+            erp_row[1] = '00166'            # 거래처코드 (B)
+            erp_row[2] = '기타매출처/doo'   # 거래처명 (C)
+            erp_row[3] = today             # 일자 (D)
+            erp_row[5] = '두현숙'           # 표시담당자 (F)
             erp_row[14] = product_code   # 품목코드 (O)
             erp_row[15] = product_name   # 품목명 (P)
             erp_row[16] = quantity_raw   # 수량 (Q)

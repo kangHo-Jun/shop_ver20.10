@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dev Tools</title>
+    <style>
+      /* Reset and basic layout - keep it minimal for devtools */
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        /* Ensure scrolling and interaction works */
+        overflow-x: hidden;
+        overflow-y: auto;
+        /* Ensure pointer events work */
+        pointer-events: auto;
+      }
+
+      #root {
+        min-height: 100%;
+        pointer-events: auto;
+      }
+    </style>
+    <script type="module" crossorigin src="/assets/devtools-65KLV2i0.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/t-CrUv5W6q.js">
+    <link rel="stylesheet" crossorigin href="/assets/devtools-Cvo2Dsyo.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

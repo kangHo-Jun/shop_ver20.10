@@ -1,0 +1,2 @@
+(()=>{"use strict";document.addEventListener("DOMContentLoaded",()=>{document.getElementById("options-title").textContent=chrome.i18n.getMessage("optionsTitle"),document.getElementById("options-instructions").textContent=chrome.i18n.getMessage("optionsEditInstructions")})})();
+//# sourceMappingURL=options.js.map

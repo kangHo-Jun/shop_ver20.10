@@ -1,0 +1,33 @@
+body {
+    font-size: medium!important;
+    font-family: Arial, Helvetica, sans-serif!important;
+    background-color: rgba(255,255,255,0.6);
+}
+
+h3, h2, h1 { 
+    color: #000;
+}
+
+a {
+    color: #007BFF;
+    cursor: pointer;
+}
+
+#options-menu {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#popup-container {
+    border: 4px solid #FDB511;
+    width: 550px;
+    height: "auto";  
+}
+
+.logo {
+    width: 75px; height: 78px;position: absolute;top: 5px;right: 5px; margin: 20px;
+}
+
+.intro {
+    display: inline-block; margin: 15px;width: 80%; font-size: 14px; margin-bottom: 0px;
+}

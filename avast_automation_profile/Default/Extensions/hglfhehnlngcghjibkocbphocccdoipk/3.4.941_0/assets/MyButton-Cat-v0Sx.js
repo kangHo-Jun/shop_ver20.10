@@ -1,0 +1,1 @@
+import{j as e}from"./t-CrUv5W6q.js";import{u as n}from"./ThemeProvider-DbuMqxgg.js";const c=t=>{const o=n();return e.jsx("button",{className:`MyButton MyButton--${o.colorMode}`,onClick:t.onClick,children:t.children})};export{c as M};

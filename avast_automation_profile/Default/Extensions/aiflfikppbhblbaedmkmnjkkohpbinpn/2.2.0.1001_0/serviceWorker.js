@@ -1,0 +1,1 @@
+var window=this;(new class{importBGScripts(){try{importScripts("js/background.js")}catch(o){console.debug(`ServiceWorker failed to load one of the bg scripts due to , ${o}`)}}}).importBGScripts();

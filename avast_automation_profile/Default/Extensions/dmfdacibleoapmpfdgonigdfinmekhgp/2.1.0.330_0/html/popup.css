@@ -1,0 +1,890 @@
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Roboto' san-serif;
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto'), local('Roboto-Regular'), url("/font/roboto-cyrillic-ext-400.woff2") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Roboto' san-serif;
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto'), local('Roboto-Regular'), url("/font/roboto-latin-ext-400.woff2") format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Roboto' san-serif;
+  font-style: normal;
+  font-weight: 500;
+  src: local('Roboto Medium'), local('Roboto-Medium'), url("/font/roboto-cyrillic-ext-500.woff2") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Roboto' san-serif;
+  font-style: normal;
+  font-weight: 500;
+  src: local('Roboto Medium'), local('Roboto-Medium'), url("/font/roboto-latin-ext-500.woff2") format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Roboto' san-serif;
+  font-style: normal;
+  font-weight: 700;
+  src: local('Roboto Bold'), local('Roboto-Bold'), url("/font/roboto-cyrillic-ext-700.woff2") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Roboto' san-serif;
+  font-style: normal;
+  font-weight: 700;
+  src: local('Roboto Bold'), local('Roboto-Bold'), url("/font/roboto-latin-ext-700.woff2") format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Mier B03' san-serif;
+  font-style: normal;
+  font-weight: 750;
+  src: local('Mier B03 ExtraBold'), local('Mier B03-ExtraBold'), url("/font/MierB03-SubsetCyr-ExtraBold.woff2") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Mier B03' san-serif;
+  font-style: normal;
+  font-weight: 700;
+  src: local('Mier B03 Bold'), local('Mier B03-Bold'), url("/font/MierB03-SubsetCyr-Bold.woff2") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Mier B03' san-serif;
+  font-style: normal;
+  font-weight: 400;
+  src: local('Mier B03 Regular'), local('Mier B03-Regular'), url("/font/MierB03-SubsetCyr-Regular.woff2") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Mier B03' san-serif;
+  font-style: normal;
+  font-weight: 750;
+  src: local('Mier B03 ExtraBold'), local('Mier B03-ExtraBold'), url("/font/MierB03-SubsetLatinA-ExtraBold.woff2") format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Mier B03' san-serif;
+  font-style: normal;
+  font-weight: 700;
+  src: local('Mier B03 Bold'), local('Mier B03-Bold'), url("/font/MierB03-SubsetLatinA-Bold.woff2") format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Mier B03' san-serif;
+  font-style: normal;
+  font-weight: 400;
+  src: local('Mier B03 Regular'), local('Mier B03-Regular'), url("/font/MierB03-SubsetLatinA-Bold.woff2") format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+html {
+  --avast-green: #388700;
+  --avast-green-40: rgba(56,135,0,0.4);
+  --avast-red: #d93511;
+  --avast-red-40: rgba(217,53,17,0.4);
+  --avast-white: #fff;
+  --avast-background: #f8f9fa;
+  --avast-background-a1: #fffcfa;
+  --avast-text-principal: #131415;
+  --avast-text-secondary: #5f6368;
+  --avast-text-red: #dc143f;
+  --avast-button-green: #09884c;
+  --avast-button-green-hover: #076d3d;
+  --avast-button-green-ripple: #087e3a;
+  --avast-location-selected: #fff;
+  --avast-location-shadow: rgba(132,132,132,0.24);
+  --avast-action-img-hover: rgba(196,196,196,0.2);
+  --avast-locations-scrollbar-thumb: #5f6368;
+  --avast-locations-scrollbar-track: #f2f2f3;
+  --avast-locations-separator: rgba(95,99,104,0.2);
+  --avast-locations-list-hover: #f8f9fa;
+  --avast-promotion-separator-color: rgba(7,29,43,0.08);
+  --avast-progress-bar: rgba(7,29,43,0.1);
+  --avast-progress-bar-progress: #4096ff;
+  --avast-tooltip-background: #fff;
+}
+@media (prefers-color-scheme: dark) {
+  html {
+    --avast-green: #5ad38c;
+    --avast-green-40: rgba(90,211,140,0.4);
+    --avast-red: #ff4672;
+    --avast-red-40: rgba(255,70,114,0.4);
+    --avast-white: #0e1431;
+    --avast-background: linear-gradient(0deg, rgba(0,0,0,0.5), rgba(0,0,0,0.5)), #1c2863;
+    --avast-background-a1: linear-gradient(0deg, rgba(0,0,0,0.5), rgba(0,0,0,0.5)), #1c2863;
+    --avast-text-principal: #e8eaed;
+    --avast-text-secondary: #bcbfc6;
+    --avast-text-red: #ff7c9b;
+    --avast-button-green: #5ad38c;
+    --avast-button-green-hover: #51df9e;
+    --avast-button-green-ripple: #087e3a;
+    --avast-location-selected: #1c2362;
+    --avast-location-shadow: rgba(132,132,132,0);
+    --avast-action-img-hover: rgba(0,0,0,0.4);
+    --avast-locations-scrollbar-thumb: #1c2862;
+    --avast-locations-scrollbar-track: #e8eaed;
+    --avast-locations-separator: rgba(255,255,255,0.2);
+    --avast-locations-list-hover: #1c2362;
+    --avast-promotion-separator-color: rgba(255,255,255,0.2);
+    --avast-progress-bar: #000;
+    --avast-progress-bar-progress: #4096ff;
+    --avast-tooltip-background: #000;
+  }
+}
+html {
+  font-size: 100%;
+  height: auto;
+  width: 100%;
+  font-family: 'Roboto', sans-serif;
+}
+body {
+  -webkit-font-smoothing: antialiased;
+  background-color: transparent;
+  height: auto;
+  width: 100%;
+  margin: 0;
+  visibility: visible;
+}
+.container,
+.container-avast-one {
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  width: 320px;
+  padding: 0 0 24px 0;
+}
+.container {
+  font-family: 'Roboto', sans-serif;
+  background: var(--avast-background);
+}
+.container-avast-one {
+  font-family: 'Mier B03', sans-serif;
+  background: var(--avast-background-a1);
+}
+.header {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: min-content 1fr 24px;
+}
+.header-product-image-a1 {
+  background: transparent url("/img/a1.svg") no-repeat 50%;
+  width: 100px;
+  height: 20px;
+  margin: auto auto auto 0;
+  grid-column: 1/2;
+}
+.header-product-image {
+  background: transparent url("/img/sl.svg") no-repeat 50%;
+  width: 32px;
+  height: 32px;
+  margin: auto auto auto 0;
+  grid-column: 1;
+  border-radius: 8px;
+}
+.header-product-name-text {
+  display: grid;
+  grid-column: 2;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 16px;
+  color: var(--avast-text-principal);
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: none;
+  margin: auto auto auto 0;
+}
+.header-close-image {
+  display: grid;
+  grid-column: 3;
+  height: 12px;
+  width: 12px;
+  margin: auto 0 auto auto;
+  padding: 6px;
+  border-radius: 50%;
+}
+.header-close-image:hover {
+  background-color: var(--avast-action-img-hover);
+}
+.header-center {
+  padding: 20px 30px 20px 30px;
+}
+::-webkit-scrollbar {
+  width: 5px;
+  background-color: #f5f5f5;
+  position: relative;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb {
+  width: 5px;
+  border-radius: 4px;
+  height: 50px;
+  background-color: #c8c8c8;
+}
+@media (prefers-color-scheme: dark) {
+  html ::-webkit-scrollbar {
+    background-color: #1c2862;
+  }
+  html ::-webkit-scrollbar-thumb {
+    background-color: #e8eaed;
+  }
+}
+/*---------------------------*/
+/*---wrapper for main page---*/
+/*---------------------------*/
+.wrapper {
+  margin: 12px 0 2px 0;
+}
+/*-----------------------*/
+/*------Toggle-------*/
+/*-----------------------*/
+#toggle-container {
+  margin: 10px auto;
+  height: 40px;
+  width: 80px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  align-items: center;
+}
+#toggle {
+  width: 80px;
+  height: 40px;
+  display: flex;
+  cursor: pointer;
+}
+#bar {
+  background-color: var(--avast-red-40);
+  border-radius: 20px;
+  height: 40px;
+  width: 80px;
+  display: flex;
+}
+#toggle.checked #bar,
+#toggle.connecting #bar {
+  background-color: var(--avast-green-40);
+}
+#toggle.disconnecting #bar {
+  background-color: var(--avast-red-40);
+}
+#knob {
+  background: var(--avast-red) url("/img/cross.svg") no-repeat 50%;
+  border-radius: 50%;
+  height: 32px;
+  position: relative;
+  transition: transform linear 80ms, background linear 80ms;
+  width: 32px;
+  z-index: 1;
+  display: inline-flex;
+  margin: 4px auto 4px 4px;
+}
+#toggle.disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+#toggle.checked #bar #knob,
+#toggle.connecting #bar #knob {
+  margin: 4px 4px 4px auto;
+}
+#toggle.connecting #bar #knob,
+#toggle.disconnecting #bar #knob {
+  animation-name: spin;
+  animation-duration: 2000ms;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+#toggle.checked #bar #knob {
+  background: var(--avast-green) url("/img/checkmark.svg") no-repeat 50%;
+}
+#toggle.connecting #bar #knob {
+  background: var(--avast-green) url("/img/processing.svg") no-repeat 50%;
+}
+#toggle.disconnecting #bar #knob {
+  background: var(--avast-red) url("/img/processing.svg") no-repeat 50%;
+}
+#toggle #toggle-hover {
+  display: none;
+  width: 64px;
+  height: 64px;
+  opacity: 0.2;
+  margin-top: -10px;
+  border-radius: 50%;
+  position: absolute;
+}
+#toggle.checked:hover #toggle-hover {
+  background-color: var(--avast-green);
+  margin-left: 29px;
+  display: block;
+}
+#toggle:not(.connecting):not(.disconnecting):not(.checked):not(.disabled):hover #toggle-hover {
+  background-color: var(--avast-red);
+  margin-left: -14px;
+  display: block;
+}
+/*-----------------------*/
+/*------Toggle-end-------*/
+/*-----------------------*/
+/*----------------*/
+/*----location----*/
+/*----------------*/
+.location-your-location-text,
+.location-optimal-text,
+.location-country-city-pair {
+  font-style: normal;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--avast-text-principal);
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: none;
+}
+.location-selected {
+  margin: 24px auto;
+}
+.location-your-location-text {
+  margin: 0 auto 16px;
+  text-align: center;
+}
+.location-item {
+  width: 272px;
+  max-height: 72px;
+  background: var(--avast-white);
+  box-shadow: 0px 4px 16px var(--avast-location-shadow);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 0 auto;
+  cursor: pointer;
+}
+.location-selected .location-item {
+  border-radius: 36px;
+  background: var(--avast-location-selected);
+}
+.location-flag-container {
+  max-width: 72px;
+  width: 72px;
+  display: flex;
+}
+.location-flag {
+  width: 40px;
+  height: 40px;
+  margin: 16px;
+  border-radius: 50%;
+}
+span.selected {
+  background: var(--avast-green) url("/img/checkmarkSmall.svg") no-repeat 50%;
+  height: 5px;
+  width: 7px;
+  padding: 4px 3px;
+  border-radius: 50%;
+  margin: 48px 0 0 -30px;
+}
+.location-data {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  width: 140px;
+}
+.location-country-city-pair {
+  font-size: 16px;
+  line-height: 24px;
+}
+.location-optimal-text {
+  color: var(--avast-text-secondary);
+  font-weight: 400;
+}
+.location-arrow-right {
+  width: 24px;
+  height: 24px;
+  padding: 8px;
+  margin: 14px 6px 14px 8px;
+  border-radius: 50%;
+}
+.location-selected .location-item:hover {
+  box-shadow: 0px 12px 24px var(--avast-location-shadow);
+}
+.location-selected .location-item:hover .location-arrow-right {
+  background-color: var(--avast-action-img-hover);
+}
+/*------------------*/
+/*----location END----*/
+/*------------------*/
+/*----------------*/
+/*----locations----*/
+/*----------------*/
+.locations-list {
+  background-color: var(--avast-white);
+  z-index: 1;
+  top: 0px;
+  position: absolute;
+  width: 320px;
+  max-height: 428px;
+  overflow: hidden;
+}
+.locations-list-select {
+  background-color: var(--avast-locations-list-hover);
+  display: flex;
+  flex-direction: row;
+  height: 57px;
+  width: 320px;
+  border-bottom: 1px solid var(--avast-locations-separator);
+}
+.locations-list-arrow-left {
+  width: 24px;
+  height: 24px;
+  padding: 8px;
+  margin: auto 6px auto 8px;
+  border-radius: 50%;
+}
+.locations-list-arrow-left:hover {
+  background-color: var(--avast-action-img-hover);
+}
+.locations-list-select-location-msg {
+  font-style: normal;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 16px;
+  color: var(--avast-text-principal);
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: none;
+  margin: auto 0;
+}
+.locations-container {
+  background-color: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 371px;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  width: 320px;
+}
+.locations {
+  background-color: var(--avast-locations-scrollbar-thumb);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: auto;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  width: 100%;
+}
+.locations .location-item {
+  width: 100%;
+  border-bottom: 1px solid var(--avast-locations-separator);
+}
+.locations .location-item:hover {
+  background-color: var(--avast-locations-list-hover);
+}
+.locations .location-item .location-data {
+  width: 190px;
+}
+/*------------------*/
+/*----locations END----*/
+/*------------------*/
+/*------------------------*/
+/*----connection-status----*/
+/*------------------------*/
+.connection-status-container {
+  padding: 10px auto 24px auto;
+}
+.connection-status {
+  display: flex;
+  flex-direction: column;
+  max-width: 290px;
+  margin: auto;
+}
+.secure-connection,
+.connection-status-title,
+.connection-status-description,
+.connection-status-promotion-text,
+.connection-status-item-text,
+.connection-status-button {
+  font-style: normal;
+  font-weight: 750;
+  font-size: 16px;
+  line-height: 16px;
+  color: var(--avast-text-principal);
+  text-align: center;
+  user-select: none;
+  margin: auto;
+}
+.secure-connection {
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  font-size: 12px;
+  line-height: 16px;
+  padding-bottom: 4px;
+}
+.connection-status-title {
+  font-size: 24px;
+  line-height: 32px;
+  padding-bottom: 8px;
+  letter-spacing: -1px;
+}
+.connection-status-description {
+  color: var(--avast-text-secondary);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  max-width: 256px;
+  padding: 0px 30px 14px 30px;
+}
+.promotion-items {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+}
+.connection-status-promotion-text {
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  max-width: 256px;
+  margin: 2px auto 18px 8px;
+  display: grid;
+  grid-column: 1/3;
+}
+.connection-status-item-img {
+  display: grid;
+  grid-column: 1;
+  height: 24px;
+  width: 24px;
+}
+.connection-status-item-text {
+  color: var(--avast-text-secondary);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: left;
+  margin: 0 auto 20px 8px;
+  display: grid;
+  grid-column: 2;
+}
+.connection-status-button {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 16px;
+  width: 272px;
+  height: 32px;
+  background: linear-gradient(135deg, #ffbf00 0%, #ffbf00 50%, #ff7800 100%);
+  box-shadow: 0px 0px 1px rgba(98,46,0,0.12), 0px 0px 0px rgba(98,46,0,0.24);
+  border-radius: 24px;
+  border: 0px;
+  margin: 4px 0;
+  display: grid;
+  grid-column: 1/2;
+  align-items: center;
+  cursor: pointer;
+}
+/*------------------------*/
+/*----connection-status END----*/
+/*------------------------*/
+/*------------------------*/
+/*----upgrade-promotion---*/
+/*------------------------*/
+.upgrade-promotion {
+  display: grid;
+  grid-template-columns: 24px 8px 1fr;
+  padding: 24px 24px 0 24px;
+  border-width: 0;
+  border-top: 1px solid var(--avast-promotion-separator-color);
+  margin: 24px auto 0;
+}
+.upgrade-promotion-img {
+  display: grid;
+  grid-column: 1;
+}
+.upgrade-promotion-texts {
+  grid-column: 3;
+  display: flex;
+  flex-direction: column;
+}
+.upgrade-promotion-title,
+.upgrade-promotion-text {
+  color: var(--avast-text-principal);
+  font-style: normal;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 20px;
+  user-select: none;
+}
+.upgrade-promotion-text {
+  color: var(--avast-text-secondary);
+  font-weight: 400;
+  padding-bottom: 24px;
+}
+.upgrade-promotion-button {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 16px;
+  width: 272px;
+  height: 32px;
+  background: linear-gradient(135deg, #ffbf00 0%, #ffbf00 50%, #ff7800 100%);
+  box-shadow: 0px 0px 1px rgba(98,46,0,0.12), 0px 0px 0px rgba(98,46,0,0.24);
+  border-radius: 24px;
+  border: 0px;
+  margin: 4px 0;
+  display: grid;
+  grid-column: 1/4;
+  align-items: center;
+  cursor: pointer;
+}
+/*------------------------*/
+/*----upgrade-promotion END----*/
+/*------------------------*/
+/*--------------------------*/
+/*----free-data-container---*/
+/*--------------------------*/
+.free-data-container {
+  width: 270px;
+  max-width: 270px;
+  display: grid;
+  grid-template-columns: minmax(min-content, 1fr) 8px minmax(min-content, 1fr);
+  grid-template-rows: minmax(8px, 24px);
+  overflow: hidden;
+  margin: 24px auto 0;
+}
+.free-data-free-title,
+.free-data-renew-in-title,
+.free-data-used-text,
+.free-data-allowed-text {
+  color: var(--avast-text-principal);
+  font-style: normal;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 20px;
+  user-select: none;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.free-data-free-title {
+  grid-column: 1;
+}
+.free-data-renew-in-title {
+  grid-column: 3;
+  font-weight: 400;
+  color: var(--avast-text-secondary);
+  text-align: right;
+}
+.free-data-bar,
+.free-data-bar-progress {
+  grid-column: 1/5;
+  grid-row: 2;
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--avast-progress-bar);
+}
+.free-data-bar-progress {
+  width: 0%;
+  max-width: 100%;
+  background: var(--avast-progress-bar-progress);
+  z-index: 1;
+  padding: 0 4px;
+  max-width: 262px;
+}
+.free-data-used-text {
+  grid-column: 1;
+  color: var(--avast-progress-bar-progress);
+}
+.free-data-allowed-text {
+  grid-column: 3;
+  font-weight: 400;
+  color: var(--avast-text-secondary);
+  text-align: right;
+}
+/*--------------------------*/
+/*----free-data-container END---*/
+/*--------------------------*/
+/*--------------------------*/
+/*----error-notifications---*/
+/*--------------------------*/
+.error-wrapper {
+  display: flex;
+  flex-direction: column;
+  padding: 0 14px;
+}
+.error-notification-text,
+.error-notification-link {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--avast-text-red);
+  text-align: center;
+  user-select: none;
+  margin: auto;
+  padding: 0 12px 12px;
+}
+.error-notification-link {
+  padding: 0;
+}
+/* Ripple effect */
+#error-notification-button.ripple {
+  background-position: center;
+  transition: background 0.8s;
+}
+#error-notification-button.ripple:hover {
+  background: var(--avast-button-green-hover) radial-gradient(circle, transparent 1%, var(--avast-button-green-hover) 1%) center/15000%;
+}
+#error-notification-button.ripple:active {
+  background-color: var(--avast-button-green-ripple);
+  background-size: 100%;
+  transition: background 0s;
+}
+/* Button style */
+button#error-notification-button {
+  border: none;
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 20px;
+  text-transform: capitalize;
+  cursor: pointer;
+  color: var(--avast-white);
+  background-color: var(--avast-button-green);
+  box-shadow: 0 0 4px #999;
+  outline: none;
+  min-width: 180px;
+  max-width: inherit;
+  width: min-content;
+  margin: auto;
+}
+/*--------------------------*/
+/*----error-notifications END---*/
+/*--------------------------*/
+/*--------------------------*/
+/*----markers for A1 -------*/
+/*--------------------------*/
+.container-avast-one .marker-orange {
+  background: transparent url("/img/markerOrange.svg") no-repeat 50%;
+}
+.container-avast-one .marker-red {
+  background: transparent url("/img/markerRed.svg") no-repeat 50%;
+}
+.container-avast-one .marker-green {
+  background: transparent url("/img/markerGreen.svg") no-repeat 50%;
+}
+/*--------------------------*/
+/*----markers for A1 END -------*/
+/*--------------------------*/
+/*------------------------*/
+/*----ip-info-container---*/
+/*------------------------*/
+.ip-info-container {
+  margin: 4px auto auto;
+}
+.ip-info-msg {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--avast-text-secondary);
+  text-align: center;
+  user-select: none;
+}
+.ip-info-image {
+  width: 16px;
+  height: 16px;
+  margin: auto 0 auto auto;
+  padding: 6px;
+  border-radius: 50%;
+  margin-bottom: -10px;
+}
+.ip-info-image:hover {
+  background-color: var(--avast-action-img-hover);
+}
+.ip-full-info {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--avast-tooltip-background);
+  z-index: 2;
+  position: absolute;
+  max-height: 428px;
+  min-height: 170px;
+  border-radius: 8px;
+  box-shadow: 0px 8px 12px rgba(98,46,0,0.1), 0px 0px 12px rgba(98,46,0,0.1);
+  width: 300px;
+  max-width: 300px;
+  margin: 12px 10px;
+  padding: 12px 24px;
+  box-sizing: border-box;
+  top: 65px;
+}
+.ip-full-info-texts {
+  margin: auto 0;
+}
+.ip-full-info-text,
+.ip-full-info-title {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--avast-text-principal);
+  text-align: left;
+  user-select: none;
+}
+.ip-full-info-title {
+  font-weight: 750;
+  font-size: 20px;
+  line-height: 28px;
+  padding-bottom: 4px;
+}
+/*------------------------*/
+/*----ip-info-container END---*/
+/*------------------------*/
+@-moz-keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@-webkit-keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@-o-keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

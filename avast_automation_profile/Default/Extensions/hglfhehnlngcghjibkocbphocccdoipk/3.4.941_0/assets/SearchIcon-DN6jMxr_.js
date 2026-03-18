@@ -1,0 +1,1 @@
+import{j as o}from"./t-CrUv5W6q.js";const s=({size:r=16,className:e=""})=>o.jsxs("svg",{width:r,height:r,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:"2",strokeLinecap:"round",strokeLinejoin:"round",className:e,children:[o.jsx("circle",{cx:"11",cy:"11",r:"8"}),o.jsx("path",{d:"m21 21-4.3-4.3"})]});export{s as S};

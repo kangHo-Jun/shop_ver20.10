@@ -1,0 +1,14 @@
+<svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+<style>
+    :root {
+        --small-check-color: white;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --small-check-color: #0E1431;
+        }
+    }
+</style>
+<path d="M1.45837 4.29863L3.69727 6.57812L8.68494 1.5" stroke="var(--small-check-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

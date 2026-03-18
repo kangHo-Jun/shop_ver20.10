@@ -1,0 +1,1 @@
+import{r as t}from"./t-CrUv5W6q.js";import{d as f,r as i}from"./RemoteConfigRepository-Z5u-kz0e.js";function u(){const[e,o]=t.useState(f),[s,n]=t.useState(!0);return t.useEffect(()=>{i.getConfig().then(r=>{o(r),n(!1)})},[]),{config:e,loading:s}}export{u};

@@ -1,0 +1,1 @@
+import{b as r,j as o,R as t}from"./t-CrUv5W6q.js";import{W as n}from"./WordleGame-D35NF7ec.js";import"./storage-BPEiTgs3.js";const e=document.getElementById("wordle-root");e?r.createRoot(e).render(o.jsx(t.StrictMode,{children:o.jsx(n,{})})):console.error("Root container not found for Wordle");
