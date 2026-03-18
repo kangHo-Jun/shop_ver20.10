@@ -29,9 +29,6 @@ const SHEET_HUB = {
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('Sheet Hub')
-    .addItem('✅ Sheet1 완료 (정리)', 'sheetHubDoneSheet1')
-    .addItem('✅ Sheet2 완료 (정리)', 'sheetHubDoneSheet2')
-    .addSeparator()
     .addItem('Refresh Lock State', 'sheetHubRefreshLockState')
     .addToUi();
   sheetHubEnsureStructure_();
@@ -51,70 +48,111 @@ function onEdit(e) {
 function copySheet1() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName(SHEET_HUB.sheet1Name);
+
+  const lastRow = sheet.getLastRow();
+  if (lastRow < SHEET_HUB.dataStartRowSheet1) {
+    ss.toast('Sheet1 데이터 없음', '', 3);
+    return;
+  }
+
+  const numRows = lastRow - SHEET_HUB.dataStartRowSheet1 + 1;
+  const numCols = 22;
+  const dataRange = sheet.getRange(SHEET_HUB.dataStartRowSheet1, 1, numRows, numCols);
+  const values = dataRange.getValues();
+
+  // 품목코드(O열=index 14) 기준: 품목코드 있는 행 위, 빈 행 아래로 정렬
+  const itemCodeIdx = SHEET_HUB.sheet1ItemCodeIndex;
+  values.sort(function(a, b) {
+    const aHas = String(a[itemCodeIdx]).trim() !== '';
+    const bHas = String(b[itemCodeIdx]).trim() !== '';
+    if (aHas && !bHas) return -1;
+    if (!aHas && bHas) return 1;
+    return 0;
+  });
+  dataRange.setValues(values);
+
+  const filledCount = values.filter(function(row) {
+    return String(row[itemCodeIdx]).trim() !== '';
+  }).length;
+
+  if (filledCount === 0) {
+    ss.toast('품목코드 있는 행 없음', '', 3);
+    return;
+  }
+
+  const existingMeta = sheetHubReadMeta_();
+  sheetHubWriteMeta_({
+    status: 'processing',
+    processor: sheetHubActiveUser_(),
+    started_at: sheetHubNow_(),
+    doc_type: existingMeta.doc_type || 'manual',
+    file_names: existingMeta.file_names || 'manual',
+    row_count: String(filledCount),
+    completed_at: '',
+  });
+
   ss.setActiveSheet(sheet);
-  const dataRange = sheet.getRange(5, 1, sheet.getLastRow() - 4, 22);
-  sheet.setActiveRange(dataRange);
-  ss.toast('Ctrl+C 후 이카운트에 붙여넣기 하세요', '', 5);
+  sheet.setActiveRange(sheet.getRange(SHEET_HUB.dataStartRowSheet1, 1, filledCount, numCols));
+  ss.toast('Ctrl+C 후 이카운트에 붙여넣기 하세요 (10초 후 자동 클리어)', '', 10);
+  Utilities.sleep(10000);
+
+  // 백업 + 로그 + 클리어
+  const meta = sheetHubReadMeta_();
+  const allRows = sheetHubReadSheet1Rows_();
+  const copiedAt = sheetHubNow_();
+  if (allRows.length) {
+    sheetHubAppendSheet1Backup_(allRows, copiedAt, meta.doc_type || 'manual', sheetHubActiveUser_(), meta.file_names || 'manual');
+    sheetHubAppendLog_(copiedAt, allRows.length, meta.file_names || 'manual');
+  }
+  sheetHubClearSheet1_();
+  sheetHubWriteMeta_({
+    status: 'idle', processor: '', started_at: '',
+    doc_type: meta.doc_type, file_names: meta.file_names,
+    row_count: '0', completed_at: copiedAt,
+  });
 }
 
 function copySheet2() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName(SHEET_HUB.sheet2Name);
-  ss.setActiveSheet(sheet);
-  const dataRange = sheet.getRange(2, 1, sheet.getLastRow() - 1, 2);
-  sheet.setActiveRange(dataRange);
-  ss.toast('Ctrl+C 후 이카운트에 붙여넣기 하세요', '', 5);
-}
 
-function sheetHubDoneSheet1() {
-  const meta = sheetHubReadMeta_();
-  if (meta.status !== 'processing') {
-    sheetHubToast_('진행 중인 복사 작업이 없습니다', 3);
+  const lastRow = sheet.getLastRow();
+  if (lastRow < SHEET_HUB.dataStartRowSheet2) {
+    ss.toast('Sheet2 데이터 없음', '', 3);
     return;
   }
-  const allRows = sheetHubReadSheet1RowEntries_().map(function(e) { return e.values; });
-  const copiedAt = sheetHubNow_();
-  const docType = meta.doc_type || 'estimate';
-  const fileNames = meta.file_names || 'manual';
 
-  if (allRows.length) {
-    sheetHubAppendSheet1Backup_(allRows, copiedAt, docType, sheetHubActiveUser_(), fileNames);
-    sheetHubAppendLog_(copiedAt, allRows.length, fileNames);
-  }
-  sheetHubClearSheet1_();
-  sheetHubTempCopySheet_().clearContents();
+  const existingMeta = sheetHubReadMeta_();
   sheetHubWriteMeta_({
-    status: 'idle', processor: '', started_at: '', doc_type: docType,
-    file_names: fileNames, row_count: '0', completed_at: copiedAt,
+    status: 'processing',
+    processor: sheetHubActiveUser_(),
+    started_at: sheetHubNow_(),
+    doc_type: existingMeta.doc_type || 'manual',
+    file_names: existingMeta.file_names || 'manual',
+    row_count: String(lastRow - SHEET_HUB.dataStartRowSheet2 + 1),
+    completed_at: '',
   });
-  sheetHubRefreshLockState();
-  sheetHubSpreadsheet_().setActiveSheet(sheetHubSheet1_());
-  sheetHubToast_('Sheet1 완료 ✅', 3);
-}
 
-function sheetHubDoneSheet2() {
+  ss.setActiveSheet(sheet);
+  const dataRange = sheet.getRange(SHEET_HUB.dataStartRowSheet2, 1, lastRow - SHEET_HUB.dataStartRowSheet2 + 1, 2);
+  sheet.setActiveRange(dataRange);
+  ss.toast('Ctrl+C 후 이카운트에 붙여넣기 하세요 (10초 후 자동 클리어)', '', 10);
+  Utilities.sleep(10000);
+
+  // 백업 + 로그 + 클리어
   const meta = sheetHubReadMeta_();
-  if (meta.status !== 'processing') {
-    sheetHubToast_('진행 중인 복사 작업이 없습니다', 3);
-    return;
-  }
   const rows = sheetHubReadSheet2Rows_();
   const copiedAt = sheetHubNow_();
-  const fileNames = meta.file_names || 'manual';
-
   if (rows.length) {
-    sheetHubAppendSheet2Backup_(rows, copiedAt, fileNames);
-    sheetHubAppendLog_(copiedAt, rows.length, fileNames);
+    sheetHubAppendSheet2Backup_(rows, copiedAt, meta.file_names || 'manual');
+    sheetHubAppendLog_(copiedAt, rows.length, meta.file_names || 'manual');
   }
   sheetHubClearSheet2_();
-  sheetHubTempCopySheet_().clearContents();
   sheetHubWriteMeta_({
-    status: 'idle', processor: '', started_at: '', doc_type: '',
-    file_names: '', row_count: '0', completed_at: copiedAt,
+    status: 'idle', processor: '', started_at: '',
+    doc_type: meta.doc_type, file_names: meta.file_names,
+    row_count: '0', completed_at: copiedAt,
   });
-  sheetHubRefreshLockState();
-  sheetHubSpreadsheet_().setActiveSheet(sheetHubSheet2_());
-  sheetHubToast_('Sheet2 완료 ✅', 3);
 }
 
 // ─── 기존 유지 함수들 ──────────────────────────────────────────
