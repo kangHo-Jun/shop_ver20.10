@@ -1136,6 +1136,7 @@ class AutoDownloader(threading.Thread):
             if not order_no or order_no == "":
                 continue
 
+            if not force_mode:
                 # V10: Check v10_state.json BEFORE checking local history
                 # SKIP if already completed or locked
                 state_keys = state_manager.get_keys_by_status(doc_type, state_manager.STATUS_COMPLETED)
@@ -1152,8 +1153,6 @@ class AutoDownloader(threading.Thread):
                 # Check local history (backward compatibility - still skip if in v10_history)
                 if order_no in history.get(doc_type, []):
                     logger.info(f"[Downloader] {order_no} already in local history - skipping")
-                    # No need to update state manager here as it might be an old entry
-                    # Release lock since we're skipping (only if distributed lock enabled)
                     if config.ENABLE_DISTRIBUTED_LOCK:
                         distributed_lock.release_lock(order_no, status=DistributedLockManager.STATUS_COMPLETED,
                                                     notes="Already in local history")
