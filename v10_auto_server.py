@@ -413,7 +413,7 @@ HTML_TEMPLATE = """
             </div>
         </div>
 
-        <div class="card">
+        <div class="card" style="display:none;" id="ledger-card">
             <h2>📦 Purchase Order (원장)</h2>
             <div class="status-box">
                 <div><span class="label">Pending (READY):</span><span class="val pending-count" id="l-pending">0</span> items</div>
@@ -899,10 +899,14 @@ def save_history(history_dict):
         logger.error(f"[History] Failed to save history: {e}")
 
 
+MAX_ROWS_PER_UPLOAD = 300
+
 def collect_pending_data(doc_type):
-    """Collect READY files and convert them into ERP row bundles for Sheet Hub."""
+    """Collect READY files and convert them into ERP row bundles for Sheet Hub.
+    Limits total rows to MAX_ROWS_PER_UPLOAD (300). Remaining files stay READY for next upload.
+    """
     doc_dir = config.DOWNLOADS_DIR / doc_type
-    html_files = list(doc_dir.glob("*.html")) + list(doc_dir.glob("*.mhtml"))
+    html_files = sorted(list(doc_dir.glob("*.html")) + list(doc_dir.glob("*.mhtml")))
     pending_keys = set(state_manager.get_keys_by_status(doc_type, state_manager.STATUS_READY))
 
     rows = []
@@ -925,6 +929,12 @@ def collect_pending_data(doc_type):
             )
 
             if erp_data:
+                if len(rows) + len(erp_data) > MAX_ROWS_PER_UPLOAD:
+                    logger.info(
+                        "[SheetHub] Row limit %s reached (%s so far). Stopping. %s will be uploaded next time.",
+                        MAX_ROWS_PER_UPLOAD, len(rows), order_id
+                    )
+                    break
                 rows.extend(erp_data)
                 processed_files.append(order_id)
             else:
@@ -1338,6 +1348,8 @@ def get_stats():
 @app.route('/trigger_ledger', methods=['POST'])
 def trigger_ledger_upload():
     """Trigger ledger upload with lock awareness and pending_save state"""
+    if not config.ENABLE_LEDGER:
+        return jsonify({"status": "disabled", "message": "Ledger 기능이 비활성화되어 있습니다 (ENABLE_LEDGER=false)"}), 200
     return sheet_hub_copy("ledger")
 
     if not ledger_lock.acquire(blocking=False):
@@ -1612,6 +1624,19 @@ def sheet_hub_copy(doc_type):
                 upload_state[doc_type]["pending_files"] = processed_files
                 upload_state[doc_type]["pending_since"] = result["started_at"]
                 logger.info("[SheetHub] %s copied to Sheet1 (%s files / %s rows)", doc_type, len(processed_files), len(rows))
+
+                # 잔여 READY 파일이 있으면 30분 후 자동 재업로드
+                remaining = state_manager.get_keys_by_status(doc_type, state_manager.STATUS_READY)
+                if remaining:
+                    logger.info("[SheetHub] %s remaining READY files after batch. Auto-upload in 30 min.", len(remaining))
+                    def auto_retrigger():
+                        logger.info("[SheetHub] Auto-retriggering %s upload (30 min timer)", doc_type)
+                        with app.test_request_context():
+                            sheet_hub_copy(doc_type)
+                    timer = threading.Timer(1800, auto_retrigger)
+                    timer.daemon = True
+                    timer.start()
+
             except Exception as exc:
                 logger.error("[SheetHub] %s copy failed: %s", doc_type, exc)
                 upload_state[doc_type]["status"] = "idle"
@@ -1970,7 +1995,7 @@ if __name__ == "__main__":
     logger.info(f"[Server] Dashboard: http://localhost:{config.FLASK_PORT}")
 
     try:
-        app.run(host='0.0.0.0', port=config.FLASK_PORT, debug=config.FLASK_DEBUG, use_reloader=False)
+        app.run(host='0.0.0.0', port=config.FLASK_PORT, debug=config.FLASK_DEBUG, use_reloader=False, threaded=True)
     except Exception as e:
         logger.critical(f"[Server] Flask server crashed: {e}")
         traceback.print_exc()

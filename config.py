@@ -70,6 +70,10 @@ class Config:
         self.MAX_RETRIES = int(os.getenv("MAX_RETRIES", 3))
         self.RETRY_DELAY_SEC = int(os.getenv("RETRY_DELAY_SEC", 2))
 
+        # Document Type Enable/Disable
+        self.ENABLE_LEDGER = os.getenv("ENABLE_LEDGER", "true").lower() == "true"
+        self.ENABLE_ESTIMATE = os.getenv("ENABLE_ESTIMATE", "true").lower() == "true"
+
         # V10: Distributed Lock Settings
         self.LOCK_TIMEOUT_SEC = int(os.getenv("LOCK_TIMEOUT_SEC", 1800))  # 30 minutes default
         self.LOCK_SHEET_NAME = os.getenv("LOCK_SHEET_NAME", "processing_lock")
