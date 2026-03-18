@@ -5,6 +5,8 @@ const SHEET_HUB = {
   sheet3Name: 'Sheet3',
   sheet4Name: 'Sheet4',
   sheet5Name: 'Sheet5',
+  sheet10Name: 'Sheet10',
+  sheet11Name: 'Sheet11',
   tempCopySheetName: 'TempCopy',
   metaHeaders: ['status', 'processor', 'started_at', 'doc_type', 'file_names', 'row_count', 'completed_at'],
   sheet1Headers: [[
@@ -17,6 +19,11 @@ const SHEET_HUB = {
   sheet3Headers: [['copied_at', 'doc_type', 'processor', 'file_names', 'row_json']],
   sheet4Headers: [['copied_at', 'file_names', 'item_name', 'item_code']],
   sheet5Headers: [['date', 'count', 'file_names']],
+  sheet10Headers: [['saved_at', 'file_names', 'seq', 'customer_code', 'customer_name', 'date', 'warehouse', 'display_manager',
+    'customer_manager', 'customer_phone', 'trade_type', 'payment_term', 'estimate_valid_until',
+    'execution_base', 'receiver_info', 'no', 'item_code', 'item_name', 'qty',
+    'unit_price', 'supply_amount', 'vat', 'total', 'note']],
+  sheet11Headers: [['saved_at', 'file_names', 'item_name', 'item_code']],
   dataStartRowSheet1: 5,
   dataStartRowSheet2: 2,
   sheet1CopyColumnCount: 22,
@@ -80,6 +87,15 @@ function copySheet1() {
     return;
   }
 
+  // 빈칸 행 → Sheet10에 저장
+  const emptyRows = values.filter(function(row) {
+    return String(row[itemCodeIdx]).trim() === '';
+  });
+  if (emptyRows.length) {
+    const meta0 = sheetHubReadMeta_();
+    sheetHubAppendSheet1Unmapped_(emptyRows, sheetHubNow_(), meta0.file_names || 'manual');
+  }
+
   const existingMeta = sheetHubReadMeta_();
   sheetHubWriteMeta_({
     status: 'processing',
@@ -132,6 +148,16 @@ function copySheet2() {
     row_count: String(lastRow - SHEET_HUB.dataStartRowSheet2 + 1),
     completed_at: '',
   });
+
+  // 빈칸 행(품목코드 없는 행) → Sheet11에 저장
+  const allSheet2Rows = sheetHubReadSheet2Rows_();
+  const emptySheet2Rows = allSheet2Rows.filter(function(row) {
+    return String(row[1] || '').trim() === '';
+  });
+  if (emptySheet2Rows.length) {
+    const meta0 = sheetHubReadMeta_();
+    sheetHubAppendSheet2Unmapped_(emptySheet2Rows, sheetHubNow_(), meta0.file_names || 'manual');
+  }
 
   ss.setActiveSheet(sheet);
   const dataRange = sheet.getRange(SHEET_HUB.dataStartRowSheet2, 1, lastRow - SHEET_HUB.dataStartRowSheet2 + 1, 2);
@@ -191,6 +217,11 @@ function sheetHubEnsureStructure_() {
   if (!sheet3.getRange('A1').getValue()) sheet3.getRange('A1:E1').setValues(SHEET_HUB.sheet3Headers);
   if (!sheet4.getRange('A1').getValue()) sheet4.getRange('A1:D1').setValues(SHEET_HUB.sheet4Headers);
   if (!sheet5.getRange('A1').getValue()) sheet5.getRange('A1:C1').setValues(SHEET_HUB.sheet5Headers);
+
+  const sheet10 = sheetHubSheet_(spreadsheet, SHEET_HUB.sheet10Name);
+  const sheet11 = sheetHubSheet_(spreadsheet, SHEET_HUB.sheet11Name);
+  if (!sheet10.getRange('A1').getValue()) sheet10.getRange(1, 1, 1, SHEET_HUB.sheet10Headers[0].length).setValues(SHEET_HUB.sheet10Headers);
+  if (!sheet11.getRange('A1').getValue()) sheet11.getRange('A1:D1').setValues(SHEET_HUB.sheet11Headers);
 }
 
 function sheetHubReadMeta_() {
@@ -278,6 +309,22 @@ function sheetHubAppendLog_(copiedAt, count, fileNames) {
   sheetHubSheet5_().appendRow([copiedAt, count, fileNames]);
 }
 
+function sheetHubAppendSheet1Unmapped_(rows, savedAt, fileNames) {
+  const s = sheetHubSheet10_();
+  const backupRows = rows.map(function(row) {
+    return [savedAt, fileNames].concat(row);
+  });
+  s.getRange(s.getLastRow() + 1, 1, backupRows.length, backupRows[0].length).setValues(backupRows);
+}
+
+function sheetHubAppendSheet2Unmapped_(rows, savedAt, fileNames) {
+  const s = sheetHubSheet11_();
+  const backupRows = rows.map(function(row) {
+    return [savedAt, fileNames, row[0] || '', row[1] || ''];
+  });
+  s.getRange(s.getLastRow() + 1, 1, backupRows.length, 4).setValues(backupRows);
+}
+
 function sheetHubClearSheet1_() {
   const sheet = sheetHubSheet1_();
   sheet.getRange(SHEET_HUB.dataStartRowSheet1, 1,
@@ -340,6 +387,8 @@ function sheetHubSheet2_() { return sheetHubSheet_(sheetHubSpreadsheet_(), SHEET
 function sheetHubSheet3_() { return sheetHubSheet_(sheetHubSpreadsheet_(), SHEET_HUB.sheet3Name); }
 function sheetHubSheet4_() { return sheetHubSheet_(sheetHubSpreadsheet_(), SHEET_HUB.sheet4Name); }
 function sheetHubSheet5_() { return sheetHubSheet_(sheetHubSpreadsheet_(), SHEET_HUB.sheet5Name); }
+function sheetHubSheet10_() { return sheetHubSheet_(sheetHubSpreadsheet_(), SHEET_HUB.sheet10Name); }
+function sheetHubSheet11_() { return sheetHubSheet_(sheetHubSpreadsheet_(), SHEET_HUB.sheet11Name); }
 
 function sheetHubTempCopySheet_() {
   const ss = sheetHubSpreadsheet_();
