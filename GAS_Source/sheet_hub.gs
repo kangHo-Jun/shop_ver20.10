@@ -34,10 +34,14 @@ const SHEET_HUB = {
 };
 
 function onOpen() {
-  SpreadsheetApp.getUi()
-    .createMenu('Sheet Hub')
-    .addItem('Refresh Lock State', 'sheetHubRefreshLockState')
-    .addToUi();
+  try {
+    SpreadsheetApp.getUi()
+      .createMenu('Sheet Hub')
+      .addItem('Refresh Lock State', 'sheetHubRefreshLockState')
+      .addToUi();
+  } catch (e) {
+    // standalone 스크립트 컨텍스트에서는 getUi() 사용 불가 - 무시
+  }
   sheetHubEnsureStructure_();
   sheetHubRefreshLockState();
 }
