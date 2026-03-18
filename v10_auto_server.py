@@ -1086,6 +1086,16 @@ class AutoDownloader(threading.Thread):
             else:
                 server_status["empty_cycle_count"] = 0
                 logger.info(f"[Downloader] Downloaded {e_new} estimate files. Ledger download is disabled.")
+
+            # 자동 업로드: READY 파일이 있고 업로드가 진행 중이 아니면 자동 트리거
+            ready_count = len(state_manager.get_keys_by_status("estimate", state_manager.STATUS_READY))
+            if ready_count > 0 and upload_state["estimate"]["status"] == "idle":
+                logger.info(f"[Downloader] Auto-triggering estimate upload ({ready_count} READY files)")
+                def auto_upload():
+                    with app.test_request_context():
+                        sheet_hub_copy("estimate")
+                t = threading.Thread(target=auto_upload, daemon=True)
+                t.start()
         
         except RetryExhaustedError as e:
             logger.error(f"[V10] Critical Lock Manager failure: {e}")
