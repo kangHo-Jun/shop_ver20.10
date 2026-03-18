@@ -32,9 +32,8 @@ pause >nul
 echo.
 
 echo [4/4] V10 서버 시작 중...
-echo 대시보드: http://localhost:5080
 echo 종료하려면 이 창을 닫으세요.
 echo.
 call .venv\Scripts\activate
-python v10_auto_server.py
+python run_server.py
 pause
