@@ -20,6 +20,8 @@ class GoogleSheetHub:
     SHEET3_NAME = "Sheet3"
     SHEET4_NAME = "Sheet4"
     SHEET5_NAME = "Sheet5"
+    SHEET10_NAME = "Sheet10"
+    SHEET11_NAME = "Sheet11"
     SHEET1_META_HEADERS = [
         "status",
         "processor",
@@ -249,6 +251,18 @@ class GoogleSheetHub:
         sheet2 = self._worksheet(self.SHEET2_NAME)
         sheet2.update(f"A2:B{1 + len(extracted_rows)}", extracted_rows)
 
+    def _append_sheet10_rows(self, rows):
+        if not rows:
+            return
+        sheet10 = self._worksheet(self.SHEET10_NAME)
+        sheet10.append_rows(rows, value_input_option="USER_ENTERED")
+
+    def _append_sheet11_rows(self, rows):
+        if not rows:
+            return
+        sheet11 = self._worksheet(self.SHEET11_NAME)
+        sheet11.append_rows(rows, value_input_option="USER_ENTERED")
+
     def _sheet1_data_rows(self):
         values = self._worksheet(self.SHEET1_NAME).get("A5:AZ2000")
         return [row for row in values if any(str(cell).strip() for cell in row)]
@@ -265,34 +279,46 @@ class GoogleSheetHub:
 
         now_iso = datetime.datetime.now().isoformat()
         joined_files = ", ".join(file_names)
-        extracted_rows = self._extract_sheet2_rows(rows)
+        # Sheet1: O열(index 14) 품목코드 기준 분리
+        mapped_rows = [r for r in rows if len(r) > 14 and str(r[14]).strip()]
+        unmapped_rows = [r for r in rows if not (len(r) > 14 and str(r[14]).strip())]
 
-        self._write_sheet1_rows(rows)
-        self._write_sheet2_rows(extracted_rows)
+        extracted_rows = self._extract_sheet2_rows(rows)
+        # Sheet2: B열(index 1) 품목코드 기준 분리
+        mapped_extracted = [r for r in extracted_rows if len(r) > 1 and str(r[1]).strip()]
+        unmapped_extracted = [r for r in extracted_rows if not (len(r) > 1 and str(r[1]).strip())]
+
+        self._write_sheet1_rows(mapped_rows)
+        self._write_sheet2_rows(mapped_extracted)
+        self._append_sheet10_rows(unmapped_rows)
+        self._append_sheet11_rows(unmapped_extracted)
+
+        if unmapped_rows:
+            logger.info("[SheetHub] 품목코드 없는 행: Sheet10 %s행, Sheet11 %s행", len(unmapped_rows), len(unmapped_extracted))
         self._write_sheet1_meta({
             "status": "처리중",
             "processor": self.machine_id,
             "started_at": now_iso,
             "doc_type": doc_type,
             "file_names": joined_files,
-            "row_count": str(len(rows)),
+            "row_count": str(len(mapped_rows)),
             "completed_at": "",
         })
 
         clipboard_text = "\r\n".join(
             "\t".join("" if cell is None else str(cell) for cell in row)
-            for row in rows
+            for row in mapped_rows
         )
         pyperclip.copy(clipboard_text)
         logger.info(
             "[SheetHub] Staged %s rows to Sheet1/Sheet2 and extracted %s item rows",
-            len(rows),
-            len(extracted_rows),
+            len(mapped_rows),
+            len(mapped_extracted),
         )
 
         return {
-            "row_count": len(rows),
-            "item_count": len(extracted_rows),
+            "row_count": len(mapped_rows),
+            "item_count": len(mapped_extracted),
             "file_count": len(file_names),
             "processor": self.machine_id,
             "started_at": now_iso,

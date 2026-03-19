@@ -54,75 +54,33 @@ function onEdit(e) {
   sheetHubSyncExtractedItems();
 }
 
-// ─── 시트 내 복사 버튼 ─────────────────────────────────────────────
+// ─── 시트 내 복사/클리어 버튼 ──────────────────────────────────────
+// 빈칸 행 분리는 Python 업로드 시 처리됨 (Sheet10/11으로 자동 이동)
+// 복사버튼: 데이터 선택 + 안내 토스트
+// 클리어버튼: 백업 + 로그 + 클리어
 
 function copySheet1() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName(SHEET_HUB.sheet1Name);
-
   const lastRow = sheet.getLastRow();
   if (lastRow < SHEET_HUB.dataStartRowSheet1) {
     ss.toast('Sheet1 데이터 없음', '', 3);
     return;
   }
-
   const numRows = lastRow - SHEET_HUB.dataStartRowSheet1 + 1;
-  const numCols = 22;
-  const dataRange = sheet.getRange(SHEET_HUB.dataStartRowSheet1, 1, numRows, numCols);
-  const values = dataRange.getValues();
-
-  // 품목코드(O열=index 14) 기준: 품목코드 있는 행 위, 빈 행 아래로 정렬
-  const itemCodeIdx = SHEET_HUB.sheet1ItemCodeIndex;
-  values.sort(function(a, b) {
-    const aHas = String(a[itemCodeIdx]).trim() !== '';
-    const bHas = String(b[itemCodeIdx]).trim() !== '';
-    if (aHas && !bHas) return -1;
-    if (!aHas && bHas) return 1;
-    return 0;
-  });
-  dataRange.setValues(values);
-
-  const filledCount = values.filter(function(row) {
-    return String(row[itemCodeIdx]).trim() !== '';
-  }).length;
-
-  if (filledCount === 0) {
-    ss.toast('품목코드 있는 행 없음', '', 3);
-    return;
-  }
-
-  // 빈칸 행 → Sheet10에 저장
-  const emptyRows = values.filter(function(row) {
-    return String(row[itemCodeIdx]).trim() === '';
-  });
-  if (emptyRows.length) {
-    const meta0 = sheetHubReadMeta_();
-    sheetHubAppendSheet1Unmapped_(emptyRows, sheetHubNow_(), meta0.file_names || 'manual');
-  }
-
-  const existingMeta = sheetHubReadMeta_();
-  sheetHubWriteMeta_({
-    status: 'processing',
-    processor: sheetHubActiveUser_(),
-    started_at: sheetHubNow_(),
-    doc_type: existingMeta.doc_type || 'manual',
-    file_names: existingMeta.file_names || 'manual',
-    row_count: String(filledCount),
-    completed_at: '',
-  });
-
   ss.setActiveSheet(sheet);
-  sheet.setActiveRange(sheet.getRange(SHEET_HUB.dataStartRowSheet1, 1, filledCount, numCols));
-  ss.toast('Ctrl+C 후 이카운트에 붙여넣기 하세요 (30초 후 자동 클리어)', '', 30);
-  Utilities.sleep(30000);
+  sheet.setActiveRange(sheet.getRange(SHEET_HUB.dataStartRowSheet1, 1, numRows, SHEET_HUB.sheet1CopyColumnCount));
+  ss.toast('Ctrl+C → 이카운트 붙여넣기 → 저장(F8) → [클리어] 버튼 클릭', '📋 복사 준비 완료', 60);
+}
 
-  // 백업 + 로그 + 클리어
+function clearSheet1() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
   const meta = sheetHubReadMeta_();
-  const allRows = sheetHubReadSheet1Rows_();
+  const rows = sheetHubReadSheet1Rows_();
   const copiedAt = sheetHubNow_();
-  if (allRows.length) {
-    sheetHubAppendSheet1Backup_(allRows, copiedAt, meta.doc_type || 'manual', sheetHubActiveUser_(), meta.file_names || 'manual');
-    sheetHubAppendLog_(copiedAt, allRows.length, meta.file_names || 'manual');
+  if (rows.length) {
+    sheetHubAppendSheet1Backup_(rows, copiedAt, meta.doc_type || 'manual', sheetHubActiveUser_(), meta.file_names || 'manual');
+    sheetHubAppendLog_(copiedAt, rows.length, meta.file_names || 'manual');
   }
   sheetHubClearSheet1_();
   sheetHubWriteMeta_({
@@ -130,46 +88,25 @@ function copySheet1() {
     doc_type: meta.doc_type, file_names: meta.file_names,
     row_count: '0', completed_at: copiedAt,
   });
+  ss.toast('Sheet1 클리어 완료', '✅', 5);
 }
 
 function copySheet2() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName(SHEET_HUB.sheet2Name);
-
   const lastRow = sheet.getLastRow();
   if (lastRow < SHEET_HUB.dataStartRowSheet2) {
     ss.toast('Sheet2 데이터 없음', '', 3);
     return;
   }
-
-  const existingMeta = sheetHubReadMeta_();
-  sheetHubWriteMeta_({
-    status: 'processing',
-    processor: sheetHubActiveUser_(),
-    started_at: sheetHubNow_(),
-    doc_type: existingMeta.doc_type || 'manual',
-    file_names: existingMeta.file_names || 'manual',
-    row_count: String(lastRow - SHEET_HUB.dataStartRowSheet2 + 1),
-    completed_at: '',
-  });
-
-  // 빈칸 행(품목코드 없는 행) → Sheet11에 저장
-  const allSheet2Rows = sheetHubReadSheet2Rows_();
-  const emptySheet2Rows = allSheet2Rows.filter(function(row) {
-    return String(row[1] || '').trim() === '';
-  });
-  if (emptySheet2Rows.length) {
-    const meta0 = sheetHubReadMeta_();
-    sheetHubAppendSheet2Unmapped_(emptySheet2Rows, sheetHubNow_(), meta0.file_names || 'manual');
-  }
-
+  const numRows = lastRow - SHEET_HUB.dataStartRowSheet2 + 1;
   ss.setActiveSheet(sheet);
-  const dataRange = sheet.getRange(SHEET_HUB.dataStartRowSheet2, 1, lastRow - SHEET_HUB.dataStartRowSheet2 + 1, 2);
-  sheet.setActiveRange(dataRange);
-  ss.toast('Ctrl+C 후 이카운트에 붙여넣기 하세요 (30초 후 자동 클리어)', '', 30);
-  Utilities.sleep(30000);
+  sheet.setActiveRange(sheet.getRange(SHEET_HUB.dataStartRowSheet2, 1, numRows, SHEET_HUB.sheet2CopyColumnCount));
+  ss.toast('Ctrl+C → 이카운트 붙여넣기 → 저장(F8) → [클리어] 버튼 클릭', '📋 복사 준비 완료', 60);
+}
 
-  // 백업 + 로그 + 클리어
+function clearSheet2() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
   const meta = sheetHubReadMeta_();
   const rows = sheetHubReadSheet2Rows_();
   const copiedAt = sheetHubNow_();
@@ -178,11 +115,7 @@ function copySheet2() {
     sheetHubAppendLog_(copiedAt, rows.length, meta.file_names || 'manual');
   }
   sheetHubClearSheet2_();
-  sheetHubWriteMeta_({
-    status: 'idle', processor: '', started_at: '',
-    doc_type: meta.doc_type, file_names: meta.file_names,
-    row_count: '0', completed_at: copiedAt,
-  });
+  ss.toast('Sheet2 클리어 완료', '✅', 5);
 }
 
 // ─── 기존 유지 함수들 ──────────────────────────────────────────
