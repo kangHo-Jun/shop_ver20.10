@@ -181,6 +181,8 @@ def auto_upload(doc_type="estimate"):
 
     try:
         result = sheet_hub.stage_and_copy(doc_type, rows, processed)
+        for key in processed:
+            state_manager.update_state(doc_type, key, state_manager.STATUS_COMPLETED)
         logger.info("[Upload] ✅ %s행 / %s파일 → Google Sheets 완료", result['row_count'], result['file_count'])
     except Exception as e:
         logger.error("[Upload] Google Sheets 업로드 실패: %s", e)
