@@ -11,14 +11,14 @@
    영림 OMS → HTML 파일 저장 → READY 상태
 
 ② 자동 Google Sheets 업로드
-   READY 파일 파싱 → Sheet1/Sheet2 기록
+   READY 파일 파싱 → 품목코드 있는 행 → Sheet1/Sheet2
+                  → 품목코드 없는 행 → Sheet10/Sheet11 (자동 분리)
    (최대 300행, 초과 시 30분 후 자동 재업로드)
 
 ③ 복사버튼 클릭 (수동)
-   ├─ 품목코드 없는 행 → Sheet10/11 이동 + Sheet1/2에서 삭제
-   ├─ 품목코드 있는 행 선택 상태 유지 (30초)
+   ├─ 데이터 행 선택 상태
    ├─ Ctrl+C → 이카운트 붙여넣기 → 저장(F8)
-   └─ 30초 후 Sheet1/2 자동 클리어 + Sheet3/4 백업 + Sheet5 로그
+   └─ 30분 후 다음 업로드 사이클에서 Sheet1/2 자동 덮어쓰기
 
 ④ 30분 후 자동 반복 (①부터)
 ```
@@ -35,16 +35,10 @@ START.bat  ← 더블클릭
 1. 기존 프로세스 자동 정리
 2. Edge 브라우저 디버그 모드 실행 (포트 9333)
 3. 영림 로그인 확인 후 아무 키 입력
-4. 서버 시작 → 대시보드: `http://localhost:5080`
+4. `run_server.py` 시작 → 콘솔에서 로그 확인
 
 ### 서버 재시작 (코드 수정 또는 오류 시)
 - 터미널에서 **Ctrl+C** → `START.bat` 재실행
-
-### 서버 초기화
-```
-START.bat
-```
-동일. 기존 프로세스 자동 정리 후 재시작.
 
 ---
 
@@ -53,25 +47,24 @@ START.bat
 ### 일반 사용 흐름
 1. `START.bat` 실행 → 서버 유지 (창 닫으면 종료)
 2. 다운로드 및 구글 시트 업로드는 **자동** (30분마다)
-3. 구글 시트 Sheet1에 데이터 확인 → **복사버튼** 클릭
-4. 30초 안에 **Ctrl+C** → 이카운트에 **붙여넣기** → 저장(F8)
-5. Sheet1/2 자동 클리어 후 다음 사이클 대기
+3. 구글 시트 Sheet1/Sheet2에 데이터 확인 → **복사버튼** 클릭
+4. **Ctrl+C** → 이카운트에 **붙여넣기** → 저장(F8)
+5. 30분 후 다음 사이클에서 Sheet1/2 자동 덮어쓰기
 
 ### 구글 시트 구조
 | 시트 | 용도 |
 |------|------|
-| Sheet1 | 현재 업로드 데이터 (복사 후 자동 클리어) |
+| Sheet1 | 현재 업로드 데이터 (견적 행 데이터) |
 | Sheet2 | 품목코드 매핑 데이터 |
 | Sheet3 | Sheet1 백업 이력 |
 | Sheet4 | Sheet2 백업 이력 |
 | Sheet5 | 업로드 로그 (날짜/건수/파일명) |
-| Sheet10 | Sheet1 미매핑 행 (품목코드 없는 행) |
-| Sheet11 | Sheet2 미매핑 행 (품목코드 없는 행) |
+| Sheet10 | 품목코드 없는 행 (Sheet1에서 자동 분리) |
+| Sheet11 | 품목코드 없는 행 (Sheet2에서 자동 분리) |
 
 ### 주의사항
 - **START.bat 실행 창을 닫으면 서버도 종료됨** — 창 유지 필수
 - Edge 브라우저가 먼저 실행된 후 서버 시작해야 함 (START.bat이 자동 처리)
-- 복사버튼 클릭 후 **30초 안에** Ctrl+C 및 붙여넣기 완료 필요
 - 300행 초과 시 1차 300행 업로드 후 30분 뒤 자동으로 나머지 업로드
 - `ENABLE_LEDGER=false` — 원장 다운로드 비활성화 상태 (견적만 운영)
 - 서버는 이 PC(DSAI)가 아닌 **운영 PC(DS-Sales0)** 에서 실행
@@ -82,10 +75,38 @@ START.bat
 
 | 파일 | 역할 |
 |------|------|
-| `START.bat` | 서버 시작 (Edge + Flask) |
-| `v10_auto_server.py` | Flask 서버, 다운로더, 대시보드 |
+| `START.bat` | 서버 시작 (Edge + run_server.py) |
+| `run_server.py` | 콘솔 전용 서버 (다운로드+업로드 루프) |
 | `local_file_processor.py` | HTML → ERP 행 데이터 변환 |
-| `google_sheet_hub.py` | Google Sheets 읽기/쓰기 |
-| `GAS_Source/sheet_hub.gs` | 구글 시트 복사버튼 GAS |
+| `google_sheet_hub.py` | Google Sheets 읽기/쓰기, 업로드 시 품목코드 기준 분리 |
+| `GAS_Source/sheet_hub.gs` | 구글 시트 복사버튼 GAS (standalone) |
 | `v10_state.json` | 파일별 상태 (READY/COMPLETED/FAILED) |
 | `.env` | 환경 설정 (크리덴셜, 포트 등) |
+
+---
+
+## GAS 바운드 스크립트 (구글 시트 직접 편집)
+
+구글 시트 → 확장 프로그램 → Apps Script 에서 관리.
+`clasp push`는 standalone 스크립트에만 적용되므로, 복사버튼 함수는 **바운드 스크립트에 수동으로 붙여넣기** 필요.
+
+### 복사버튼 함수 구조
+- `copySheet1()` — Sheet1 데이터 선택 + 토스트 안내 (row 2~lastRow, 22열)
+- `copySheet2()` — Sheet2 데이터 선택 + 토스트 안내 (row 2~lastRow, 2열)
+- 빈칸 행 분리 로직은 Python 업로드 시 처리 (GAS에서 불필요)
+
+### Sheet1 품목코드 기준
+- Sheet1: **O열 (index 14)** 비어있으면 → Sheet10
+- Sheet2: **B열 (index 1)** 비어있으면 → Sheet11
+
+---
+
+## 개발 이력 요약
+
+| 날짜 | 변경 내용 |
+|------|-----------|
+| 2026-03-19 | Flask 서버 → 콘솔 전용 `run_server.py`로 간소화 |
+| 2026-03-19 | 다운로드 후 자동 업로드 (수동 버튼 제거) |
+| 2026-03-19 | 업로드 시 품목코드 없는 행 → Sheet10/11 자동 분리 |
+| 2026-03-19 | GAS 복사버튼: sleep/auto-clear 제거 → 선택+토스트만 |
+| 2026-03-19 | START.bat → run_server.py 실행으로 변경 |
