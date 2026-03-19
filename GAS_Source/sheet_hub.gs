@@ -74,6 +74,24 @@ function copySheet1() {
 }
 
 
+function clearSheet1() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const meta = sheetHubReadMeta_();
+  const rows = sheetHubReadSheet1Rows_();
+  const copiedAt = sheetHubNow_();
+  if (rows.length) {
+    sheetHubAppendSheet1Backup_(rows, copiedAt, meta.doc_type || 'manual', sheetHubActiveUser_(), meta.file_names || 'manual');
+    sheetHubAppendLog_(copiedAt, rows.length, meta.file_names || 'manual');
+  }
+  sheetHubClearSheet1_();
+  sheetHubWriteMeta_({
+    status: 'idle', processor: '', started_at: '',
+    doc_type: meta.doc_type, file_names: meta.file_names,
+    row_count: '0', completed_at: copiedAt,
+  });
+  ss.toast('Sheet1 클리어 완료', '✅', 5);
+}
+
 function copySheet2() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName(SHEET_HUB.sheet2Name);
