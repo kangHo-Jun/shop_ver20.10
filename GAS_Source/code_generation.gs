@@ -278,6 +278,12 @@ function preprocessColorForProductName(color) {
   
   // VER10: 회사명 제거 전에 영림{숫자} 패턴 먼저 체크
   
+  // 0순위: 영림{숫자}(코드) → 괄호 제거, 내용 유지, 하이픈 유지 (VER12 추가)
+  const younglimBracketMatch = colorStr.match(/^(영림\d+)\(([^)]+)\)/);
+  if (younglimBracketMatch) {
+    return younglimBracketMatch[1] + younglimBracketMatch[2];
+  }
+
   // 1순위: 영림{숫자} + 영문{숫자} → 공백 제거, 전부 출력
   if (/영림\d+\s+[A-Za-z]+\d+/.test(colorStr)) {
     return colorStr.replace(/\s+/g, '');
@@ -294,6 +300,11 @@ function preprocessColorForProductName(color) {
     return colorStr;
   }
   
+  // 3.5순위: 영문+숫자+한글 혼합 → 한글 및 공백 제거 (VER12 추가)
+  if (/[A-Za-z]/.test(colorStr) && /[가-힣]/.test(colorStr)) {
+    colorStr = colorStr.replace(/[가-힣\s]+/g, '').trim();
+  }
+
   // VER10: 여기서 회사명 키워드 제거 (영림{숫자} 패턴이 아닌 경우만)
   for (const keyword of Object.keys(COMPANY_MAPPING)) {
     colorStr = colorStr.replace(keyword, '').trim();
@@ -509,6 +520,11 @@ function generateBrandColorCode(color, brandCode) {
   let colorStr = color.toString().trim();
   const brand = brandCode; // 'Y', 'W', 'y' 등
   
+  // VER12 추가: 영문+숫자+한글 혼합 상단 처리 (예: PX450-3 발렌무디 다크)
+  if (/[A-Za-z]/.test(colorStr) && /[가-힣]/.test(colorStr)) {
+    colorStr = colorStr.replace(/[가-힣\s]+/g, '').trim();
+  }
+
   // VER09: 회사명 키워드 제거
   for (const keyword of Object.keys(COMPANY_MAPPING)) {
     colorStr = colorStr.replace(keyword, '').trim();
@@ -522,18 +538,24 @@ function generateBrandColorCode(color, brandCode) {
     return brand + younglimPsMatch[1];
   }
   
-  // 2순위: PS{문자+숫자} → 브랜드 + S + 문자+숫자
+  // 2순위: PS{문자+숫자} → 브랜드 + S + 문자+숫자 (하이픈 제거)
   const psMatch = colorStr.match(/^PS(.+)$/);
   if (psMatch) {
-    return brand + 'S' + psMatch[1];
+    return brand + 'S' + psMatch[1].replace(/-/g, '');
   }
   
-  // 3순위: PX{문자+숫자} → 브랜드 + X + 문자+숫자 (VER11 추가)
+  // 3순위: PX{문자+숫자} → 브랜드 + X + 문자+숫자 (하이픈 제거)
   const pxMatch = colorStr.match(/^PX(.+)$/);
   if (pxMatch) {
-    return brand + 'X' + pxMatch[1];
+    return brand + 'X' + pxMatch[1].replace(/-/g, '');
   }
   
+  // 3.5순위: P + {영문} + {숫자} 일반화 (VER12 추가)
+  const pGeneralMatch = colorStr.match(/^P([A-Z]+)(\d+(?:-\d+)*)$/);
+  if (pGeneralMatch) {
+    return brand + pGeneralMatch[1] + pGeneralMatch[2].replace(/-/g, '');
+  }
+
   // 4순위: 영림{숫자} → 브랜드 + 숫자
   const younglimMatch = colorStr.match(/영림(\d+)/);
   if (younglimMatch) {
