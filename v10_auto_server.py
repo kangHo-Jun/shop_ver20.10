@@ -5,14 +5,18 @@ import threading
 import sys
 import datetime
 import subprocess
+import hashlib
+import re
 from flask import Flask, jsonify, request, render_template_string
 from pathlib import Path
+from html import unescape
 from selenium import webdriver
 from selenium.webdriver.edge.options import Options as EdgeOptions
 from selenium.webdriver.common.by import By
 import traceback
 import atexit
 import signal
+from urllib.parse import urljoin, urlparse, parse_qs, urlunparse, urlencode
 
 # Import foundation modules
 from config import config
@@ -78,6 +82,11 @@ upload_state = {
         "last_error": None
     }
 }
+
+PAGINATION_PARAM_KEYS = (
+    "page", "pageNum", "pageno", "page_no", "cpage",
+    "currentPage", "currPage", "curPage", "nowPage", "nowpage"
+)
 
 # Timeout for pending_save state
 PENDING_SAVE_TIMEOUT_SEC = config.SHEET_HUB_LOCK_TIMEOUT_SEC
@@ -899,6 +908,160 @@ def save_history(history_dict):
         logger.error(f"[History] Failed to save history: {e}")
 
 
+def normalize_list_url(url):
+    parsed = urlparse(url)
+    query_items = parse_qs(parsed.query, keep_blank_values=True)
+    normalized_query = urlencode(sorted(
+        (key, value)
+        for key, values in query_items.items()
+        for value in values
+    ))
+    return urlunparse((parsed.scheme, parsed.netloc, parsed.path, "", normalized_query, ""))
+
+
+def build_paged_url(base_url, page_key, page_number):
+    parsed = urlparse(base_url)
+    query = parse_qs(parsed.query, keep_blank_values=True)
+    query[page_key] = [str(page_number)]
+    encoded = urlencode(
+        [(key, value) for key, values in query.items() for value in values],
+        doseq=True
+    )
+    return urlunparse((parsed.scheme, parsed.netloc, parsed.path, "", encoded, ""))
+
+
+def extract_pagination_urls(base_url, current_url, soup, html_source):
+    base_parsed = urlparse(base_url)
+    base_params = parse_qs(base_parsed.query, keep_blank_values=True)
+    expected_gubun = base_params.get("younglim_gubun", [""])[0]
+    candidates = {normalize_list_url(current_url)}
+    snippets = [html_source]
+
+    for tag in soup.find_all(["a", "button"]):
+        for attr_name in ("href", "onclick", "data-href"):
+            attr_val = tag.get(attr_name)
+            if attr_val:
+                snippets.append(str(attr_val))
+
+        href = tag.get("href")
+        if href and not href.lower().startswith("javascript:"):
+            candidate = urljoin(current_url, href)
+            parsed = urlparse(candidate)
+            if parsed.path == base_parsed.path:
+                if parse_qs(parsed.query, keep_blank_values=True).get("younglim_gubun", [""])[0] == expected_gubun:
+                    candidates.add(normalize_list_url(candidate))
+
+    page_key = next((key for key in PAGINATION_PARAM_KEYS if key in base_params), None)
+    for snippet in snippets:
+        text = unescape(str(snippet))
+        for match in re.findall(rf"{re.escape(Path(base_parsed.path).name)}[^\"'<>\\s]+", text):
+            candidate = urljoin(current_url, match)
+            parsed = urlparse(candidate)
+            if parsed.path != base_parsed.path:
+                continue
+            if parse_qs(parsed.query, keep_blank_values=True).get("younglim_gubun", [""])[0] != expected_gubun:
+                continue
+            candidates.add(normalize_list_url(candidate))
+
+        for key in PAGINATION_PARAM_KEYS:
+            for page_no in re.findall(rf"{key}\D{{0,5}}(\d+)", text, flags=re.IGNORECASE):
+                candidates.add(normalize_list_url(build_paged_url(base_url, key, page_no)))
+                page_key = page_key or key
+
+    if page_key:
+        for tag in soup.find_all(["a", "button"], string=re.compile(r"^\s*\d+\s*$")):
+            page_no = tag.get_text(strip=True)
+            if page_no.isdigit():
+                candidates.add(normalize_list_url(build_paged_url(base_url, page_key, page_no)))
+
+    return sorted(candidates)
+
+
+def build_row_fallback_key(order_no, row, button_col):
+    raw = f"{order_no}|{row.get_text(' ', strip=True)}|{button_col}"
+    return f"{order_no}_ROW{hashlib.sha1(raw.encode('utf-8', errors='ignore')).hexdigest()[:10]}"
+
+
+def extract_button_reference(order_no, row, button_col, younglim_gubun):
+    fallback_key = build_row_fallback_key(order_no, row, button_col)
+    candidates = []
+
+    estimate_button = button_col.find("button", class_="estimate_link")
+    if estimate_button:
+        candidates.append(("estimate", estimate_button))
+    ledger_button = button_col.find("button", class_="trans_link")
+    if ledger_button:
+        candidates.append(("ledger", ledger_button))
+
+    for element in button_col.find_all(["button", "a"]):
+        if element not in [candidate[1] for candidate in candidates]:
+            candidates.append((None, element))
+
+    direct_url = None
+    button_type = None
+    button_id = None
+
+    for inferred_type, element in candidates:
+        attrs_to_scan = [element.get("ordno"), element.get("chulhano"), element.get("href"), element.get("onclick")]
+        attrs_to_scan.extend(str(value) for value in element.attrs.values() if value)
+        attrs_to_scan.append(str(element))
+
+        for value in attrs_to_scan:
+            if not value:
+                continue
+            text = unescape(str(value))
+
+            estimate_url = re.search(r"(estimate_doc\.jsp\?[^\"'\s<>]+)", text)
+            ledger_url = re.search(r"(trans_doc\.jsp\?[^\"'\s<>]+)", text)
+            if estimate_url:
+                direct_url = urljoin(config.YOUNGRIM_URL, estimate_url.group(1))
+                button_type = "estimate"
+            elif ledger_url:
+                direct_url = urljoin(config.YOUNGRIM_URL, ledger_url.group(1))
+                button_type = "ledger"
+
+            ordno_match = re.search(r"(?:\bordno\b|[?&]ordno=)\s*=?['\"]?([A-Za-z0-9_-]+)", text)
+            if ordno_match:
+                button_id = ordno_match.group(1)
+                button_type = "estimate"
+            chulhano_match = re.search(r"(?:\bchulhano\b|[?&]chulhano=)\s*=?['\"]?([A-Za-z0-9_-]+)", text)
+            if chulhano_match:
+                button_id = chulhano_match.group(1)
+                button_type = "ledger"
+
+            if inferred_type and not button_type:
+                button_type = inferred_type
+
+            if button_id and button_type:
+                break
+
+        if button_id and button_type:
+            break
+
+    if direct_url and not button_id:
+        parsed = urlparse(direct_url)
+        params = parse_qs(parsed.query, keep_blank_values=True)
+        button_id = (params.get("ordno") or params.get("chulhano") or [None])[0]
+        if params.get("ordno"):
+            button_type = "estimate"
+        elif params.get("chulhano"):
+            button_type = "ledger"
+
+    if button_id and not direct_url:
+        if button_type == "ledger":
+            direct_url = f"http://door.yl.co.kr/oms/trans_doc.jsp?chulhano={button_id}&younglim_gubun={younglim_gubun}"
+        else:
+            direct_url = f"http://door.yl.co.kr/oms/estimate_doc.jsp?ordno={button_id}&younglim_gubun={younglim_gubun}"
+
+    key_suffix = button_id or fallback_key.split("_", 1)[1]
+    return {
+        "button_type": button_type or "estimate",
+        "button_id": button_id,
+        "history_key": f"{order_no}_{key_suffix}",
+        "detail_url": direct_url,
+    }
+
+
 MAX_ROWS_PER_UPLOAD = 300
 
 def collect_pending_data(doc_type):
@@ -1120,6 +1283,7 @@ class AutoDownloader(threading.Thread):
             doc_type: 'ledger' or 'estimate'
             force_mode: If True, bypass history and lock checks
         """
+        return self._download_from_page_impl(list_url, save_dir, doc_type, force_mode)
         logger.info(f"[Downloader] Fetching page: {list_url}")
         with browser_lock:
             browser_manager.navigate(list_url)
@@ -1146,28 +1310,7 @@ class AutoDownloader(threading.Thread):
             if not order_no or order_no == "":
                 continue
 
-            if not force_mode:
-                # V10: Check v10_state.json BEFORE checking local history
-                # SKIP if already completed or locked
-                state_keys = state_manager.get_keys_by_status(doc_type, state_manager.STATUS_COMPLETED)
-                if order_no in state_keys or any(k.startswith(order_no) for k in state_keys):
-                    logger.info(f"[Downloader] {order_no} already completed in state - skipping")
-                    continue
-
-                # Only use distributed lock if enabled
-                if config.ENABLE_DISTRIBUTED_LOCK:
-                    if not distributed_lock.acquire_lock(order_no, notes=f"Download attempt from {doc_type}"):
-                        logger.info(f"[V10] Order {order_no} is locked by another machine or already completed - skipping")
-                        continue
-
-                # Check local history (backward compatibility - still skip if in v10_history)
-                if order_no in history.get(doc_type, []):
-                    logger.info(f"[Downloader] {order_no} already in local history - skipping")
-                    if config.ENABLE_DISTRIBUTED_LOCK:
-                        distributed_lock.release_lock(order_no, status=DistributedLockManager.STATUS_COMPLETED,
-                                                    notes="Already in local history")
-                    continue
-            else:
+            if force_mode:
                 logger.info(f"[Downloader] FORCE MODE: Bypassing checks for {order_no}")
 
             try:
@@ -1209,6 +1352,21 @@ class AutoDownloader(threading.Thread):
                         distributed_lock.release_lock(order_no, status=DistributedLockManager.STATUS_FAILED,
                                                     notes=f"No {button_attr}")
                     continue
+
+                history_key = f"{order_no}_{button_id}"
+
+                if not force_mode:
+                    state_keys = state_manager.get_keys_by_status(doc_type, state_manager.STATUS_COMPLETED)
+                    if history_key in state_keys:
+                        logger.info(f"[Downloader] {history_key} already completed in state - skipping")
+                        continue
+
+                    if history_key in history.get(doc_type, []):
+                        logger.info(f"[Downloader] {history_key} already in local history - skipping")
+                        if config.ENABLE_DISTRIBUTED_LOCK:
+                            distributed_lock.release_lock(order_no, status=DistributedLockManager.STATUS_COMPLETED,
+                                                        notes="Already in local history")
+                        continue
 
                 logger.info(f"[Downloader] Downloading {button_type} for {order_no} ({button_attr}={button_id})")
 
@@ -1269,7 +1427,6 @@ class AutoDownloader(threading.Thread):
 
                 # Add to local state (DOWNLOADED)
                 # Use UNIQUE key for history in unique filename mode
-                history_key = f"{order_no}_{button_id}"
                 state_manager.update_state(doc_type, history_key, state_manager.STATUS_DOWNLOADED)
 
                 # Parsing Success -> READY
@@ -1298,6 +1455,138 @@ class AutoDownloader(threading.Thread):
                     distributed_lock.release_lock(order_id=order_no, status=DistributedLockManager.STATUS_FAILED,
                                                 notes=f"Download error: {str(e)[:100]}")
                 continue
+
+        return downloaded_count
+
+    def _download_from_page_impl(self, list_url, save_dir, doc_type, force_mode=False):
+        history = load_history()
+        downloaded_count = 0
+        queue = [list_url]
+        visited = set()
+
+        while queue:
+            current_list_url = queue.pop(0)
+            normalized_url = normalize_list_url(current_list_url)
+            if normalized_url in visited:
+                continue
+            visited.add(normalized_url)
+
+            logger.info(f"[Downloader] Fetching page: {current_list_url}")
+            with browser_lock:
+                browser_manager.navigate(current_list_url)
+                time.sleep(2)
+                current_url = browser_manager.driver.current_url
+                html_source = browser_manager.get_source()
+
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(html_source, 'html.parser')
+            rows = soup.select("table tbody tr")
+            logger.info(f"[Downloader] Found {len(rows)} rows in table ({current_url})")
+
+            for next_url in extract_pagination_urls(list_url, current_url, soup, html_source):
+                if next_url not in visited and next_url not in queue:
+                    queue.append(next_url)
+
+            parsed = urlparse(current_url)
+            params = parse_qs(parsed.query)
+            younglim_gubun = params.get('younglim_gubun', [''])[0]
+
+            for row in rows:
+                cols = row.find_all("td")
+                if len(cols) < 3:
+                    continue
+
+                order_no = cols[0].get_text(strip=True)
+                if not order_no:
+                    continue
+
+                if force_mode:
+                    logger.info(f"[Downloader] FORCE MODE: Bypassing checks for {order_no}")
+
+                try:
+                    button_col = cols[-1] if len(cols) > 0 else None
+                    if not button_col:
+                        logger.warning(f"[Downloader] No button column for {order_no}")
+                        if config.ENABLE_DISTRIBUTED_LOCK:
+                            distributed_lock.release_lock(order_no, status=DistributedLockManager.STATUS_FAILED, notes="No button column")
+                        continue
+
+                    button_ref = extract_button_reference(order_no, row, button_col, younglim_gubun)
+                    history_key = button_ref["history_key"]
+
+                    if not force_mode:
+                        state_keys = state_manager.get_keys_by_status(doc_type, state_manager.STATUS_COMPLETED)
+                        if history_key in state_keys:
+                            logger.info(f"[Downloader] {history_key} already completed in state - skipping")
+                            continue
+
+                        if history_key in history.get(doc_type, []):
+                            logger.info(f"[Downloader] {history_key} already in local history - skipping")
+                            if config.ENABLE_DISTRIBUTED_LOCK:
+                                distributed_lock.release_lock(order_no, status=DistributedLockManager.STATUS_COMPLETED, notes="Already in local history")
+                            continue
+
+                    if not button_ref["detail_url"]:
+                        logger.warning(f"[Downloader] Missing detail URL for {order_no} - fallback key {history_key}")
+                        state_manager.update_state(doc_type, history_key, state_manager.STATUS_FAILED, error_msg="Missing detail URL / button reference")
+                        if config.ENABLE_DISTRIBUTED_LOCK:
+                            distributed_lock.release_lock(order_no, status=DistributedLockManager.STATUS_FAILED, notes="Missing detail URL")
+                        continue
+
+                    logger.info(
+                        f"[Downloader] Downloading {button_ref['button_type']} for {order_no} "
+                        f"(key={history_key}, id={button_ref['button_id'] or 'fallback'})"
+                    )
+
+                    try:
+                        original_url = browser_manager.driver.current_url
+                        logger.info(f"[Downloader] Navigating to detail page: {button_ref['detail_url']}")
+                        with browser_lock:
+                            browser_manager.driver.get(button_ref["detail_url"])
+                            time.sleep(3)
+                            detail_html = browser_manager.get_source()
+                            logger.info(f"[Downloader] Retrieved detail page HTML ({len(detail_html)} bytes)")
+                            browser_manager.driver.get(original_url)
+                            time.sleep(2)
+                        logger.info(f"[Downloader] Returned to list page")
+                    except Exception as nav_error:
+                        logger.error(f"[Downloader] Error navigating for {order_no}: {nav_error}")
+                        if config.ENABLE_DISTRIBUTED_LOCK:
+                            distributed_lock.release_lock(order_no, status=DistributedLockManager.STATUS_FAILED, notes=f"Navigation error: {str(nav_error)[:100]}")
+                        try:
+                            browser_manager.driver.get(current_list_url)
+                            time.sleep(2)
+                        except Exception:
+                            pass
+                        state_manager.update_state(doc_type, history_key, state_manager.STATUS_FAILED, error_msg=str(nav_error)[:200])
+                        continue
+
+                    filepath = save_dir / f"{history_key}.html"
+                    with open(filepath, 'w', encoding='utf-8') as f:
+                        f.write(detail_html)
+
+                    logger.info(f"[Downloader] ??Saved {filepath}")
+                    state_manager.update_state(doc_type, history_key, state_manager.STATUS_DOWNLOADED)
+
+                    try:
+                        if len(detail_html) > 1000:
+                            state_manager.update_state(doc_type, history_key, state_manager.STATUS_READY)
+                        else:
+                            state_manager.update_state(doc_type, history_key, state_manager.STATUS_FAILED, error_msg="HTML context too small")
+                    except Exception as parse_e:
+                        logger.error(f"[Downloader] Parsing error for {history_key}: {parse_e}")
+                        state_manager.update_state(doc_type, history_key, state_manager.STATUS_FAILED, error_msg=str(parse_e))
+
+                    if config.ENABLE_DISTRIBUTED_LOCK:
+                        distributed_lock.release_lock(order_no, status=DistributedLockManager.STATUS_COMPLETED, notes=f"Download successful (ID: {button_ref['button_id'] or history_key})")
+
+                    downloaded_count += 1
+
+                except Exception as e:
+                    logger.error(f"[Downloader] Error downloading {order_no}: {e}")
+                    if config.ENABLE_DISTRIBUTED_LOCK:
+                        distributed_lock.release_lock(order_id=order_no, status=DistributedLockManager.STATUS_FAILED, notes=f"Download error: {str(e)[:100]}")
+                    continue
 
         return downloaded_count
 

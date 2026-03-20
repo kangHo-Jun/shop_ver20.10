@@ -329,3 +329,13 @@ function sheetHubSheet_(spreadsheet, name) {
   if (!sheet) sheet = spreadsheet.insertSheet(name);
   return sheet;
 }
+
+function clearSheet2() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName('Sheet2');
+  const lastRow = sheet.getLastRow();
+  if (lastRow >= 2) {
+    sheet.getRange(2, 1, lastRow - 1, 2).clearContent();
+  }
+  ss.toast('Sheet2 완료', '', 2);
+}
