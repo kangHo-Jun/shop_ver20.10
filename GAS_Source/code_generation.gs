@@ -175,18 +175,27 @@ function automateEstimateParsing() {
     Logger.log(`결과 시트: ${resultData.length}행 작성 완료`);
   }
   
-  // 10-2. ERP 시트
+  // 10-2. ERP 시트 (데이터 보존 및 필터링 적용)
   const erpData = sortedObjects.map(obj => obj.erpRow);
   if (erpData.length > 0) {
-    let erpSheet = spreadsheet.getSheetByName('erp');
-    if (erpSheet) {
-      spreadsheet.deleteSheet(erpSheet);
+    const ERP_SHEET_NAME = 'erp';
+    let erpSheet = spreadsheet.getSheetByName(ERP_SHEET_NAME);
+    if (!erpSheet) {
+      erpSheet = spreadsheet.insertSheet(ERP_SHEET_NAME);
     }
-    erpSheet = spreadsheet.insertSheet('erp');
     
-    const erpColumns = erpData[0].length;
-    erpSheet.getRange(1, 1, erpData.length, erpColumns).setValues(erpData);
-    Logger.log(`ERP 시트: ${erpData.length}행 작성 완료`);
+    // 기존 데이터 로드 및 오늘/어제 필터링 (cleanupOldData 호출)
+    const preservedData = cleanupOldData(spreadsheet, ERP_SHEET_NAME);
+    
+    // 기존 보존 데이터 + 새로운 데이터 합치기
+    const finalErpData = preservedData.concat(erpData);
+    
+    // 시트 초기화 후 다시 쓰기
+    erpSheet.clearContents();
+    if (finalErpData.length > 0) {
+      erpSheet.getRange(1, 1, finalErpData.length, finalErpData[0].length).setValues(finalErpData);
+      Logger.log(`ERP 시트: 기존 ${preservedData.length}행 보존 + 신규 ${erpData.length}행 작성 완료 (총 ${finalErpData.length}행)`);
+    }
   }
   
   // 11. 처리 완료 후 폴더 비우기
@@ -1247,6 +1256,48 @@ function parseTableBody(tableBody) {
 
   Logger.log(`총 ${resultData.length}개 데이터 행 추출됨`);
   return resultData;
+}
+
+/**
+ * 데이터 보존 로직: 특정 시트에서 오늘과 어제 데이터만 남기고 반환 (VER12 추가)
+ */
+function cleanupOldData(spreadsheet, sheetName) {
+  const sheet = spreadsheet.getSheetByName(sheetName);
+  if (!sheet) return [];
+  
+  const lastRow = sheet.getLastRow();
+  if (lastRow === 0) return [];
+  
+  const data = sheet.getDataRange().getValues();
+  
+  // 기준 날짜 생성 (yyyy/MM/dd 문자열)
+  const now = new Date();
+  const todayStr = Utilities.formatDate(now, "GMT+9", "yyyy/MM/dd");
+  
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  const yesterdayStr = Utilities.formatDate(yesterday, "GMT+9", "yyyy/MM/dd");
+  
+  Logger.log(`데이터 정리 시작 (${sheetName}): 기준일 - 오늘(${todayStr}), 어제(${yesterdayStr})`);
+  
+  // 오늘과 어제 데이터만 필터링 (A열 기준)
+  const filteredData = data.filter(row => {
+    const rowDateRaw = row[0];
+    if (!rowDateRaw) return false;
+    
+    let rowDateStr = "";
+    if (rowDateRaw instanceof Date) {
+      rowDateStr = Utilities.formatDate(rowDateRaw, "GMT+9", "yyyy/MM/dd");
+    } else {
+      rowDateStr = rowDateRaw.toString().trim();
+    }
+    
+    const isPreserved = (rowDateStr === todayStr || rowDateStr === yesterdayStr);
+    return isPreserved;
+  });
+  
+  Logger.log(`${sheetName} 시트: 총 ${data.length}행 중 ${filteredData.length}행 보존 결정`);
+  return filteredData;
 }
 
 /**
