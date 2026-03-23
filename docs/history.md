@@ -242,6 +242,41 @@ Sheet3/Sheet4 諛깆뾽 + Sheet5 濡쒓렇 + ?대━??meta ??idle
   - 2026-03-20 기준 결과: 산업 9행, 임업 9행, 신규 다운로드 0건
   - pagination 탐지 결과 현재 운영 화면은 1페이지로 확인되어 `DETECTED_COUNT=1`
 
+### BUG-11: ESTIMATE 목록 오인으로 다운로드 누락 (2026-03-23)
+
+- **증상**: 영림 화면에는 ESTIMATE가 열려 있는데 자동화는 다운로드를 하지 못했고, 로그에는 `6 rows found`로 잘못 보임
+- **원인**
+  - 조회 조건이 `start_date=end_date=today`로 고정되어 오늘 자료만 조회
+  - 목록 selector가 `table tbody tr` 전체를 잡아 실제 ESTIMATE 목록이 아닌 하단 마진/설정 테이블까지 행으로 집계
+  - 실제 목록은 `Not found`인데도 하단 설정 행 때문에 다운로드 대상이 있는 것처럼 보이는 오진 발생
+- **조치**
+  - `run_server.py`, `v10_auto_server.py` 모두 최근 7일 조회로 자동 확장
+  - 실제 다운로드 버튼/`ordno`가 있는 행만 `actionable rows`로 집계하도록 selector 수정
+  - 로그에 `filters`와 `actionable rows`를 함께 남기도록 개선
+- **검증 결과**
+  - 수정 후 실제 조회 결과: 산업 33건, 임업 30건
+  - 수동 다운로드 검증 결과: 총 23건 다운로드 시도
+  - 현재 상태: `COMPLETED 39`, `READY 21`
+- **잔여 리스크**
+  - 산업/임업 양쪽에 동일 `ordno`가 존재할 경우 현재 키 체계에서 충돌 가능성 존재
+  - 후속으로 `younglim_gubun`까지 포함한 고유 키 필요
+
+### BUG-12: Windows 작업 스케줄러 6시 자동 시작 실패 (2026-03-24)
+
+- **증상**: 월~토 06:00 자동 시작 스케줄이 등록되어 있으나 실제로 서버가 시작되지 않음. 수동 실행으로 대체
+- **원인**
+  - 작업 스케줄러에 등록된 실행 경로가 `C:\Users\DSAI\Downloads\files (2)\START.bat`로 잘못 지정됨
+  - 해당 파일은 존재하지 않아 `LastTaskResult: 1` (실패)
+  - `docs\윈도우_작업스케쥴\setup_scheduler.bat`이 Downloads 폴더에서 실행되어 `%~dp0START.bat` 경로가 잘못 해석됨
+  - 추가로 `START.bat`에 `pause` 명령이 있어 스케줄러 실행 시 키 입력 대기로 영원히 멈춤
+  - `START_SCHEDULED.bat`에는 Edge 브라우저 시작 로직이 없어, Edge 꺼진 상태에서 서버 시작 시 연결 실패
+- **조치**
+  - `setup_scheduler.bat` 재실행: 올바른 절대경로(`C:\Users\DSAI\Desktop\shop_ver20.10_new\START_SCHEDULED.bat`)로 재등록
+  - `START_SCHEDULED.bat` 보강: 기존 프로세스 정리 → Edge 디버그 모드 시작 → 10초 대기 → `run_server.py` 실행
+  - `STOP_SCHEDULED.bat` 경로도 올바르게 재등록 확인
+- **검증**: 스케줄러 XML 확인 결과 올바른 경로로 등록 완료. 다음 실행 예정: 2026-03-25 06:00
+- **주의사항**: `InteractiveToken` 모드이므로 사용자 로그인 상태에서만 실행됨
+
 ---
 
-*작성: Antigravity AI / 최종 업데이트: 2026-03-20*
+*작성: Antigravity AI / 최종 업데이트: 2026-03-24*
