@@ -441,7 +441,8 @@ function generateProductCode(color, itemName, spec, remarks, brandCode) {
     if (!specCode) return '';
     
     // 5. 최종 코드 조합
-    const finalCode = brandColorCode + flagModelCode + specCode;
+    Logger.log(`brandColorCode="${brandColorCode}", flagModelCode="${flagModelCode}", specCode="${specCode}"`);
+    const finalCode = (brandColorCode + flagModelCode + specCode).replace(/-/g, '');
     Logger.log(`코드 생성: ${color} + ${itemName} + ${spec} → ${finalCode}`);
     
     return finalCode;
@@ -479,7 +480,7 @@ function classifyTarget(itemName) {
   const itemStr = itemName.toString().trim();
   
   // 문틀 키워드
-  const frameKeywords = ['문틀', '발포', '분리형', '스토퍼'];
+  const frameKeywords = ['문틀', '발포', '분리형', '스토퍼', '목재', '슬림형', '와이드형'];
   const hasFrame = frameKeywords.some(kw => itemStr.includes(kw));
   
   // 문짝 키워드
@@ -1298,6 +1299,12 @@ function cleanupOldData(spreadsheet, sheetName) {
   
   Logger.log(`${sheetName} 시트: 총 ${data.length}행 중 ${filteredData.length}행 보존 결정`);
   return filteredData;
+}
+
+function debugPx455BrandColorCode() {
+  const result = generateBrandColorCode('PX455-1', 'Y');
+  Logger.log(`debugPx455BrandColorCode result="${result}"`);
+  return result;
 }
 
 /**
