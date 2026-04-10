@@ -259,9 +259,10 @@ def classify_target(item_name: str) -> str:
     has_door = any(kw in item_str for kw in door_keywords)
     
     door_patterns = [
-        r'YS-[A-Z0-9]+', r'YA-[A-Z0-9]+', r'YAT-[A-Z0-9]+', r'EZ-[A-Z0-9]+', 
+        r'YS-[A-Z0-9]+', r'YA-[A-Z0-9]+', r'YAT-[A-Z0-9]+', r'EZ-[A-Z0-9]+',
         r'LS-[A-Z0-9]+', r'YM-[A-Z0-9]+', r'YAL-[A-Z0-9]+', r'YV-[A-Z0-9]+',
-        r'YFL-[A-Z0-9]+', r'SW-[A-Z0-9]+', r'TD-[A-Z0-9]+', r'SL-[A-Z0-9]+'
+        r'YFL-[A-Z0-9]+', r'SW-[A-Z0-9]+', r'TD-[A-Z0-9]+', r'SL-[A-Z0-9]+',
+        r'AP-[A-Z0-9]+'
     ]
     has_door_pattern = any(re.search(pat, item_str) for pat in door_patterns)
     
@@ -277,12 +278,18 @@ def classify_target(item_name: str) -> str:
     if has_molding: return 'MOLDING'
     return 'NONE'
 
-def generate_brand_color_code(color: str, brand_code: str) -> str:
+def generate_brand_color_code(color: str, brand_code: str, item_name: str = '') -> str:
     color_str = str(color).strip()
     brand = brand_code
-    
+    item_str = str(item_name).strip()
+
     for keyword in COMPANY_MAPPING.keys():
         color_str = color_str.replace(keyword, '').strip()
+
+    # Some Youngrim door models arrive without a color column.
+    # In that case, use the brand prefix and let the model/spec portions carry uniqueness.
+    if not color_str and re.search(r'^[A-Z]+-[A-Z0-9]+', item_str):
+        return brand
         
     # 1. 영림{숫자}PS{숫자}
     match = re.search(r'영림(\d+)PS\d+', color_str)
@@ -309,6 +316,9 @@ def generate_brand_color_code(color: str, brand_code: str) -> str:
     match = re.search(r'(\d+)', color_str)
     if match: return brand + match.group(1)
     
+    if re.search(r'^[A-Z]+-[A-Z0-9]+', item_str):
+        return brand
+
     return ''
 
 def generate_flag_code(item_name: str) -> str:
@@ -526,7 +536,7 @@ def generate_product_code(color: str, item_name: str, spec: str, remarks: str, b
         if classification != 'MOLDING' and not is_valid_spec_size(spec):
             return ''
             
-        brand_color_code = generate_brand_color_code(color, brand_code)
+        brand_color_code = generate_brand_color_code(color, brand_code, item_name)
         if not brand_color_code: return ''
         
         flag_model_code = ''

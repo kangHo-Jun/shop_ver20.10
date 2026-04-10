@@ -7,13 +7,11 @@ echo   V10 자동화 서버 시작
 echo ============================================================
 echo.
 
-if not exist logs mkdir logs
-
-echo [1/4] run_server 관련 프로세스 / lock 정리...
-powershell -NoProfile -Command "$targets = Get-CimInstance Win32_Process -Filter \"name = 'python.exe' or name = 'pythonw.exe'\" | Where-Object { ($_.CommandLine -like '*run_server.py*') -or ($_.ExecutablePath -like '*shop_ver20.10_new*') }; foreach ($p in $targets) { try { Stop-Process -Id $p.ProcessId -Force -ErrorAction Stop } catch {} }"
-if exist "logs\v11.lock" del /f /q "logs\v11.lock" >nul 2>&1
-if exist "logs\run_server.pid" del /f /q "logs\run_server.pid" >nul 2>&1
-timeout /t 3 /nobreak >nul
+echo [1/4] 기존 프로세스 정리...
+taskkill /F /IM python.exe /T >nul 2>&1
+taskkill /F /IM pythonw.exe /T >nul 2>&1
+taskkill /F /IM msedge.exe /T >nul 2>&1
+timeout /t 2 /nobreak >nul
 echo [OK] 정리 완료
 echo.
 
@@ -28,11 +26,14 @@ start "" "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" ^
 echo [OK] Edge 실행됨 (포트 9333)
 echo.
 
-echo [3/4] Edge 디버그 브라우저 준비 대기...
-timeout /t 10 /nobreak >nul
+echo [3/4] 영림 로그인 확인 후 아무 키나 누르세요...
+echo       (브라우저에서 로그인 상태 확인)
+pause >nul
 echo.
 
 echo [4/4] V10 서버 시작 중...
+echo 종료하려면 이 창을 닫으세요.
 echo.
 call .venv\Scripts\activate
 python run_server.py
+pause

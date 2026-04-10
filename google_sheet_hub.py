@@ -5,7 +5,6 @@ import socket
 import threading
 from pathlib import Path
 
-import pyperclip
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.oauth2.service_account import Credentials as ServiceAccountCredentials
@@ -41,6 +40,13 @@ class GoogleSheetHub:
     SHEET3_HEADERS = [["completed_at", "doc_type", "processor", "file_names", "row_json"]]
     SHEET4_HEADERS = [["completed_at", "file_names", "item_name", "item_code"]]
     SHEET5_HEADERS = [["date", "count", "file_names"]]
+    SHEET10_HEADERS = [[
+        "saved_at", "file_names", "seq", "customer_code", "customer_name", "date", "warehouse",
+        "display_manager", "customer_manager", "customer_phone", "trade_type", "payment_term",
+        "estimate_valid_until", "execution_base", "receiver_info", "no", "item_code", "item_name",
+        "qty", "unit_price", "supply_amount", "vat", "total", "note",
+    ]]
+    SHEET11_HEADERS = [["saved_at", "file_names", "item_name", "item_code"]]
     SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
     def __init__(self, spreadsheet_id=None):
@@ -134,6 +140,8 @@ class GoogleSheetHub:
         sheet3 = self._worksheet(self.SHEET3_NAME)
         sheet4 = self._worksheet(self.SHEET4_NAME)
         sheet5 = self._worksheet(self.SHEET5_NAME)
+        sheet10 = self._worksheet(self.SHEET10_NAME)
+        sheet11 = self._worksheet(self.SHEET11_NAME)
 
         if not sheet1.row_values(1):
             sheet1.update("A1:G2", [self.SHEET1_META_HEADERS, ["", "", "", "", "", "", ""]])
@@ -151,6 +159,12 @@ class GoogleSheetHub:
 
         if not sheet5.row_values(1):
             sheet5.update("A1:C1", self.SHEET5_HEADERS)
+
+        if not sheet10.row_values(1):
+            sheet10.update("A1:X1", self.SHEET10_HEADERS)
+
+        if not sheet11.row_values(1):
+            sheet11.update("A1:D1", self.SHEET11_HEADERS)
 
     def _sheet1_meta(self):
         values = self._worksheet(self.SHEET1_NAME).get("A2:G2")
@@ -183,6 +197,17 @@ class GoogleSheetHub:
 
     def _clear_sheet2_data_area(self):
         self._worksheet(self.SHEET2_NAME).batch_clear(["A2:AZ2000"])
+
+    def _clear_sheet10_data_area(self):
+        self._worksheet(self.SHEET10_NAME).batch_clear(["A2:AZ2000"])
+
+    def _clear_sheet11_data_area(self):
+        self._worksheet(self.SHEET11_NAME).batch_clear(["A2:AZ2000"])
+
+    def clear_unmapped_sheets(self):
+        self._clear_sheet10_data_area()
+        self._clear_sheet11_data_area()
+        logger.info("[SheetHub] Cleared Sheet10/Sheet11 data area")
 
     def _release_expired_lock(self, meta=None):
         meta = meta or self._sheet1_meta()
@@ -233,35 +258,43 @@ class GoogleSheetHub:
                 extracted.append([item_name, item_code])
         return extracted
 
+    def _next_sheet1_append_row(self):
+        return 5 + len(self._sheet1_data_rows())
+
     def _write_sheet1_rows(self, rows):
-        self._clear_sheet1_data_area()
         if not rows:
-            return
+            return len(self._sheet1_data_rows())
 
         sheet1 = self._worksheet(self.SHEET1_NAME)
+        start_row = self._next_sheet1_append_row()
         end_col = self._column_letter(max(len(row) for row in rows))
         normalized = [list(row) for row in rows]
-        sheet1.update(f"A5:{end_col}{4 + len(normalized)}", normalized)
+        end_row = start_row + len(normalized) - 1
+        sheet1.update(f"A{start_row}:{end_col}{end_row}", normalized)
+        return end_row - 4
 
     def _write_sheet2_rows(self, extracted_rows):
         self._clear_sheet2_data_area()
         if not extracted_rows:
             return
 
+        deduped_rows = list(dict.fromkeys(tuple(row) for row in extracted_rows))
         sheet2 = self._worksheet(self.SHEET2_NAME)
-        sheet2.update(f"A2:B{1 + len(extracted_rows)}", extracted_rows)
+        sheet2.update(f"A2:B{1 + len(deduped_rows)}", [list(row) for row in deduped_rows])
 
-    def _append_sheet10_rows(self, rows):
+    def _append_sheet10_rows(self, rows, saved_at, file_names):
         if not rows:
             return
         sheet10 = self._worksheet(self.SHEET10_NAME)
-        sheet10.append_rows(rows, value_input_option="USER_ENTERED")
+        payload = [[saved_at, file_names] + list(row) for row in rows]
+        sheet10.append_rows(payload, value_input_option="USER_ENTERED")
 
-    def _append_sheet11_rows(self, rows):
+    def _append_sheet11_rows(self, rows, saved_at, file_names):
         if not rows:
             return
         sheet11 = self._worksheet(self.SHEET11_NAME)
-        sheet11.append_rows(rows, value_input_option="USER_ENTERED")
+        payload = [[saved_at, file_names, row[0], row[1]] for row in rows]
+        sheet11.append_rows(payload, value_input_option="USER_ENTERED")
 
     def _sheet1_data_rows(self):
         values = self._worksheet(self.SHEET1_NAME).get("A5:AZ2000")
@@ -277,8 +310,22 @@ class GoogleSheetHub:
         if status["locked"] and not status["locked_by_me"]:
             raise RuntimeError(f"다른 처리자가 사용 중입니다: {status['processor']}")
 
-        now_iso = datetime.datetime.now().isoformat()
+        now = datetime.datetime.now()
+        now_iso = now.isoformat()
+        saved_at = now.strftime("%Y-%m-%d %H:%M:%S")
         joined_files = ", ".join(file_names)
+        current_meta = self._sheet1_meta()
+        if joined_files and current_meta.get("file_names", "") == joined_files:
+            existing_row_count = len(self._sheet1_data_rows())
+            logger.info("[SheetHub] Duplicate batch detected for Sheet1 file_names=%s; append skipped", joined_files)
+            return {
+                "row_count": existing_row_count,
+                "item_count": len(self._sheet2_data_rows()),
+                "file_count": len(file_names),
+                "processor": current_meta.get("processor", ""),
+                "started_at": current_meta.get("started_at", ""),
+                "skipped_duplicate": True,
+            }
         # Sheet1: O열(index 14) 품목코드 기준 분리
         mapped_rows = [r for r in rows if len(r) > 14 and str(r[14]).strip()]
         unmapped_rows = [r for r in rows if not (len(r) > 14 and str(r[14]).strip())]
@@ -288,10 +335,10 @@ class GoogleSheetHub:
         mapped_extracted = [r for r in extracted_rows if len(r) > 1 and str(r[1]).strip()]
         unmapped_extracted = [r for r in extracted_rows if not (len(r) > 1 and str(r[1]).strip())]
 
-        self._write_sheet1_rows(mapped_rows)
+        total_sheet1_rows = self._write_sheet1_rows(mapped_rows)
         self._write_sheet2_rows(mapped_extracted)
-        self._append_sheet10_rows(unmapped_rows)
-        self._append_sheet11_rows(unmapped_extracted)
+        self._append_sheet10_rows(unmapped_rows, saved_at, joined_files)
+        self._append_sheet11_rows(unmapped_extracted, saved_at, joined_files)
 
         if unmapped_rows:
             logger.info("[SheetHub] 품목코드 없는 행: Sheet10 %s행, Sheet11 %s행", len(unmapped_rows), len(unmapped_extracted))
@@ -301,15 +348,10 @@ class GoogleSheetHub:
             "started_at": now_iso,
             "doc_type": doc_type,
             "file_names": joined_files,
-            "row_count": str(len(mapped_rows)),
+            "row_count": str(total_sheet1_rows),
             "completed_at": "",
         })
 
-        clipboard_text = "\r\n".join(
-            "\t".join("" if cell is None else str(cell) for cell in row)
-            for row in mapped_rows
-        )
-        pyperclip.copy(clipboard_text)
         logger.info(
             "[SheetHub] Staged %s rows to Sheet1/Sheet2 and extracted %s item rows",
             len(mapped_rows),
@@ -317,14 +359,15 @@ class GoogleSheetHub:
         )
 
         return {
-            "row_count": len(mapped_rows),
+            "row_count": total_sheet1_rows,
             "item_count": len(mapped_extracted),
             "file_count": len(file_names),
             "processor": self.machine_id,
             "started_at": now_iso,
+            "skipped_duplicate": False,
         }
 
-    def complete(self):
+    def complete(self, force_clear=False):
         self.connect()
         status = self.get_status()
         meta = self._sheet1_meta()
@@ -353,15 +396,15 @@ class GoogleSheetHub:
             value_input_option="USER_ENTERED",
         )
 
-        self._clear_sheet1_data_area()
-        self._clear_sheet2_data_area()
+        if force_clear:
+            self._clear_sheet1_data_area()
         self._write_sheet1_meta({
             "status": "완료",
             "processor": "",
             "started_at": "",
             "doc_type": "",
             "file_names": "",
-            "row_count": "0",
+            "row_count": str(len(sheet1_rows)) if not force_clear else "0",
             "completed_at": completed_at,
         })
         logger.info(

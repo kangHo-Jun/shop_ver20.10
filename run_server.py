@@ -13,8 +13,10 @@ import threading
 import json
 import hashlib
 import re
+import atexit
 from pathlib import Path
 from html import unescape
+from datetime import date, timedelta
 
 from config import config
 from logging_config import logger
@@ -24,6 +26,7 @@ import local_file_processor
 
 from selenium import webdriver
 from selenium.webdriver.edge.options import Options as EdgeOptions
+from selenium.webdriver.edge.service import Service as EdgeService
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, parse_qs, urljoin, urlunparse, urlencode
 
@@ -37,6 +40,188 @@ PAGINATION_PARAM_KEYS = (
     "page", "pageNum", "pageno", "page_no", "cpage",
     "currentPage", "currPage", "curPage", "nowPage", "nowpage"
 )
+DEFAULT_LOOKBACK_DAYS = 7
+PID_FILE = config.LOGS_DIR / "run_server.pid"
+EDGE_PID_FILE = config.LOGS_DIR / "edge_9333.pid"
+LOCK_FILE = config.LOGS_DIR / "v11.lock"
+SHEET_RESET_DATE_FILE = config.LOGS_DIR / "sheet_reset_date.txt"
+SINGLE_INSTANCE_PORT = int(os.getenv("RUN_SERVER_LOCK_PORT", "5081"))
+instance_lock_socket = None
+
+
+def _write_pid_file():
+    try:
+        PID_FILE.write_text(str(os.getpid()), encoding="utf-8")
+    except Exception as exc:
+        logger.warning("[System] Failed to write PID file %s: %s", PID_FILE, exc)
+
+
+def _cleanup_pid_file():
+    try:
+        if PID_FILE.exists():
+            content = PID_FILE.read_text(encoding="utf-8").strip()
+            if content == str(os.getpid()):
+                PID_FILE.unlink()
+    except Exception as exc:
+        logger.warning("[System] Failed to clean PID file %s: %s", PID_FILE, exc)
+
+
+def _write_edge_pid_file(pid_text):
+    try:
+        EDGE_PID_FILE.write_text(str(pid_text).strip(), encoding="utf-8")
+    except Exception as exc:
+        logger.warning("[System] Failed to write Edge PID file %s: %s", EDGE_PID_FILE, exc)
+
+
+def _get_listener_pid(port):
+    try:
+        result = subprocess.run(
+            ["netstat", "-ano"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+    except Exception as exc:
+        logger.warning("[System] Failed to query listener PID on port %s: %s", port, exc)
+        return None
+
+    for line in (result.stdout or "").splitlines():
+        if f":{port}" not in line:
+            continue
+        if "LISTENING" not in line.upper():
+            continue
+        parts = line.split()
+        if parts:
+            return parts[-1].strip()
+    return None
+
+
+def _record_edge_pid_from_listener(port):
+    pid_text = _get_listener_pid(port)
+    if pid_text:
+        _write_edge_pid_file(pid_text)
+    else:
+        logger.warning("[Browser] Could not determine Edge PID for port %s", port)
+    return pid_text
+
+
+def _is_pid_running(pid_text):
+    try:
+        pid = int(str(pid_text).strip())
+    except Exception:
+        return False
+
+    try:
+        os.kill(pid, 0)
+        return True
+    except OSError:
+        return False
+
+
+def _cleanup_lock_file():
+    try:
+        if LOCK_FILE.exists():
+            content = LOCK_FILE.read_text(encoding="utf-8").strip()
+            if content == str(os.getpid()):
+                LOCK_FILE.unlink()
+    except Exception as exc:
+        logger.warning("[System] Failed to clean lock file %s: %s", LOCK_FILE, exc)
+
+
+def acquire_single_instance_lock():
+    global instance_lock_socket
+
+    if instance_lock_socket is not None:
+        return True
+
+    if LOCK_FILE.exists():
+        existing_pid = LOCK_FILE.read_text(encoding="utf-8", errors="ignore").strip()
+        if _is_pid_running(existing_pid):
+            logger.error("[System] Another run_server.py instance is already running (lock file %s, pid=%s)", LOCK_FILE, existing_pid)
+            return False
+        try:
+            LOCK_FILE.unlink()
+            logger.warning("[System] Removed stale lock file %s", LOCK_FILE)
+        except Exception as exc:
+            logger.error("[System] Failed to remove stale lock file %s: %s", LOCK_FILE, exc)
+            return False
+
+    try:
+        fd = os.open(str(LOCK_FILE), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(str(os.getpid()))
+        with open("logs/run_server.pid", "w", encoding="utf-8") as f:
+            f.write(str(os.getpid()))
+    except FileExistsError:
+        existing_pid = LOCK_FILE.read_text(encoding="utf-8", errors="ignore").strip()
+        logger.error("[System] Another run_server.py instance is already running (lock file %s, pid=%s)", LOCK_FILE, existing_pid)
+        return False
+    except Exception as exc:
+        logger.error("[System] Failed to create lock file %s: %s", LOCK_FILE, exc)
+        return False
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    try:
+        sock.bind(("127.0.0.1", SINGLE_INSTANCE_PORT))
+        sock.listen(1)
+        instance_lock_socket = sock
+        logger.info("[System] Single-instance lock acquired on 127.0.0.1:%s", SINGLE_INSTANCE_PORT)
+        return True
+    except OSError:
+        sock.close()
+        _cleanup_lock_file()
+        logger.error("[System] Another run_server.py instance is already running (lock port %s)", SINGLE_INSTANCE_PORT)
+        return False
+
+
+def release_single_instance_lock():
+    global instance_lock_socket
+    if instance_lock_socket is not None:
+        try:
+            instance_lock_socket.close()
+        except Exception:
+            pass
+        instance_lock_socket = None
+
+
+def ensure_daily_sheet_reset(today_str=None, reset_file=None, hub=None):
+    reset_file = Path(reset_file) if reset_file else SHEET_RESET_DATE_FILE
+    hub = hub or sheet_hub
+    today_str = today_str or date.today().isoformat()
+
+    last_reset = ""
+    if reset_file.exists():
+        try:
+            last_reset = reset_file.read_text(encoding="utf-8").strip()
+        except Exception as exc:
+            logger.warning("[SheetReset] Failed to read %s: %s", reset_file, exc)
+
+    if last_reset == today_str:
+        logger.info("[SheetReset] Sheet10/11 already reset for %s", today_str)
+        return False
+
+    hub.connect()
+    hub.clear_unmapped_sheets()
+    reset_file.write_text(today_str, encoding="utf-8")
+    logger.info("[SheetReset] Reset Sheet10/11 for %s and updated %s", today_str, reset_file)
+    return True
+
+
+def _normalize_gubun(younglim_gubun):
+    value = (younglim_gubun or "").strip()
+    if value in ("산업", "임업"):
+        return value
+    if "산업" in value and "임업" not in value:
+        return "산업"
+    if "임업" in value and "산업" not in value:
+        return "임업"
+    return value or "미상"
+
+
+def _build_history_key(order_no, key_suffix, younglim_gubun):
+    return f"{order_no}_{key_suffix}_{_normalize_gubun(younglim_gubun)}"
 
 
 # ─── 브라우저 ───────────────────────────────────────────────
@@ -60,11 +245,37 @@ def connect_browser():
         sock.close()
         if result != 0:
             raise ConnectionError(f"Edge 포트 {port} 연결 실패")
+        _record_edge_pid_from_listener(port)
 
     options = EdgeOptions()
     options.add_experimental_option("debuggerAddress", f"127.0.0.1:{port}")
-    driver = webdriver.Edge(options=options)
+    driver = _create_edge_driver(options)
+    _record_edge_pid_from_listener(port)
     logger.info("[Browser] ✅ Edge 연결 완료 (포트 %s)", port)
+
+
+def _find_local_msedgedriver():
+    cache_root = Path.home() / ".cache" / "selenium" / "msedgedriver" / "win64"
+    if not cache_root.exists():
+        return None
+
+    candidates = sorted(cache_root.glob("*/msedgedriver.exe"))
+    if not candidates:
+        return None
+    return candidates[-1]
+
+
+def _create_edge_driver(options):
+    try:
+        return webdriver.Edge(options=options)
+    except Exception as exc:
+        local_driver = _find_local_msedgedriver()
+        if not local_driver:
+            raise
+
+        logger.warning("[Browser] Selenium Manager failed, retrying with local EdgeDriver: %s (%s)", local_driver, exc)
+        service = EdgeService(executable_path=str(local_driver))
+        return webdriver.Edge(service=service, options=options)
 
 
 def is_browser_alive():
@@ -73,6 +284,38 @@ def is_browser_alive():
         return True
     except Exception:
         return False
+
+
+def _is_no_such_window_error(exc):
+    message = str(exc).lower()
+    return "no such window" in message or "target window already closed" in message or "web view not found" in message
+
+
+def reconnect_and_retry(action, description, max_retries=2):
+    last_exc = None
+    for attempt in range(max_retries + 1):
+        try:
+            return action()
+        except Exception as exc:
+            last_exc = exc
+            if not _is_no_such_window_error(exc):
+                raise
+            if attempt >= max_retries:
+                logger.error(
+                    "[Browser] %s failed after %s reconnect attempt(s): %s",
+                    description,
+                    max_retries,
+                    exc,
+                )
+                raise
+            logger.warning(
+                "[Browser] %s hit no such window. Reconnecting now (%s/%s)...",
+                description,
+                attempt + 1,
+                max_retries,
+            )
+            connect_browser()
+    raise last_exc
 
 
 def load_history():
@@ -166,6 +409,53 @@ def _extract_pagination_urls(base_url, current_url, soup, html_source):
     return sorted(candidates)
 
 
+def _apply_date_window(list_url, lookback_days=DEFAULT_LOOKBACK_DAYS):
+    parsed = urlparse(list_url)
+    query = parse_qs(parsed.query, keep_blank_values=True)
+    end_date = date.today()
+    start_date = end_date - timedelta(days=lookback_days)
+    query["start_date"] = [start_date.isoformat()]
+    query["end_date"] = [end_date.isoformat()]
+    encoded = urlencode(
+        [(key, value) for key, values in query.items() for value in values],
+        doseq=True
+    )
+    return urlunparse((parsed.scheme, parsed.netloc, parsed.path, "", encoded, ""))
+
+
+def _extract_list_rows(soup):
+    actionable_rows = []
+
+    for row in soup.select("tr"):
+        if "jsgrid-nodata-row" in (row.get("class") or []):
+            continue
+        if row.find("button", class_="estimate_link") or row.find("button", class_="trans_link"):
+            actionable_rows.append(row)
+            continue
+
+        button_col = row.find_all("td")
+        if not button_col:
+            continue
+        row_html = str(row)
+        if "estimate_doc.jsp" in row_html or "trans_doc.jsp" in row_html:
+            actionable_rows.append(row)
+            continue
+        if re.search(r"\bordno\b|\bchulhano\b", row_html):
+            actionable_rows.append(row)
+
+    return actionable_rows
+
+
+def _read_filter_values(soup):
+    filters = {}
+    for name in ("start_date", "end_date", "younglim_gubun"):
+        field = soup.find(attrs={"name": name})
+        if not field:
+            continue
+        filters[name] = field.get("value") or field.get_text(" ", strip=True)
+    return filters
+
+
 def _build_fallback_key(order_no, row, button_col):
     raw = f"{order_no}|{row.get_text(' ', strip=True)}|{button_col}"
     return f"{order_no}_ROW{hashlib.sha1(raw.encode('utf-8', errors='ignore')).hexdigest()[:10]}"
@@ -246,7 +536,7 @@ def _extract_button_reference(order_no, row, button_col, younglim_gubun):
     return {
         "button_type": button_type or "estimate",
         "button_id": button_id,
-        "history_key": f"{order_no}_{key_suffix}",
+        "history_key": _build_history_key(order_no, key_suffix, younglim_gubun),
         "detail_url": direct_url,
     }
 
@@ -284,7 +574,7 @@ def download_from_page(list_url, save_dir, doc_type):
         if not button_id:
             continue
 
-        history_key = f"{order_no}_{button_id}"
+        history_key = _build_history_key(order_no, button_id, younglim_gubun)
 
         if history_key in completed_keys:
             continue
@@ -323,7 +613,7 @@ def download_from_page(list_url, save_dir, doc_type):
 def _download_from_page_impl(list_url, save_dir, doc_type):
     completed_keys = set(state_manager.get_keys_by_status(doc_type, state_manager.STATUS_COMPLETED))
     history_keys = set(load_history().get(doc_type, []))
-    queue = [list_url]
+    queue = [_apply_date_window(list_url)]
     visited = set()
     downloaded = 0
 
@@ -335,14 +625,20 @@ def _download_from_page_impl(list_url, save_dir, doc_type):
         visited.add(normalized_url)
 
         with browser_lock:
-            driver.get(current_list_url)
-            time.sleep(2)
-            current_url = driver.current_url
-            html_source = driver.page_source
+            def load_list_page():
+                driver.get(current_list_url)
+                time.sleep(2)
+                return driver.current_url, driver.page_source
+
+            current_url, html_source = reconnect_and_retry(
+                load_list_page,
+                f"Load list page {current_list_url}",
+            )
 
         soup = BeautifulSoup(html_source, 'html.parser')
-        rows = soup.select("table tbody tr")
-        logger.info("[Download] %s rows found (%s)", len(rows), current_url)
+        rows = _extract_list_rows(soup)
+        filters = _read_filter_values(soup)
+        logger.info("[Download] %s actionable rows found (%s) filters=%s", len(rows), current_url, filters)
 
         for next_url in _extract_pagination_urls(list_url, current_url, soup, html_source):
             if next_url not in visited and next_url not in queue:
@@ -372,11 +668,18 @@ def _download_from_page_impl(list_url, save_dir, doc_type):
 
             try:
                 with browser_lock:
-                    driver.get(button_ref["detail_url"])
-                    time.sleep(3)
-                    detail_html = driver.page_source
-                    driver.get(current_list_url)
-                    time.sleep(2)
+                    def load_detail_page():
+                        driver.get(button_ref["detail_url"])
+                        time.sleep(3)
+                        html = driver.page_source
+                        driver.get(current_list_url)
+                        time.sleep(2)
+                        return html
+
+                    detail_html = reconnect_and_retry(
+                        load_detail_page,
+                        f"Load detail page {button_ref['detail_url']}",
+                    )
 
                 filepath = save_dir / f"{history_key}.html"
                 filepath.write_text(detail_html, encoding='utf-8')
@@ -432,6 +735,13 @@ def auto_upload(doc_type="estimate"):
 
     try:
         result = sheet_hub.stage_and_copy(doc_type, rows, processed)
+        if result.get('row_count', 0) <= 0:
+            for key in processed:
+                state_manager.update_state(doc_type, key, state_manager.STATUS_FAILED, "No mapped rows for Google Sheets")
+            logger.warning("[Upload] 0 mapped rows for %s file(s); marked FAILED instead of COMPLETED", len(processed))
+            return
+        if not result.get("skipped_duplicate"):
+            sheet_hub.complete(force_clear=False)
         history = load_history()
         for key in processed:
             state_manager.update_state(doc_type, key, state_manager.STATUS_COMPLETED)
@@ -445,6 +755,10 @@ def auto_upload(doc_type="estimate"):
 
 # ─── 메인 사이클 ────────────────────────────────────────────
 def run_cycle():
+    try:
+        ensure_daily_sheet_reset()
+    except Exception as e:
+        logger.error("[Cycle] Sheet10/11 daily reset failed: %s", e)
     logger.info("[Cycle] ── 사이클 시작 ──────────────────")
 
     if not is_browser_alive():
@@ -457,8 +771,10 @@ def run_cycle():
 
     # 세션 유지
     with browser_lock:
-        driver.get(config.YOUNGRIM_URL)
-        time.sleep(3)
+        reconnect_and_retry(
+            lambda: (driver.get(config.YOUNGRIM_URL), time.sleep(3)),
+            f"Keep session on {config.YOUNGRIM_URL}",
+        )
 
     # 다운로드 (Estimate만)
     total_new = 0
@@ -489,12 +805,23 @@ def shutdown(sig=None, frame=None):
     global running
     logger.info("[System] 종료 중...")
     running = False
+    _cleanup_pid_file()
+    _cleanup_lock_file()
+    release_single_instance_lock()
     sys.exit(0)
 
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, shutdown)
     signal.signal(signal.SIGTERM, shutdown)
+    atexit.register(_cleanup_pid_file)
+    atexit.register(_cleanup_lock_file)
+    atexit.register(release_single_instance_lock)
+
+    if not acquire_single_instance_lock():
+        sys.exit(0)
+
+    _write_pid_file()
 
     logger.info("=" * 50)
     logger.info("V10 Console Server 시작")

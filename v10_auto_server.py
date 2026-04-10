@@ -10,8 +10,10 @@ import re
 from flask import Flask, jsonify, request, render_template_string
 from pathlib import Path
 from html import unescape
+from datetime import date, timedelta
 from selenium import webdriver
 from selenium.webdriver.edge.options import Options as EdgeOptions
+from selenium.webdriver.edge.service import Service as EdgeService
 from selenium.webdriver.common.by import By
 import traceback
 import atexit
@@ -87,6 +89,7 @@ PAGINATION_PARAM_KEYS = (
     "page", "pageNum", "pageno", "page_no", "cpage",
     "currentPage", "currPage", "curPage", "nowPage", "nowpage"
 )
+DEFAULT_LOOKBACK_DAYS = 7
 
 # Timeout for pending_save state
 PENDING_SAVE_TIMEOUT_SEC = config.SHEET_HUB_LOCK_TIMEOUT_SEC
@@ -869,7 +872,7 @@ class DoorBrowser:
         print("[Browser] Connecting EdgeDriver to Edge...")
         try:
             # Selenium 4는 자동으로 적절한 드라이버를 찾아서 사용
-            self.driver = webdriver.Edge(options=edge_options)
+            self.driver = self._create_edge_driver(edge_options)
             print("[OK] Browser Connected Successfully")
             logger.info(f"[Browser] Connected to Edge browser")
         except Exception as e:
@@ -882,6 +885,28 @@ class DoorBrowser:
 
     def navigate(self, url):
         self.driver.get(url)
+
+    def _find_local_msedgedriver(self):
+        cache_root = Path.home() / ".cache" / "selenium" / "msedgedriver" / "win64"
+        if not cache_root.exists():
+            return None
+
+        candidates = sorted(cache_root.glob("*/msedgedriver.exe"))
+        if not candidates:
+            return None
+        return candidates[-1]
+
+    def _create_edge_driver(self, edge_options):
+        try:
+            return webdriver.Edge(options=edge_options)
+        except Exception as exc:
+            local_driver = self._find_local_msedgedriver()
+            if not local_driver:
+                raise
+
+            logger.warning(f"[Browser] Selenium Manager failed, retrying with local EdgeDriver: {local_driver} ({exc})")
+            service = EdgeService(executable_path=str(local_driver))
+            return webdriver.Edge(service=service, options=edge_options)
 
 browser_manager = DoorBrowser()
 
@@ -975,6 +1000,53 @@ def extract_pagination_urls(base_url, current_url, soup, html_source):
                 candidates.add(normalize_list_url(build_paged_url(base_url, page_key, page_no)))
 
     return sorted(candidates)
+
+
+def apply_date_window(list_url, lookback_days=DEFAULT_LOOKBACK_DAYS):
+    parsed = urlparse(list_url)
+    query = parse_qs(parsed.query, keep_blank_values=True)
+    end_date = date.today()
+    start_date = end_date - timedelta(days=lookback_days)
+    query["start_date"] = [start_date.isoformat()]
+    query["end_date"] = [end_date.isoformat()]
+    encoded = urlencode(
+        [(key, value) for key, values in query.items() for value in values],
+        doseq=True
+    )
+    return urlunparse((parsed.scheme, parsed.netloc, parsed.path, "", encoded, ""))
+
+
+def extract_list_rows(soup):
+    actionable_rows = []
+
+    for row in soup.select("tr"):
+        if "jsgrid-nodata-row" in (row.get("class") or []):
+            continue
+        if row.find("button", class_="estimate_link") or row.find("button", class_="trans_link"):
+            actionable_rows.append(row)
+            continue
+
+        cols = row.find_all("td")
+        if not cols:
+            continue
+        row_html = str(row)
+        if "estimate_doc.jsp" in row_html or "trans_doc.jsp" in row_html:
+            actionable_rows.append(row)
+            continue
+        if re.search(r"\bordno\b|\bchulhano\b", row_html):
+            actionable_rows.append(row)
+
+    return actionable_rows
+
+
+def read_filter_values(soup):
+    filters = {}
+    for name in ("start_date", "end_date", "younglim_gubun"):
+        field = soup.find(attrs={"name": name})
+        if not field:
+            continue
+        filters[name] = field.get("value") or field.get_text(" ", strip=True)
+    return filters
 
 
 def build_row_fallback_key(order_no, row, button_col):
@@ -1461,7 +1533,7 @@ class AutoDownloader(threading.Thread):
     def _download_from_page_impl(self, list_url, save_dir, doc_type, force_mode=False):
         history = load_history()
         downloaded_count = 0
-        queue = [list_url]
+        queue = [apply_date_window(list_url)]
         visited = set()
 
         while queue:
@@ -1480,8 +1552,9 @@ class AutoDownloader(threading.Thread):
 
             from bs4 import BeautifulSoup
             soup = BeautifulSoup(html_source, 'html.parser')
-            rows = soup.select("table tbody tr")
-            logger.info(f"[Downloader] Found {len(rows)} rows in table ({current_url})")
+            rows = extract_list_rows(soup)
+            filters = read_filter_values(soup)
+            logger.info(f"[Downloader] Found {len(rows)} actionable rows ({current_url}) filters={filters}")
 
             for next_url in extract_pagination_urls(list_url, current_url, soup, html_source):
                 if next_url not in visited and next_url not in queue:

@@ -1,6 +1,6 @@
 ﻿# ?곷┝-?댁뭅?댄듃 ?먮룞???쒖뒪??媛쒕컻 ?덉뒪?좊━
 
-> 理쒖쥌 ?낅뜲?댄듃: 2026-03-20
+> 理쒖쥌 ?낅뜲?댄듃: 2026-03-31
 
 ---
 
@@ -277,6 +277,80 @@ Sheet3/Sheet4 諛깆뾽 + Sheet5 濡쒓렇 + ?대━??meta ??idle
 - **검증**: 스케줄러 XML 확인 결과 올바른 경로로 등록 완료. 다음 실행 예정: 2026-03-25 06:00
 - **주의사항**: `InteractiveToken` 모드이므로 사용자 로그인 상태에서만 실행됨
 
+### BUG-13: 스케줄 배치가 다른 Python/Edge 작업까지 종료할 수 있음 (2026-03-24)
+
+- **증상**: 자동 시작/정지 배치가 이 프로젝트와 무관한 다른 `python.exe`, `pythonw.exe`, `msedge.exe`까지 강제 종료할 가능성 존재
+- **원인**
+  - `START_SCHEDULED.bat`가 전체 `python.exe`, `pythonw.exe`, `msedge.exe`를 대상으로 `taskkill` 수행
+  - `STOP_SCHEDULED.bat`도 모든 `python.exe` / `pythonw.exe`를 종료하는 구조
+- **영향 리스크**
+  - 다른 Python 자동화/개발 작업 중단 가능
+  - 일반 Edge 브라우저 세션까지 강제 종료 가능
+- **조치**
+  - `START_SCHEDULED.bat` / `STOP_SCHEDULED.bat`를 PID 기반 제어로 변경
+  - `run_server.py` PID를 `logs/run_server.pid`에 저장하고 종료 시 해당 PID만 정지
+  - Edge 디버그 브라우저 PID를 `logs/edge_9333.pid`에 저장하고 종료 시 해당 PID만 정지
+  - Edge는 `%LOCALAPPDATA%\\YoungrimAutoEdgeProfile` 전용 프로필로 분리
+  - `9333` 포트가 이미 열려 있으면 기존 디버그 브라우저를 재사용
+- **결론**: 현재 수정본 기준으로는 이 프로젝트가 시작한 서버/브라우저만 제어하며, 다른 기능에 영향을 주지 않도록 안전화 완료
+
 ---
 
-*작성: Antigravity AI / 최종 업데이트: 2026-03-24*
+### BUG-14: run_server 중복 실행 및 로그 날짜 꼬임 방지 (2026-03-31)
+
+- **증상**
+  - `run_server.py` 프로세스가 여러 개 동시에 떠 있을 가능성이 확인됨
+  - 오늘 로그가 `app_20260331.json`로 생성되지 않고 과거 `app_20260323.json`, `app_20260324.json`에 계속 기록됨
+  - 운영 상태 확인 시 실제 서버 상태와 로그 파일 날짜가 맞지 않아 오판 가능성 발생
+- **원인**
+  - 서버 자체에 단일 인스턴스 보장이 없어 중복 기동을 막지 못함
+  - 파일 로거가 시작 시점의 날짜 파일만 열고 유지해 자정 이후에도 같은 파일에 계속 기록
+- **조치**
+  - `run_server.py`에 단일 인스턴스 락 추가
+  - `run_server.py`가 직접 `logs/run_server.pid`를 기록/정리하도록 보강
+  - `logging_config.py`를 일별 파일 전환 방식으로 수정해 `app_YYYYMMDD.json` 자동 롤오버 적용
+- **기대 효과**
+  - 중복 사이클 실행 및 운영 혼선 감소
+  - 날짜별 운영 로그 분리로 장애 추적성 향상
+  - 스케줄러 PID 기반 정지와 서버 PID 관리 일관성 확보
+- **검증**
+  - `python -m py_compile run_server.py logging_config.py` 통과
+  - 코드 반영 완료, 실제 효과는 다음 재시작 이후 운영 로그에서 확인 예정
+
+*작성: Antigravity AI / 최종 업데이트: 2026-03-31*
+
+---
+
+## 6. 2026-04-02 로직 수정 이력
+
+- `google_sheet_hub.py`의 `Sheet1 _write_sheet1_rows()`를 전체 clear 후 덮어쓰기 방식에서 append 방식으로 변경
+- `google_sheet_hub.py`의 `complete()`를 `complete(force_clear=False)`로 변경하고, 기본 호출 시 `Sheet1`을 비우지 않도록 수정
+- `run_server.py`에 `logs/sheet_reset_date.txt` 기반 일일 초기화 로직 추가
+- 날짜가 바뀌면 사이클 시작 시 `Sheet10`, `Sheet11` 데이터 영역을 자동 clear 하고 같은 날짜에는 재실행 시 clear 하지 않도록 수정
+- `google_sheet_hub.py`의 `Sheet10` 쓰기 포맷을 `[saved_at, file_names, 기존 raw row]`로 변경
+- `google_sheet_hub.py`의 `Sheet11` 쓰기 포맷을 `[saved_at, file_names, item_name, item_code]`로 변경
+- `Sheet10`, `Sheet11` 헤더 구조를 GAS 정의와 동일하게 보장하도록 보강
+
+*최종 업데이트: 2026-04-02*
+
+---
+
+## 7. 2026-04-07 로직 수정 이력
+
+- `google_sheet_hub.py`에서 `pyperclip` 의존성 제거
+- 클립보드 복사는 운영 핵심 기능이 아니므로 업로드 경로에서 완전히 제거
+- `import pyperclip` 및 관련 복사 코드 삭제
+- 제거 후 업로드 루틴이 클립보드 상태와 무관하게 진행되도록 안정성 향상
+
+*최종 업데이트: 2026-04-07*
+- `run_server.py` 업로드 성공 경로에 `sheet_hub.complete(force_clear=False)` 호출 추가
+- `complete(force_clear=False)` 호출로 `Sheet4` 백업과 `Sheet5` 완료 기록이 자동 운영 경로에서도 남도록 수정
+- `google_sheet_hub.py stage_and_copy()`에 `Sheet1` 메타 `file_names` 기준 중복 append 방지 로직 추가
+- 동일 배치가 다시 들어오면 `Sheet1` append를 스킵하고 로그만 남기도록 수정
+- `run_server.py`에서 업로드 성공 직후 `sheet_hub.complete(force_clear=False)` 호출 추가
+- 자동 운영 경로에서도 `Sheet4` 백업과 `Sheet5` 완료 기록이 남도록 수정
+- `google_sheet_hub.py stage_and_copy()`에 동일 `file_names` 배치 중복 append 방지 로직 추가
+- 같은 배치 재처리 시 `Sheet1` append를 스킵하도록 수정
+- `Sheet10` 레이아웃 이상으로 append 결과가 비가시 영역에 들어가던 문제 확인
+- `Sheet10` 범위를 정상화하고 오늘 `07:22` 배치의 unmapped 5행을 가시 영역으로 복원
+- `pyperclip` 제거, `complete()` 호출 추가, Sheet1 중복 방지, Sheet10 복원까지 반영 후 현재 운영 정상 확인

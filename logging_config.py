@@ -1,8 +1,6 @@
 import logging
 import json
-import os
 from datetime import datetime
-from logging.handlers import RotatingFileHandler
 from config import config
 
 class JsonFormatter(logging.Formatter):
@@ -21,9 +19,50 @@ class JsonFormatter(logging.Formatter):
             log_record["exception"] = self.formatException(record.exc_info)
         return json.dumps(log_record, ensure_ascii=False)
 
+
+class DailyJsonFileHandler(logging.Handler):
+    """Write logs to app_YYYYMMDD.json and switch automatically at date boundaries."""
+
+    def __init__(self, logs_dir, encoding='utf-8'):
+        super().__init__()
+        self.logs_dir = logs_dir
+        self.encoding = encoding
+        self._current_date = None
+        self._stream = None
+
+    def _ensure_stream(self):
+        current_date = datetime.now().strftime("%Y%m%d")
+        if self._stream is not None and self._current_date == current_date:
+            return
+
+        if self._stream is not None:
+            self._stream.close()
+
+        log_file = self.logs_dir / f"app_{current_date}.json"
+        self._stream = open(log_file, "a", encoding=self.encoding)
+        self._current_date = current_date
+
+    def emit(self, record):
+        try:
+            self._ensure_stream()
+            self._stream.write(self.format(record) + "\n")
+            self._stream.flush()
+        except Exception:
+            self.handleError(record)
+
+    def close(self):
+        try:
+            if self._stream is not None:
+                self._stream.close()
+                self._stream = None
+        finally:
+            super().close()
+
 def setup_logging():
     """Setup structured logging with JSON formatting and rotation."""
     logger = logging.getLogger()
+    if logger.handlers:
+        return logger
     logger.setLevel(logging.INFO if not config.FLASK_DEBUG else logging.DEBUG)
     
     # Console Handler (Human-friendly)
@@ -31,9 +70,8 @@ def setup_logging():
     console_handler.setFormatter(logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s'))
     logger.addHandler(console_handler)
     
-    # JSON File Handler (Rotation: 5MB per file, kept 5 backups)
-    log_file = config.LOGS_DIR / f"app_{datetime.now():%Y%m%d}.json"
-    file_handler = RotatingFileHandler(log_file, maxBytes=5*1024*1024, backupCount=5, encoding='utf-8')
+    # JSON file handler with automatic daily rollover.
+    file_handler = DailyJsonFileHandler(config.LOGS_DIR, encoding='utf-8')
     file_handler.setFormatter(JsonFormatter())
     logger.addHandler(file_handler)
     
