@@ -442,7 +442,7 @@ function generateProductCode(color, itemName, spec, remarks, brandCode) {
     
     // 5. 최종 코드 조합
     Logger.log(`brandColorCode="${brandColorCode}", flagModelCode="${flagModelCode}", specCode="${specCode}"`);
-    const finalCode = (brandColorCode + flagModelCode + specCode).replace(/-/g, '');
+    const finalCode = (brandColorCode + flagModelCode + specCode).replace(/[-\u2013\u2014]/g, '');
     Logger.log(`코드 생성: ${color} + ${itemName} + ${spec} → ${finalCode}`);
     
     return finalCode;
