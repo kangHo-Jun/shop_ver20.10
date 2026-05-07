@@ -119,8 +119,13 @@ function automateEstimateParsing() {
     
     // 품목명 생성 (전처리된 데이터)
     const colorProcessed = preprocessColorForProductName(colorRaw);
-    const itemNameProcessed = preprocessItemNameForProductName(itemNameRaw, specRaw);
+    let itemNameProcessed = preprocessItemNameForProductName(itemNameRaw, specRaw);
     const specProcessed = preprocessSpecForProductName(specRaw);
+    
+    // 프레임몰딩은 PVC 표기가 없고 MDF 표기도 없으면 MDF로 간주하여 품목명 보강
+    if (itemNameRaw.includes('프레임몰딩') && !itemNameProcessed.includes('PVC') && !itemNameProcessed.includes('MDF')) {
+      itemNameProcessed = itemNameProcessed.replace('프레임몰딩', 'MDF 프레임몰딩');
+    }
     
     // 회사명 추가 여부 판단
     const needsCompanyPrefix = shouldAddCompanyPrefix(colorProcessed, itemNameProcessed, companyInfo.display);
@@ -600,6 +605,8 @@ function generateFlagCode(itemName) {
   let upperCode = '';
   if (itemStr.includes('발포')) {
     upperCode = 'B';
+  } else if (itemStr.includes('목재')) {
+    upperCode = 'W';
   } else if (itemStr.includes('방염')) {
     upperCode = 'F';
   } else if (itemStr.includes('비방염')) {
@@ -757,10 +764,11 @@ function generateMoldingFlagCode(itemName) {
     return '천장';
   }
   
-  // 수정4: 프레임몰딩/프레임 처리
-  if (itemStr.includes('프레임몰딩') || itemStr.includes('프레임')) {
-    Logger.log(`몰딩 플래그코드 (프레임): "${itemStr}" → "프레임"`);
-    return '프레임';
+  // 프레임몰딩은 PVC 표기 여부에 따라 PP/PM 처리
+  if (itemStr.includes('프레임몰딩')) {
+    const code = itemStr.includes('PVC') ? 'PP' : 'PM';
+    Logger.log(`몰딩 플래그코드 (프레임몰딩): "${itemStr}" → "${code}"`);
+    return code;
   }
   
   // 수정4: 기둥 처리
