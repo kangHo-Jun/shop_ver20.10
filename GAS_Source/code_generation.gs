@@ -674,20 +674,22 @@ function generateFlagCode(itemName) {
 function generateModelCode(itemName) {
   const itemStr = itemName.toString().trim();
   
-  // VER11 수정: 영문-패턴 → 영문+숫자만 추출 (한글 제거)
-  const patternMatch = itemStr.match(/([A-Z]+)-([A-Z0-9]+)/);
+  // 영문-숫자+영문 패턴은 숫자 뒤 영문을 버리고 하이픈도 제거
+  const numericPatternMatch = itemStr.match(/([A-Z]+)-(\d+)[A-Z0-9]*/);
   
-  if (patternMatch) {
-    const prefix = patternMatch[1];  // 영문 부분 (YS, YA 등)
-    let suffix = patternMatch[2];    // 하이픈 뒤 부분
-    
-    // VER11: 한글이 나타나면 그 전까지만 추출
-    const hangulIndex = suffix.search(/[가-힣]/);
-    if (hangulIndex !== -1) {
-      suffix = suffix.substring(0, hangulIndex);
-    }
+  if (numericPatternMatch) {
+    const prefix = numericPatternMatch[1];  // 영문 부분 (YS, YA 등)
+    const suffix = numericPatternMatch[2];  // 하이픈 뒤 숫자 부분만 유지
     
     const result = prefix + suffix;
+    Logger.log(`영문-패턴 추출: "${itemStr}" → "${result}"`);
+    return result;
+  }
+  
+  // 기존 영문-영문+숫자 패턴도 유지
+  const patternMatch = itemStr.match(/([A-Z]+)-([A-Z0-9]+)/);
+  if (patternMatch) {
+    const result = patternMatch[1] + patternMatch[2];
     Logger.log(`영문-패턴 추출: "${itemStr}" → "${result}"`);
     return result;
   }
