@@ -354,3 +354,38 @@ Sheet3/Sheet4 諛깆뾽 + Sheet5 濡쒓렇 + ?대━??meta ??idle
 - `Sheet10` 레이아웃 이상으로 append 결과가 비가시 영역에 들어가던 문제 확인
 - `Sheet10` 범위를 정상화하고 오늘 `07:22` 배치의 unmapped 5행을 가시 영역으로 복원
 - `pyperclip` 제거, `complete()` 호출 추가, Sheet1 중복 방지, Sheet10 복원까지 반영 후 현재 운영 정상 확인
+# 2026-05-14 장애 분석 및 복구 기록: 5/13 자동화 미시작
+
+## 요약
+- 2026-05-13 06:00 스케줄러는 실행됐지만 `run_server.py`가 실제로 시작되지 않아 `app_20260513.json`이 생성되지 않았다.
+- 영림 OMS에는 5/13 데이터가 있었으나 자동화 루프가 돌지 않아 로컬 다운로드가 0건이었다.
+- 2026-05-13 17:35 수동 재시작 후 서버가 정상 시작됐고, `2026-05-06 ~ 2026-05-13` 범위 재조회로 신규 17건을 다운로드했다.
+- Google Sheets 업로드 결과는 17파일 / 193행 완료였다.
+
+## 타임라인
+- 2026-05-13 06:00: `START_SCHEDULED.bat` 실행 기록 생성.
+- 2026-05-13 06:00: `app_20260513.json` 미생성. 실제 서버 미시작.
+- 2026-05-13 17:00: `STOP_SCHEDULED.bat` 실행. 서버가 떠 있지 않은 상태에서 종료 루틴만 수행.
+- 2026-05-13 17:34~17:35: 수동 재시작 시도.
+- 2026-05-13 17:35:18: `run_server.py` 실제 시작 성공.
+- 2026-05-13 17:37:16: 신규 17건 다운로드 완료.
+- 2026-05-13 17:37:24: 193행 / 17파일 Google Sheets 업로드 완료.
+
+## 확인된 원인
+- `START_SCHEDULED.bat`에서 PowerShell `Start-Process`의 `RedirectStandardOutput`과 `RedirectStandardError`가 같은 파일로 지정되어 있었다.
+- Windows PowerShell은 stdout/stderr를 같은 파일로 리다이렉트하는 `Start-Process` 호출을 허용하지 않아 06:00 실행 시 `run_server.py`가 시작되지 않았다.
+- 스케줄러 로그에는 `START_SCHEDULED completed`가 남았지만, 실제 앱 로그와 영림 조회 로그는 없었다.
+
+## 복구 및 정리
+- `START_SCHEDULED.bat`의 stdout/stderr를 각각 `logs/run_server_stdout_YYYYMMDD.log`, `logs/run_server_stderr_YYYYMMDD.log`로 분리했다.
+- 수동 재실행 후 5/13 누락분을 다운로드하고 Google Sheets 업로드까지 완료했다.
+- 2026-05-14 점검 중 오래된 zombie `msedgedriver.exe` PID `4792`, `85344`를 종료했다.
+- 현재 운용 중인 `msedgedriver.exe` PID `290812`는 유지했다.
+
+## 후속 개선 과제
+- 스케줄러 시작 후 `run_server.pid`만 보지 말고 PID 생존, `5081` listen, `app_YYYYMMDD.json` 생성 여부까지 확인해야 한다.
+- `START_SCHEDULED completed`가 실제 앱 시작 성공을 의미하지 않으므로 성공/실패 로그를 명확히 분리해야 한다.
+- Selenium 자동화 간 충돌 방지를 위해 프로젝트별 Edge 디버그 포트와 `user-data-dir`를 분리해야 한다.
+- 오래된 `msedgedriver.exe` 잔여 프로세스가 다른 자동화에 간섭하지 않도록 시작 전/종료 후 점검 루틴을 추가해야 한다.
+
+---
