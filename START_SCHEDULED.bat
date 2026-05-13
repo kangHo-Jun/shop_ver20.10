@@ -29,7 +29,7 @@ if exist "%SERVER_PID_FILE%" (
 )
 
 echo [%date% %time%] Starting run_server.py... >> "%LOG_FILE%"
-powershell -NoProfile -Command "$p = Start-Process -FilePath '.\.venv\Scripts\python.exe' -ArgumentList 'run_server.py' -WorkingDirectory '%cd%' -RedirectStandardOutput '%cd%\%LOG_FILE%' -RedirectStandardError '%cd%\%LOG_FILE%' -PassThru; Set-Content -Path '%cd%\%SERVER_PID_FILE%' -Value $p.Id"
+powershell -NoProfile -Command "$p = Start-Process -FilePath '.\.venv\Scripts\python.exe' -ArgumentList 'run_server.py' -WorkingDirectory '%cd%' -RedirectStandardOutput '%cd%\logs\run_server_stdout_%LOG_DATE%.log' -RedirectStandardError '%cd%\logs\run_server_stderr_%LOG_DATE%.log' -PassThru; Set-Content -Path '%cd%\%SERVER_PID_FILE%' -Value $p.Id"
 if errorlevel 1 (
     echo [%date% %time%] Failed to start run_server.py >> "%LOG_FILE%"
     exit /b 1
