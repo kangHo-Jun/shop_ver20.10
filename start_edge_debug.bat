@@ -59,4 +59,8 @@ echo - 프로필 위치: %%LOCALAPPDATA%%\Microsoft\Edge\User Data\Default
 echo.
 echo 이제 V10 서버가 이 브라우저에 자동으로 연결됩니다.
 echo.
+if /I "%MANUAL_PROMPT%"=="1" (
 pause
+) else (
+echo [INFO] MANUAL_PROMPT not set. Exiting without interactive pause.
+)

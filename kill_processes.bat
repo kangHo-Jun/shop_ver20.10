@@ -22,4 +22,8 @@ if errorlevel 1 (
 echo.
 echo Cleanup complete.
 echo ========================================
+if /I "%MANUAL_PROMPT%"=="1" (
 pause
+) else (
+echo [INFO] MANUAL_PROMPT not set. Exiting without interactive pause.
+)

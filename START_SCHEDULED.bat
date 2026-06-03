@@ -9,6 +9,7 @@ set "LOG_FILE=logs\scheduler_%LOG_DATE%.log"
 set "SERVER_PID_FILE=logs\run_server.pid"
 set "EDGE_PID_FILE=logs\edge_9333.pid"
 set "EDGE_PROFILE_DIR=%LOCALAPPDATA%\YoungrimAutoEdgeProfile"
+set "SERVER_PORT=5081"
 
 echo ================================================== >> "%LOG_FILE%"
 echo [%date% %time%] START_SCHEDULED.bat launched >> "%LOG_FILE%"
@@ -17,8 +18,29 @@ echo Working directory: %cd% >> "%LOG_FILE%"
 if not exist "%EDGE_PROFILE_DIR%" mkdir "%EDGE_PROFILE_DIR%" >nul 2>&1
 
 REM 1) Reuse existing automation server if it is still alive.
+set "SERVER_LISTENER_PID="
+for /f "tokens=5" %%P in ('netstat -ano ^| findstr /R /C:":%SERVER_PORT% .*LISTENING"') do (
+    set "SERVER_LISTENER_PID=%%P"
+    goto :server_listener_found
+)
+goto :after_server_listener_check
+
+:server_listener_found
+if defined SERVER_LISTENER_PID (
+    > "%SERVER_PID_FILE%" echo %SERVER_LISTENER_PID%
+    echo [%date% %time%] Port %SERVER_PORT% already listening. Reusing existing run_server.py PID %SERVER_LISTENER_PID%. >> "%LOG_FILE%"
+    goto :ensure_edge
+)
+
+:after_server_listener_check
+
 if exist "%SERVER_PID_FILE%" (
-    set /p EXISTING_SERVER_PID=<"%SERVER_PID_FILE%"
+    set "EXISTING_SERVER_PID="
+    for /f "usebackq delims=" %%I in ("%SERVER_PID_FILE%") do (
+        set "EXISTING_SERVER_PID=%%I"
+        goto :existing_server_pid_loaded
+    )
+    :existing_server_pid_loaded
     if not "%EXISTING_SERVER_PID%"=="" (
         powershell -NoProfile -Command "if (Get-Process -Id %EXISTING_SERVER_PID% -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"
         if not errorlevel 1 (

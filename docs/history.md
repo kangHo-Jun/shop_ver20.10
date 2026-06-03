@@ -389,3 +389,41 @@ Sheet3/Sheet4 諛깆뾽 + Sheet5 濡쒓렇 + ?대━??meta ??idle
 - 오래된 `msedgedriver.exe` 잔여 프로세스가 다른 자동화에 간섭하지 않도록 시작 전/종료 후 점검 루틴을 추가해야 한다.
 
 ---
+
+## 8. 2026-06-01 로직 수정 이력
+
+- `run_server.py`
+  - `faulthandler` 로그 활성화
+  - sleep 대기 진입/heartbeat/종료 로그 추가
+  - 종료 시그널 로그 추가
+  - 사이클 완료 시각(`last_cycle_completed_at`) 기록 추가
+- 반복 장애 분석 결과
+  - `sleep` 자체가 직접 멈춤 원인이라기보다, 중복 인스턴스/잔존 프로세스/공유 Edge 세션 충돌 가능성이 더 높다고 판단
+  - `2026-05-30 08:31` 배치는 실제로는 정상 다운로드/업로드 완료였음을 로그로 재확인
+- 수동/보조 배치 입력 대기 기본 비활성화
+  - `start_all.bat`
+  - `start_edge_debug.bat`
+  - `start_ready.bat`
+  - `start_youngrim_browser.bat`
+  - `run_v10_server.bat`
+  - `kill_processes.bat`
+- 위 배치들은 기본적으로 입력 대기를 하지 않고, 필요 시에만 `MANUAL_PROMPT=1` 일 때 `pause`/`choice` 가 동작하도록 수정
+- stale 상태 정리 후 재기동
+  - `run_server.pid = 91824`
+  - `v11.lock = 91824`
+  - `edge_9333.pid = 223448`
+  - `127.0.0.1:5081`, `127.0.0.1:9333` listen 확인
+  - 재기동 후 첫 사이클 정상 완료 확인
+
+### 2026-06-02 추가 로직 수정
+- `START_SCHEDULED.bat`
+  - `run_server.pid` 확인보다 먼저 `127.0.0.1:5081` 리스너 PID 를 확인하도록 수정
+  - `5081` 이 이미 listen 중이면 해당 PID 를 `logs/run_server.pid` 에 다시 기록하고 재기동을 스킵하도록 변경
+  - PID 파일 읽기를 `set /p < file` 에서 `for /f` 방식으로 변경
+- `STOP_SCHEDULED.bat`
+  - PID 파일 기반 종료 후에도 `127.0.0.1:5081` 리스너 PID 를 fallback 으로 찾아 종료 시도하도록 수정
+  - `run_server.pid`, `edge_9333.pid` 읽기를 `for /f` 방식으로 변경
+- 해석 메모
+  - 수동 `cmd /c START_SCHEDULED.bat` 실행에서 보인 `Input redirection is not supported` 메시지는 현재 Codex 비대화형 실행 환경 영향 가능성이 높음
+  - 실제 스케줄러 실행(`2026-06-02 07:08`)은 `scheduler_20260602.log` 기준 정상 완료 확인
+  - 오늘 로그는 기존 중복 인스턴스 흔적과 수동 샌드박스 실행 흔적이 섞여 있어, 청정 상태 판정은 다음 아침 로그에서 재확인 필요

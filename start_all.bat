@@ -13,7 +13,11 @@ taskkill /F /IM python.exe /T 2>nul
 echo.
 echo [2/5] Edge 브라우저를 모두 닫아주세요.
 echo       창을 닫은 후 아무 키나 누르세요...
+if /I "%MANUAL_PROMPT%"=="1" (
 pause >nul
+) else (
+echo [INFO] MANUAL_PROMPT not set. Skipping interactive pause.
+)
 
 echo.
 echo [3/5] Edge 디버그 모드 실행 (영림 사이트 포함)...
@@ -34,4 +38,4 @@ echo [5/5] V10 서버 시작...
 echo 대시보드: http://localhost:5080
 echo.
 python v10_auto_server.py
-pause
+if /I "%MANUAL_PROMPT%"=="1" pause

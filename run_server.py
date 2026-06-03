@@ -14,9 +14,10 @@ import json
 import hashlib
 import re
 import atexit
+import faulthandler
 from pathlib import Path
 from html import unescape
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 
 from config import config
 from logging_config import logger
@@ -47,6 +48,9 @@ LOCK_FILE = config.LOGS_DIR / "v11.lock"
 SHEET_RESET_DATE_FILE = config.LOGS_DIR / "sheet_reset_date.txt"
 SINGLE_INSTANCE_PORT = int(os.getenv("RUN_SERVER_LOCK_PORT", "5081"))
 instance_lock_socket = None
+sleep_loop_counter = 0
+last_cycle_completed_at = None
+faulthandler_log_handle = None
 
 
 def _write_pid_file():
@@ -127,6 +131,51 @@ def _cleanup_lock_file():
                 LOCK_FILE.unlink()
     except Exception as exc:
         logger.warning("[System] Failed to clean lock file %s: %s", LOCK_FILE, exc)
+
+
+def _cleanup_faulthandler_log():
+    global faulthandler_log_handle
+    if faulthandler_log_handle is not None:
+        try:
+            faulthandler_log_handle.flush()
+            faulthandler_log_handle.close()
+        except Exception:
+            pass
+        faulthandler_log_handle = None
+
+
+def _setup_runtime_diagnostics():
+    global faulthandler_log_handle
+
+    dump_path = config.LOGS_DIR / f"faulthandler_{date.today().strftime('%Y%m%d')}.log"
+    try:
+        faulthandler_log_handle = open(dump_path, "a", encoding="utf-8")
+        faulthandler.enable(file=faulthandler_log_handle, all_threads=True)
+        logger.info("[Diag] faulthandler enabled -> %s", dump_path)
+    except Exception as exc:
+        logger.warning("[Diag] Failed to enable faulthandler: %s", exc)
+
+
+def _log_sleep_heartbeat(second_index):
+    global sleep_loop_counter
+
+    sleep_loop_counter += 1
+    if second_index == 0:
+        logger.info(
+            "[Sleep] Entering wait loop: interval=%ss, last_cycle_completed_at=%s",
+            config.DOWNLOAD_INTERVAL_SEC,
+            last_cycle_completed_at,
+        )
+        return
+
+    if second_index % 60 == 0:
+        logger.info(
+            "[Sleep] Heartbeat: slept=%ss/%ss (loop=%s, running=%s)",
+            second_index,
+            config.DOWNLOAD_INTERVAL_SEC,
+            sleep_loop_counter,
+            running,
+        )
 
 
 def acquire_single_instance_lock():
@@ -755,6 +804,7 @@ def auto_upload(doc_type="estimate"):
 
 # ─── 메인 사이클 ────────────────────────────────────────────
 def run_cycle():
+    global last_cycle_completed_at
     try:
         ensure_daily_sheet_reset()
     except Exception as e:
@@ -798,15 +848,17 @@ def run_cycle():
         logger.info("[Cycle] READY 파일 없음. 업로드 스킵.")
 
     logger.info("[Cycle] ── 완료. %s분 후 다음 사이클 ──", config.DOWNLOAD_INTERVAL_SEC // 60)
+    last_cycle_completed_at = datetime.now().isoformat()
 
 
 # ─── 진입점 ────────────────────────────────────────────────
 def shutdown(sig=None, frame=None):
     global running
-    logger.info("[System] 종료 중...")
+    logger.info("[System] 종료 중... sig=%s pid=%s time=%s", sig, os.getpid(), datetime.now().isoformat())
     running = False
     _cleanup_pid_file()
     _cleanup_lock_file()
+    _cleanup_faulthandler_log()
     release_single_instance_lock()
     sys.exit(0)
 
@@ -816,12 +868,14 @@ if __name__ == "__main__":
     signal.signal(signal.SIGTERM, shutdown)
     atexit.register(_cleanup_pid_file)
     atexit.register(_cleanup_lock_file)
+    atexit.register(_cleanup_faulthandler_log)
     atexit.register(release_single_instance_lock)
 
     if not acquire_single_instance_lock():
         sys.exit(0)
 
     _write_pid_file()
+    _setup_runtime_diagnostics()
 
     logger.info("=" * 50)
     logger.info("V10 Console Server 시작")
@@ -850,7 +904,10 @@ if __name__ == "__main__":
         except Exception as e:
             logger.error("[Main] 오류: %s", e)
 
-        for _ in range(config.DOWNLOAD_INTERVAL_SEC):
+        wait_started_at = datetime.now().isoformat()
+        for second_index in range(config.DOWNLOAD_INTERVAL_SEC):
+            _log_sleep_heartbeat(second_index)
             if not running:
                 break
             time.sleep(1)
+        logger.info("[Sleep] Wait loop finished: started_at=%s, ended_at=%s, running=%s", wait_started_at, datetime.now().isoformat(), running)

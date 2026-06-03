@@ -51,4 +51,8 @@ echo.
 echo Please login to Youngrim in the browser and run start_prod.bat.
 echo ============================================================
 echo.
+if /I "%MANUAL_PROMPT%"=="1" (
 pause
+) else (
+echo [INFO] MANUAL_PROMPT not set. Exiting without interactive pause.
+)

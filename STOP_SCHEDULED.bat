@@ -17,12 +17,18 @@ for /f %%I in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd"') do 
 set "LOG_FILE=logs\scheduler_%LOG_DATE%.log"
 set "SERVER_PID_FILE=logs\run_server.pid"
 set "EDGE_PID_FILE=logs\edge_9333.pid"
+set "SERVER_PORT=5081"
 set "EDGE_PORT=9333"
 
 echo [%date% %time%] STOP_SCHEDULED.bat launched >> "%LOG_FILE%"
 
 if exist "%SERVER_PID_FILE%" (
-    set /p SERVER_PID=<"%SERVER_PID_FILE%"
+    set "SERVER_PID="
+    for /f "usebackq delims=" %%I in ("%SERVER_PID_FILE%") do (
+        set "SERVER_PID=%%I"
+        goto :server_pid_loaded
+    )
+    :server_pid_loaded
     if not "%SERVER_PID%"=="" (
         echo [%date% %time%] Stopping run_server.py PID %SERVER_PID% >> "%LOG_FILE%"
         taskkill /f /pid %SERVER_PID% /t >> "%LOG_FILE%" 2>&1
@@ -32,8 +38,28 @@ if exist "%SERVER_PID_FILE%" (
     echo [%date% %time%] No run_server PID file found. >> "%LOG_FILE%"
 )
 
+set "SERVER_LISTENER_PID="
+for /f "tokens=5" %%P in ('netstat -ano ^| findstr /R /C:":%SERVER_PORT% .*LISTENING"') do (
+    set "SERVER_LISTENER_PID=%%P"
+    goto :server_listener_found
+)
+goto :after_server_fallback
+
+:server_listener_found
+if defined SERVER_LISTENER_PID (
+    echo [%date% %time%] Fallback stopping run_server listener PID !SERVER_LISTENER_PID! on port %SERVER_PORT%. >> "%LOG_FILE%"
+    taskkill /f /pid !SERVER_LISTENER_PID! /t >> "%LOG_FILE%" 2>&1
+)
+
+:after_server_fallback
+
 if exist "%EDGE_PID_FILE%" (
-    set /p EDGE_PID=<"%EDGE_PID_FILE%"
+    set "EDGE_PID="
+    for /f "usebackq delims=" %%I in ("%EDGE_PID_FILE%") do (
+        set "EDGE_PID=%%I"
+        goto :edge_pid_loaded
+    )
+    :edge_pid_loaded
     if not "%EDGE_PID%"=="" (
         echo [%date% %time%] Stopping Edge debug PID %EDGE_PID% >> "%LOG_FILE%"
         taskkill /f /pid %EDGE_PID% /t >> "%LOG_FILE%" 2>&1
