@@ -339,6 +339,19 @@ def _is_no_such_window_error(exc):
     return "no such window" in message or "target window already closed" in message or "web view not found" in message
 
 
+def _is_recoverable_webdriver_error(exc):
+    message = str(exc).lower()
+    if _is_no_such_window_error(exc):
+        return True
+    return (
+        "read timed out" in message
+        or "httpconnectionpool" in message
+        or "max retries exceeded" in message
+        or "failed to establish a new connection" in message
+        or ("localhost" in message and "timed out" in message)
+    )
+
+
 def reconnect_and_retry(action, description, max_retries=2):
     last_exc = None
     for attempt in range(max_retries + 1):
@@ -346,7 +359,7 @@ def reconnect_and_retry(action, description, max_retries=2):
             return action()
         except Exception as exc:
             last_exc = exc
-            if not _is_no_such_window_error(exc):
+            if not _is_recoverable_webdriver_error(exc):
                 raise
             if attempt >= max_retries:
                 logger.error(
@@ -357,7 +370,7 @@ def reconnect_and_retry(action, description, max_retries=2):
                 )
                 raise
             logger.warning(
-                "[Browser] %s hit no such window. Reconnecting now (%s/%s)...",
+                "[Browser] %s hit a recoverable browser/driver error. Reconnecting now (%s/%s)...",
                 description,
                 attempt + 1,
                 max_retries,
