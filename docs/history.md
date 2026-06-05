@@ -427,3 +427,14 @@ Sheet3/Sheet4 諛깆뾽 + Sheet5 濡쒓렇 + ?대━??meta ??idle
   - 수동 `cmd /c START_SCHEDULED.bat` 실행에서 보인 `Input redirection is not supported` 메시지는 현재 Codex 비대화형 실행 환경 영향 가능성이 높음
   - 실제 스케줄러 실행(`2026-06-02 07:08`)은 `scheduler_20260602.log` 기준 정상 완료 확인
   - 오늘 로그는 기존 중복 인스턴스 흔적과 수동 샌드박스 실행 흔적이 섞여 있어, 청정 상태 판정은 다음 아침 로그에서 재확인 필요
+
+
+---
+
+## [2026-06-05] 기본 Edge 9333 선점으로 인한 다운로드 전면 중단
+
+- `scheduler_20260605.log`: 06:00:04 `Aborted` 확인
+  - PID 138204 `msedge.exe`가 `YoungrimAutoEdgeProfile` 없이 9333 선점
+  - `START_SCHEDULED.bat` 프로필 검증 로직이 정상 차단
+- 수동 로그인 후 `START.bat` 실행으로 복구 (13:34 사이클 재개)
+- 오늘 1회분 다운로드 누락 (06:00 ~ 13:34 구간)
