@@ -1,409 +1,193 @@
-# ðŸ› ï¸ Project Context & Status (V10 Automation)
+# Project Context & Status (UTF-8 Rebuilt)
 
-## 1. í”„ë¡œì íŠ¸ í˜„í™© (Current State)
-- **ì£¼ìš” ëª©ì **: ì˜ë¦¼ OMS ì‹œìŠ¤í…œì—ì„œ ê²¬ì (Estimate) ë‚´ì—­ì„ ìžë™ìœ¼ë¡œ ë‹¤ìš´ë¡œë“œ(Python)í•˜ì—¬, íšŒê³„ ERP ì—…ë¡œë“œìš© í˜•íƒœë¡œ ê°€ê³µí•œ ë’¤ Google Sheetsë¡œ ì—…ë¡œë“œ(GAS)í•˜ëŠ” ìžë™í™” íŒŒì´í”„ë¼ì¸.
-- **í˜„ìž¬ ìƒíƒœ**: ì•ˆì •í™” ë‹¨ê³„ (ì •ìƒ ìž‘ë™ ì¤‘). êµ¬ê¸€ ë“œë¼ì´ë¸Œ ìš©ëŸ‰ ì´ˆê³¼ ë¬¸ì œ í•´ê²° ë° í’ˆëª©ì½”ë“œ íŒŒì‹± ë²„ê·¸(í•˜ì´í”ˆ ìž”ì¡´ í˜„ìƒ) í•´ê²°ì„ ì™„ë£Œí•˜ì—¬ ì¼ì‹œì ì¸ ì—…ë¡œë“œ ì¤‘ë‹¨ ë° ë°ì´í„° ì˜¤ë¥˜ê°€ ì •ìƒí™”ë¨.
-- **ì¶”ê°€ ìƒíƒœ**: 5/19 ìž¥ì•  ë³µêµ¬ ì™„ë£Œ â€” ì¢€ë¹„ `msedgedriver` + lock/pid ìž”ì¡´ìœ¼ë¡œ ì¸í•œ ë¶ˆì™„ì „ ìž¬ì‹œìž‘ ë²„ê·¸ ìž¬í™•ì¸.
-- **ì£¼ìš” ìŠ¤íƒ**: 
-  - **ë°±ì—”ë“œ/ìžë™í™”**: Python (`run_server.py`), Playwright(Edge ë¸Œë¼ìš°ì € ì»¨íŠ¸ë¡¤)
-  - **ë°ì´í„° ê°€ê³µ/ì ìž¬**: Google Apps Script (`code_generation.gs`, `sheet_hub.gs`)
+Last updated: 2026-07-27
 
----
+## 1. Project Summary
 
-## 2. ì™„ë£Œëœ ê¸°ëŠ¥ (Completed Features)
-1. **OMS ìžë™ ì¡°íšŒ ë° ë‹¤ìš´ë¡œë“œ**: ìž„ì—…/ì‚°ì—… ë¶„ì•¼ ì§€ì •ì¼ìž ê¸°ì¤€ ì£¼ê¸°ì  ë‹¨ìœ„ ë‹¤ìš´ë¡œë“œ ë° ì¤‘ë³µ/ìƒíƒœ ê´€ë¦¬(`state_manager`).
-2. **Google Sheets ì–‘ë°©í–¥ í†µì‹  ë° ì—…ë¡œë“œ**: Python ë°±ì—”ë“œì—ì„œ Google APIë¥¼ ê²½ìœ í•˜ì—¬ ë‹¤ìš´ë¡œë“œëœ HTML í…Œì´ë¸”ì„ íŒŒì‹± í›„ ì‹œíŠ¸ë¡œ ì—…ë¡œë“œ.
-3. **í’ˆëª©ëª…/í’ˆëª©ì½”ë“œ ìžë™ ìƒì„± (ì½”ë“œí™” ë¡œì§)**:
-   - ERPìš© ì‹ë³„ ì½”ë“œë¥¼ ìƒì„±í•˜ê¸° ìœ„í•´ ì›ë³¸ ìƒ‰ìƒ/í’ˆëª…/ê·œê²©ì„ ìª¼ê°œì–´ `ë¸Œëžœë“œ/ìƒ‰ìƒì½”ë“œ + í”Œëž˜ê·¸/ëª¨ë¸ì½”ë“œ + ê·œê²©ì½”ë“œ`ì˜ 3ë‹¨ê³„ë¡œ ì™„ë²½ížˆ ì¡°í•©.
-   - í‚¤ì›Œë“œ ê¸°ë°˜ ì¹´í…Œê³ ë¦¬ ë¶„ë¥˜ (ìš°ì„ ìˆœìœ„: `FRAME` > `RAIL` > `DOOR` > `MOLDING`).
-   - ë³µìž¡í•œ ëª¨ë¸ëª… ì˜ˆì™¸ ì²˜ë¦¬ (PS, PX, í•œê¸€ ë‹¨ì¶•, ë‘ê»˜(MM) ê¸°ë°˜ ê·œê²© ì‚°ì¶œ ë“±).
-4. **ë°ì´í„° ë³´ì¡´ ë¡œì§**: ì‹œíŠ¸ ìš©ëŸ‰ ì´ˆê³¼ ë°©ì§€ë¥¼ ìœ„í•´ ì˜¤ëŠ˜(T)ê³¼ ì–´ì œ(T-1) ë°ì´í„°ë§Œ ë‚¨ê²¨ë‘ê³  ê³¼ê±° ë°ì´í„°ëŠ” ìžë™ ì²­ì†Œ(`cleanupOldData`).
-
----
-
-## 3. ë‚¨ì€ ìž‘ì—… ë° ê°œì„  ì‚¬í•­ (Remaining Tasks)
-1. **GAS ë‹¨ìˆœ íŠ¸ë¦¬ê±°(`onOpen`) ì—ëŸ¬ í•´ê²°**:
-   - í˜„ìž¬ GAS ë‚´ë¶€ì—ì„œ ë‹¨ìˆœ ê¶Œí•œ(`onOpen`)ìœ¼ë¡œ ë‹¤ë¥¸ ì‹œíŠ¸ë¥¼ ì°¸ì¡°(`SpreadsheetApp.openById`)í•˜ë ¤ë‹¤ ë°œìƒí•˜ëŠ” ê¶Œí•œ ì¶©ëŒ ì—ëŸ¬ê°€ ë¡œê·¸ì— ìž”ì¡´í•¨.
-   - **ì¡°ì¹˜ ë°©ì•ˆ**: ì‚¬ìš©ìž ë©”ë‰´ ê°•ì œ ìƒì„±ì´ í•„ìš”í•˜ë‹¤ë©´ **ì„¤ì¹˜ ê°€ëŠ¥í•œ íŠ¸ë¦¬ê±°(Installable Trigger)**ë¡œ ì „í™˜í•˜ê±°ë‚˜ í•´ë‹¹ ì ‘ê·¼ ë¡œì§ ì œê±°.
-2. **ì‹ ê·œ í’ˆëª©ëª… ì˜ˆì™¸ ëª¨ë‹ˆí„°ë§**:
-   - ì˜ë¦¼ì—ì„œ ìƒˆë¡œìš´ í˜•íƒœì˜ ì½”ë“œëª…(ì˜ˆ: ì˜ë¬¸+ìˆ«ìž+íŠ¹ìˆ˜ê¸°í˜¸ í˜¼í•© ëª¨ë¸)ì„ ì¶œì‹œí•  ê²½ìš° ì •ê·œì‹ì— ê±¸ë¦¬ì§€ ì•Šì„ ìˆ˜ ìžˆì–´, ì¶”í›„ ì˜ˆì™¸ ë¡œê·¸ ë°œìƒ ì‹œ ì •ê·œì‹ íŒ¨í„´ ì¶”ê°€ ì—…ë°ì´íŠ¸ í•„ìš”.
-3. **ìž¬ì‹œìž‘ í‘œì¤€ ì ˆì°¨ ìžë™í™”**:
-   - ìž¬ì‹œìž‘ í‘œì¤€ ì ˆì°¨ë¥¼ `START.bat` ë˜ëŠ” ë³„ë„ `RESTART_CLEAN.bat`ìœ¼ë¡œ ìžë™í™”.
-
----
-
-## 4. í•µì‹¬ ê¸°ìˆ ì  ì œì•½ ì‚¬í•­ (Strict Technical Constraints)
-### âš ï¸ ì ˆëŒ€ ìœ„ë°˜ ê¸ˆì§€ ê·œì¹™
-1. **í•˜ì´í”ˆ(`-`) ì œê±° ì›ì¹™**: ERP ì‹œìŠ¤í…œì˜ ì œì•½ìœ¼ë¡œ ì¸í•´ ìµœì¢… í’ˆëª©ì½”ë“œ(`finalCode`)ì— í•˜ì´í”ˆì´ ì ˆëŒ€ í¬í•¨ë˜ì–´ì„œëŠ” ì•ˆ ë¨. (í˜„ìž¬ ë¡œì§ì˜ 445ë¼ì¸ `.replace(/-/g, '')` ìœ ì§€ å¿…).
-2. **í’ˆëª© ë¶„ë¥˜ ìš°ì„ ìˆœìœ„ ì—„ìˆ˜**: `classifyTarget()` ë¡œì§ì—ì„œ ë°˜ë“œì‹œ `ë¬¸í‹€(FRAME) > ë ˆì¼(RAIL) > ë¬¸ì§(DOOR) > ëª°ë”©(MOLDING)`ì˜ ê²€ì¦ ìˆœì„œë¥¼ ì§€ì¼œì•¼ í•¨. ìˆœì„œê°€ ê¼¬ì´ë©´ ì½”ë“œ ë¶„ê¸°ê°€ ì™„ì „ížˆ í‹€ì–´ì§.
-3. **êµ¬ê¸€ ë“œë¼ì´ë¸Œ ìš©ëŸ‰ ë³‘ëª©**: ì‹œìŠ¤í…œì´ HTML íŒŒì¼ ë‹¤ìš´ë¡œë“œì™€ ë³µì‚¬ë³¸ì„ ì£¼ê¸°ì ìœ¼ë¡œ ìƒì„±/ì‚­ì œí•˜ë¯€ë¡œ, êµ¬ê¸€ ë“œë¼ì´ë¸Œì˜ ìš©ëŸ‰ì´ í•­ìƒ 1~2GB ì´ìƒ ì—¬ìœ  ìžˆê²Œ ìœ ì§€ë˜ì–´ì•¼ ì •ìƒ ìž‘ë™í•¨. ìš©ëŸ‰ì´ ê½‰ ì°¨ë©´ Python-GAS ê°„ ì—…ë¡œë“œ í†µì‹ ì´ ì¡°ìš©ížˆ ì‹¤íŒ¨í•¨.
-4. **ë¡œì§ ëª¨ë“ˆí™” ìœ ì§€**: ì½”ë“œë¥¼ ìˆ˜ì •í•  ë•ŒëŠ” ì „ì²´ `generateProductCode`ë¥¼ ê±´ë“œë¦¬ì§€ ë§ê³ , íŠ¹ì • íƒ€ê²Ÿì˜ í•˜ìœ„ í•¨ìˆ˜(`generateBrandColorCode`, `generateModelCode` ë“±)ë§Œ ì›í¬ì¸íŠ¸ë¡œ ìˆ˜ì •í•  ê²ƒ.
-
----
-
-## 5. 2026-05-13 ìž¥ì•  ê¸°ë¡: Selenium/Edge ìžë™í™” ì¶©ëŒ ê°€ëŠ¥ì„±
-
-### ìƒí™© ìš”ì•½
-- 2026-05-13 ì˜ë¦¼ OMSì—ëŠ” ë°ì´í„°ê°€ ì¡´ìž¬í–ˆì§€ë§Œ, ë¡œì»¬ `data/downloads`ì—ëŠ” 5/13 ë‹¤ìš´ë¡œë“œ íŒŒì¼ì´ 0ê°œì˜€ë‹¤.
-- `logs/scheduler_20260513.log`ì—ëŠ” 06:00 `START_SCHEDULED.bat` ì‹¤í–‰ ê¸°ë¡ì´ ìžˆì—ˆì§€ë§Œ, ì •ìƒ ì‹¤í–‰ ì‹œ ìƒì„±ë˜ì–´ì•¼ í•  `logs/app_20260513.json`ì´ ì—†ì—ˆë‹¤.
-- `logs/sheet_reset_date.txt`ë„ `2026-05-12`ì— ë¨¸ë¬¼ëŸ¬ ìžˆì–´, 5/13 ìžë™í™” ë£¨í”„ê°€ ì‹¤ì œë¡œ ì‹œìž‘ë˜ì§€ ì•Šì•˜ìŒì„ í™•ì¸í–ˆë‹¤.
-- ìˆ˜ë™ ë³µêµ¬ í›„ `2026-05-06 ~ 2026-05-13` ë²”ìœ„ë¡œ ìž¬ì¡°íšŒí–ˆê³ , ì‹ ê·œ 17íŒŒì¼ / 193í–‰ì„ Google Sheetsì— ì—…ë¡œë“œ ì™„ë£Œí–ˆë‹¤. ì´ ì¤‘ 5/13 íŒŒì¼ì€ 7ê°œì˜€ë‹¤.
-
-### ì§ì ‘ í™•ì¸ëœ ì›ì¸
-- `START_SCHEDULED.bat`ì—ì„œ PowerShell `Start-Process` ì‹¤í–‰ ì‹œ `RedirectStandardOutput`ê³¼ `RedirectStandardError`ë¥¼ ê°™ì€ íŒŒì¼(`scheduler_YYYYMMDD.log`)ë¡œ ì§€ì •í•˜ê³  ìžˆì—ˆë‹¤.
-- Windows PowerShellì€ stdout/stderrë¥¼ ê°™ì€ íŒŒì¼ë¡œ ë¦¬ë‹¤ì´ë ‰íŠ¸í•˜ëŠ” `Start-Process` í˜¸ì¶œì„ í—ˆìš©í•˜ì§€ ì•Šì•„ `run_server.py`ê°€ ì‹œìž‘ë˜ì§€ ì•Šì•˜ë‹¤.
-- ì´ ë•Œë¬¸ì— ìŠ¤ì¼€ì¤„ëŸ¬ëŠ” "ì‹œìž‘ë¨"ì²˜ëŸ¼ ë³´ì˜€ì§€ë§Œ ì‹¤ì œ ì•± ë¡œê·¸, ì˜ë¦¼ ì¡°íšŒ, ë‹¤ìš´ë¡œë“œ, ì—…ë¡œë“œê°€ ëª¨ë‘ ì‹¤í–‰ë˜ì§€ ì•Šì•˜ë‹¤.
-- ìž„ì‹œ ìˆ˜ì •: stdout/stderrë¥¼ ê°ê° `logs/run_server_stdout_YYYYMMDD.log`, `logs/run_server_stderr_YYYYMMDD.log`ë¡œ ë¶„ë¦¬í–ˆë‹¤.
-
-### ì¶©ëŒ ê°€ëŠ¥ì„±ì´ ë†’ì€ ë°°ê²½ ì›ì¸
-- ì‚¬ìš©ìžê°€ 2026-05-12ì— ë‹¤ë¥¸ í”„ë¡œì íŠ¸ì˜ Selenium ìžë™í™”ë¥¼ ê±´ë“œë ¸ê³ , ê·¸ ì˜í–¥ìœ¼ë¡œ ì´ í”„ë¡œì íŠ¸ì˜ Edge/Selenium ì„¸ì…˜ì´ ê¹¨ì¡Œì„ ê°€ëŠ¥ì„±ì´ ë†’ë‹¤.
-- 5/12 ì˜¤í›„ ë¡œê·¸ì—ëŠ” ë‹¤ìŒ ìœ í˜•ì˜ ë¬¸ì œê°€ ë°˜ë³µëë‹¤.
-  - `ë¸Œë¼ìš°ì € ì—°ê²° ëŠê¹€`
-  - `Selenium ReadTimeoutError`
-  - `ë¸Œë¼ìš°ì € ìž¬ì—°ê²° ì‹¤íŒ¨`
-  - `no such window: target window already closed`
-  - `web view not found`
-- ì´ í”„ë¡œì íŠ¸ëŠ” Edge ë””ë²„ê·¸ í¬íŠ¸ `9333`ê³¼ Selenium EdgeDriverì— ì˜ì¡´í•œë‹¤. ë‹¤ë¥¸ ìžë™í™”ê°€ ê°™ì€ í¬íŠ¸, ê°™ì€ Edge í”„ë¡œí•„, ê°™ì€ ë¸Œë¼ìš°ì € ì„¸ì…˜ì„ ê³µìœ í•˜ê±°ë‚˜ ì¢…ë£Œí•˜ë©´ í˜„ìž¬ í”„ë¡œì íŠ¸ì˜ ì„¸ì…˜ë„ ê°™ì´ ê¹¨ì§ˆ ìˆ˜ ìžˆë‹¤.
-- ì ê²€ ë‹¹ì‹œ `msedgedriver.exe` ìž”ì—¬ í”„ë¡œì„¸ìŠ¤ê°€ ì—¬ëŸ¬ ê°œ ë‚¨ì•„ ìžˆì–´, Selenium ì‹¤í–‰ ìž”ìž¬ ë˜ëŠ” ë‹¤ë¥¸ ìžë™í™”ì™€ì˜ ê°„ì„­ ê°€ëŠ¥ì„±ì´ ìžˆì—ˆë‹¤.
-
-### ê²ªì—ˆë˜ ë¬¸ì œ
-- 5/13 ë°ì´í„° ëˆ„ë½: ì˜ë¦¼ì—ëŠ” ë°ì´í„°ê°€ ìžˆì—ˆì§€ë§Œ ë¡œì»¬ ë‹¤ìš´ë¡œë“œ 0ê±´.
-- ì•± ë¡œê·¸ ë¶€ìž¬: `app_20260513.json`ì´ ì—†ì–´ run loop ì§„ìž… ì—¬ë¶€ë¥¼ ë°”ë¡œ í™•ì¸í•˜ê¸° ì–´ë ¤ì› ë‹¤.
-- ìŠ¤ì¼€ì¤„ëŸ¬ ë¡œê·¸ ì°©ì‹œ: `START_SCHEDULED completed`ê°€ ì°í˜€ë„ ì‹¤ì œ `run_server.py` ì‹œìž‘ ì„±ê³µì„ ë³´ìž¥í•˜ì§€ ì•Šì•˜ë‹¤.
-- ë¸Œë¼ìš°ì € ì„¸ì…˜ ë¶ˆì•ˆì •: 5/12 ì˜¤í›„ë¶€í„° EdgeDriver timeoutê³¼ window closed ì˜¤ë¥˜ê°€ ë°˜ë³µëë‹¤.
-- ì •ë¦¬ ëˆ„ë½: ìˆ˜ë™ ì¢…ë£Œ í›„ì—ë„ `v11.lock` ë° ì¼ë¶€ Python/EdgeDriver í”„ë¡œì„¸ìŠ¤ê°€ ë‚¨ì„ ìˆ˜ ìžˆì—ˆë‹¤.
-
-### ë‹¤ìŒ ê°œë°œ ë•Œ ê°œì„ í•  ì 
-- ìžë™í™”ë³„ Edge ë””ë²„ê·¸ í¬íŠ¸ë¥¼ ë¶„ë¦¬í•œë‹¤.
-  - ì˜ˆ: ì´ í”„ë¡œì íŠ¸ëŠ” `9333`, ë‹¤ë¥¸ í”„ë¡œì íŠ¸ëŠ” `9334`, ë˜ ë‹¤ë¥¸ í”„ë¡œì íŠ¸ëŠ” `9335`.
-- ìžë™í™”ë³„ Edge `user-data-dir`/í”„ë¡œí•„ì„ ë¶„ë¦¬í•œë‹¤.
-  - ê°™ì€ Edge í”„ë¡œí•„ì„ ì—¬ëŸ¬ Selenium ìžë™í™”ê°€ ê³µìœ í•˜ì§€ ì•Šê²Œ í•œë‹¤.
-- `START_SCHEDULED.bat`ì—ì„œ ì‹¤ì œ `run_server.py` ìƒì¡´ í™•ì¸ì„ ì¶”ê°€í•œë‹¤.
-  - PID íŒŒì¼ ìƒì„±ë§Œ ë³´ì§€ ë§ê³ , `app_YYYYMMDD.json` ìƒì„± ë˜ëŠ” lock port `5081` listen ì—¬ë¶€ê¹Œì§€ í™•ì¸í•œë‹¤.
-- ìŠ¤ì¼€ì¤„ëŸ¬ ë¡œê·¸ì— "ì•± ì‹œìž‘ ì„±ê³µ/ì‹¤íŒ¨"ë¥¼ ëª…í™•ížˆ ë‚¨ê¸´ë‹¤.
-  - `Start-Process` ì‹¤íŒ¨, PID ì—†ìŒ, ì•± ë¡œê·¸ ë¯¸ìƒì„±, Edge í¬íŠ¸ ì—°ê²° ì‹¤íŒ¨ë¥¼ ëª¨ë‘ scheduler ë¡œê·¸ì— ê¸°ë¡í•œë‹¤.
-- ë¸Œë¼ìš°ì €/ë“œë¼ì´ë²„ ìž”ì—¬ í”„ë¡œì„¸ìŠ¤ ì •ë¦¬ ì ˆì°¨ë¥¼ ê°•í™”í•œë‹¤.
-  - ìžë™ ì‹œìž‘ ì „ ì´ í”„ë¡œì íŠ¸ê°€ ì†Œìœ í•œ `msedgedriver.exe`, stale `v11.lock`, stale `run_server.pid`ë¥¼ ì•ˆì „í•˜ê²Œ ì •ë¦¬í•œë‹¤.
-- ì¶©ëŒ ê°ì§€ìš© ì‚¬ì „ ì ê²€ì„ ì¶”ê°€í•œë‹¤.
-  - ì‹œìž‘ ì „ `9333` í¬íŠ¸ ì ìœ  PIDì™€ í”„ë¡œì„¸ìŠ¤ ê²½ë¡œë¥¼ ê¸°ë¡í•œë‹¤.
-  - í¬íŠ¸ê°€ ì´ë¯¸ ì—´ë ¤ ìžˆìœ¼ë©´ ì´ í”„ë¡œì íŠ¸ê°€ ë„ìš´ Edgeì¸ì§€ í™•ì¸í•˜ê³ , ì•„ë‹ˆë©´ ì‹œìž‘ì„ ì¤‘ë‹¨í•˜ê±°ë‚˜ ë³„ë„ í¬íŠ¸ë¡œ ì „í™˜í•œë‹¤.
-- ìžë™í™” ìž¥ì•  ì•Œë¦¼ì„ ì¶”ê°€í•œë‹¤.
-  - 06:00 ì´í›„ ì¼ì • ì‹œê°„ ì•ˆì— `app_YYYYMMDD.json`ì´ ì—†ê±°ë‚˜ ë‹¤ìš´ë¡œë“œ ì‚¬ì´í´ ë¡œê·¸ê°€ ì—†ìœ¼ë©´ ê²½ê³ ë¥¼ ë‚¨ê¸´ë‹¤.
-- ë‹¤ìŒ êµ¬í˜„ ì „ê¹Œì§€ ìš´ì˜ìƒ ì£¼ì˜:
-  - ë‹¤ë¥¸ í”„ë¡œì íŠ¸ Seleniumì„ ì‹¤í–‰í•  ë•Œ ì´ í”„ë¡œì íŠ¸ì˜ `9333` Edge ë””ë²„ê·¸ ë¸Œë¼ìš°ì €ë¥¼ ë‹«ê±°ë‚˜ ê³µìœ í•˜ì§€ ì•ŠëŠ”ë‹¤.
-  - ë™ì‹œì— ì—¬ëŸ¬ ìžë™í™”ë¥¼ ëŒë ¤ì•¼ í•˜ë©´ í¬íŠ¸ì™€ í”„ë¡œí•„ì„ ë¨¼ì € ë¶„ë¦¬í•œë‹¤.
-
----
-
-## 6. 2026-05-19 ìž¥ì•  ê¸°ë¡: ë¶ˆì™„ì „ ìž¬ì‹œìž‘ìœ¼ë¡œ ì¸í•œ ì„œë²„ ì‚¬ë§
-
-### ìƒí™© ìš”ì•½
-- ì„œë²„ ìž¬ì‹œìž‘ 1ì°¨ ì‹œë„: READY 6ê±´ ì²˜ë¦¬ í›„ ì„œë²„ ì‚¬ë§.
-- ì›ì¸: ì¢€ë¹„ `msedgedriver`(PID 4792/85344) + lock/pid íŒŒì¼ ìž”ì¡´ ìƒíƒœì—ì„œ ìž¬ì‹œìž‘.
-- ì™„ì „ ì •ë¦¬ í›„ ìž¬ì‹œìž‘: 8íŒŒì¼ / 109í–‰ ì—…ë¡œë“œ ì™„ë£Œ.
-
-### í™•ì¸ëœ ì›ì¸
-- lock/pid íŒŒì¼(`v11.lock`, `run_server.pid`, `edge_9333.pid`) ë¯¸ì œê±° ìƒíƒœ ìž¬ì‹œìž‘.
-- ì¢€ë¹„ `msedgedriver` í”„ë¡œì„¸ìŠ¤ ê°„ì„­.
-
-### ë³µêµ¬ ìˆœì„œ (í‘œì¤€ ì ˆì°¨ë¡œ í™•ì •)
-1. `cmd /c STOP_SCHEDULED.bat`
-2. `Get-Process msedgedriver | Stop-Process -Force`
-3. `netstat -ano | findstr ":9333"` â†’ í•´ë‹¹ PID `taskkill`
-4. `Remove-Item logs\v11.lock, logs\run_server.pid, logs\edge_9333.pid -Force`
-5. `cmd /c START_SCHEDULED.bat`
-
-### êµí›ˆ
-- ìž¬ì‹œìž‘ ì „ ë°˜ë“œì‹œ `msedgedriver` ì „ì²´ kill + lock íŒŒì¼ ì™„ì „ ì œê±° í•„ìˆ˜.
-- `STOP_SCHEDULED`ë§Œìœ¼ë¡œëŠ” ë¶€ì¡± â€” ìž”ì—¬ í”„ë¡œì„¸ìŠ¤ ìˆ˜ë™ ì •ë¦¬ í•„ìš”.
-
-## 7. 2026-06-01 ¿î¿µ ¿øÀÎ ºÐ¼® ¹× Á¶Ä¡
-
-### ÇÙ½É °á·Ð
-- `5/30 08:31` ¹èÄ¡´Â ½ÇÁ¦ ½ÇÆÐ°¡ ¾Æ´Ï¶ó Á¤»ó Ã³¸®µÇ¾ú´Ù.
-- ¹Ýº¹ÀûÀ¸·Î º¸ÀÎ "¾ÆÄ§ »çÀÌÅ¬ ÈÄ ÀÚµ¿ ´Ù¿î·Îµå/¾÷·Îµå°¡ ¾È µÇ°í ¼öµ¿ Àç±âµ¿À¸·Î º¹±¸µÇ´Â Çö»ó"ÀÇ ÇÙ½É ¿øÀÎÀº ´Ù¿î·Îµå ·ÎÁ÷º¸´Ù ¿î¿µ ÇÁ·Î¼¼½º °ü¸® ²¿ÀÓÀÌ´Ù.
-- Æ¯È÷ ´ÙÀ½ 3°¡Áö°¡ °ãÄ£ »óÅÂ·Î ÆÇ´ÜÇÑ´Ù.
-  - Áßº¹ `run_server.py` ÀÎ½ºÅÏ½º ÀÜÁ¸
-  - stale `v11.lock`, `run_server.pid` ¿Í ½ÇÁ¦ ½ÇÇà ÇÁ·Î¼¼½º ºÒÀÏÄ¡
-  - °øÀ¯ Edge µð¹ö±× Æ÷Æ® `9333` Àç»ç¿ëÀ¸·Î ÀÎÇÑ ¼¼¼Ç ¼ÒÀ¯±Ç Ãæµ¹
-
-### È®ÀÎ ±Ù°Å
-- `logs/app_20260530.json`
-  - `2026-05-30 08:31:26` ½Å±Ô 3°Ç ´Ù¿î·Îµå ¿Ï·á
-  - `2026-05-30 08:31:33` `Staged 82 rows`
-  - `2026-05-30 08:31:36` ÇØ´ç 3°Ç `COMPLETED`
-- `run_server.py` sleep heartbeat Ãß°¡ ÈÄ È®ÀÎ °á°ú
-  - `sleep` ±¸°£ ÀÚÃ¼´Â »ì¾Æ ÀÖ¾ú°í, 60ÃÊ heartbeat ·Î±×°¡ °è¼Ó ³²¾Ò´Ù.
-  - µû¶ó¼­ "07:00 ¿Ï·á ÈÄ sleep ÀÚÃ¼°¡ ¸ØÃã"Àº Á÷Á¢ ¿øÀÎÀ¸·Î º¸±â ¾î·Æ´Ù.
-- °°Àº ³¯Â¥ ·Î±× ¾È¿¡ ¼­·Î ´Ù¸¥ ÀÎ½ºÅÏ½º ÈçÀûÀÌ ¼¯¿´´Ù.
-  - `run_server_stderr_20260601.log`
-  - `run_server_stderr_20260530.log`
-  - µ¿ÀÏ ³¯Â¥ ·Î±×°¡ ¿©·¯ stderr ÆÄÀÏ¿¡ ¼¯¿© ÀÖ¾î, ¿À·¡µÈ ÇÁ·Î¼¼½º ÀÜÁ¸ °¡´É¼ºÀÌ ³ô´Ù.
-
-### ÀÔ·Â ´ë±âÃ¢ °ü·Ã ÆÇ´Ü
-- »ç¿ëÀÚ°¡ º» `°è¼ÓÇÏ·Á¸é ¾Æ¹« Å°³ª ´©¸£½Ê½Ã¿À . . .` Ã¢Àº ¿øÀÎ°ú ¹«°üÇÏ´Ù°í º¸±â ¾î·Æ´Ù.
-- ÀÚµ¿ ½ºÄÉÁÙ °æ·ÎÀÎ `START_SCHEDULED.bat`, `STOP_SCHEDULED.bat`, ÇöÀç `START.bat`¿¡´Â Á÷Á¢ `pause`°¡ ¾ø¾ú´Ù.
-- ´Ù¸¸ ÇÁ·ÎÁ§Æ® ³» ¼öµ¿/º¸Á¶ ¹èÄ¡¿¡´Â `pause`, `choice`, `Read-Host`°¡ ´Ù¼ö Á¸ÀçÇß°í, `cmd.exe` ÇÁ·Î¼¼½º°¡ ºñÁ¤»óÀûÀ¸·Î ¸¹ÀÌ ¶° ÀÖ¾ú´Ù.
-- µû¶ó¼­ ÀÔ·Â ´ë±âÃ¢Àº "±Ùº» ¿øÀÎ"ÀÌ¶ó±âº¸´Ù ¾Æ·¡ µÎ °¡Áö Áß ÇÏ³ªÀÇ À¯·ÂÇÑ Áõ»ó/º¸Á¶ ¿øÀÎÀ¸·Î º»´Ù.
-  - ¼öµ¿/º¸Á¶ ¹èÄ¡°¡ ¿î¿µ °æ·Î¿¡ ¼¯¿© ´ë±â »óÅÂ·Î ³²À½
-  - ¼­¹ö ÇÁ·Î¼¼½º Á¾·á ÈÄ ¹Ù±ù cmd Ã¢¸¸ ³²¾Æ ÀÔ·Â ´ë±â
-
-### 2026-06-01 Á¶Ä¡
-- `run_server.py`
-  - `faulthandler` È°¼ºÈ­
-  - sleep heartbeat ·Î±× Ãß°¡
-  - Á¾·á ½Ã±×³Î ·Î±× Ãß°¡
-- ¼öµ¿/º¸Á¶ ¹èÄ¡ ÀÔ·Â ´ë±â ±âº» ºñÈ°¼ºÈ­
-  - `start_all.bat`
+- Purpose: automatically download Youngrim OMS documents, parse them, and upload structured data for downstream ERP and Google Sheets workflows.
+- Main runtime: `run_server.py`
+- Main start paths:
+  - `START_SCHEDULED.bat`
+  - `RESTART_CLEAN.bat`
   - `start_edge_debug.bat`
-  - `start_ready.bat`
-  - `start_youngrim_browser.bat`
-  - `run_v10_server.bat`
-  - `kill_processes.bat`
-- À§ ¹èÄ¡µéÀº ±âº»ÀûÀ¸·Î ÀÔ·Â ´ë±â¸¦ ÇÏÁö ¾Ê°í, ÇÊ¿ä ½Ã¿¡¸¸ `MANUAL_PROMPT=1`ÀÏ ¶§ ´ë±âÇÏµµ·Ï ¼öÁ¤
-- stale »óÅÂ Á¤¸® ÈÄ Àç±âµ¿ ¼öÇà
-  - »õ ¼­¹ö PID: `91824`
-  - »õ lock PID: `91824`
-  - Edge PID: `223448`
-  - `127.0.0.1:5081` listen È®ÀÎ
-  - `127.0.0.1:9333` listen È®ÀÎ
-  - `2026-06-01 16:41:35 ~ 16:41:43` Ã¹ »çÀÌÅ¬ Á¤»ó ¿Ï·á È®ÀÎ
+- Key ports:
+  - Server lock/listener: `5081`
+  - Edge debug port: `9333`
+- Key state files:
+  - `logs/run_server.pid`
+  - `logs/v11.lock`
+  - `logs/edge_9333.pid`
+  - `logs/health_status.json`
 
-### ÇöÀç ÆÇ´Ü
-- ÇöÀç ½ÃÁ¡Àº ´ÜÀÏ ÀÎ½ºÅÏ½º·Î Àç±âµ¿µÈ µÚ Á¤»ó µ¿ÀÛ ÁßÀÌ´Ù.
-- ´Ù¸¸ ¹Ýº¹ ¹®Á¦ÀÇ ±Ùº» ¿øÀÎÀº ¿©ÀüÈ÷ "Áßº¹ ÀÎ½ºÅÏ½º + stale lock/pid + °øÀ¯ 9333 ¼¼¼Ç" Ãà¿¡ ÀÖÀ¸¹Ç·Î, ³»ÀÏ ¾ÆÄ§ ·Î±×±îÁö È®ÀÎÇØ¾ß Àç¹ß ¾ïÁ¦ È¿°ú¸¦ ÃÖÁ¾ ÆÇ´ÜÇÒ ¼ö ÀÖ´Ù.
+## 2. Current Operational Model
 
-### 2026-06-02 Ãß°¡ Á¡°Ë
-- `START_SCHEDULED.bat` °¡ `run_server.pid` ¸¸ º¸°í ¼­¹ö »ýÁ¸ ¿©ºÎ¸¦ ÆÇ´ÜÇÏ¸é, PID ÆÄÀÏÀÌ stale ÀÌ°Å³ª ´©¶ôµÈ °æ¿ì `5081` ¿¡ ÀÌ¹Ì »ì¾Æ ÀÖ´Â ¼­¹ö°¡ ÀÖ¾îµµ »õ ÀÎ½ºÅÏ½º¸¦ ¶Ç ¶ç¿ï ¼ö ÀÖÀ½À» È®ÀÎÇß´Ù.
-- ÀÌ¿¡ µû¶ó `START_SCHEDULED.bat` ¸¦ º¸°­Çß´Ù.
-  - `run_server.pid` È®ÀÎº¸´Ù ¸ÕÀú `127.0.0.1:5081` ¸®½º³Ê PID¸¦ Á¶È¸
-  - `5081` ÀÌ ÀÌ¹Ì listen ÁßÀÌ¸é ÇØ´ç PID¸¦ `logs/run_server.pid` ¿¡ ´Ù½Ã ±â·ÏÇÏ°í Àç±âµ¿À» ½ºÅµ
-  - PID ÆÄÀÏ ÀÐ±â´Â `set /p < file` ´ë½Å `for /f` ·Î º¯°æ
-- `STOP_SCHEDULED.bat` µµ º¸°­Çß´Ù.
-  - PID ÆÄÀÏÀÌ ¾ø°Å³ª Æ²·Áµµ `127.0.0.1:5081` ¸®½º³Ê PID¸¦ fallback À¸·Î Ã£¾Æ Á¾·á ½Ãµµ
-  - `edge_9333.pid` µµ µ¿ÀÏÇÏ°Ô `for /f` ·Î ÀÐµµ·Ï º¯°æ
-- ¼öµ¿ `cmd /c START_SCHEDULED.bat` ½ÇÇà ½Ã `Input redirection is not supported` ¸Þ½ÃÁö°¡ ³ªÅ¸³µÀ¸³ª, ½ÇÁ¦ ½ºÄÉÁÙ·¯ °æ·Î¿¡¼­´Â `2026-06-02 07:08` ½ÇÇàÀÌ ¿Ï·áµÈ °ÍÀ» `scheduler_20260602.log` ·Î È®ÀÎÇß´Ù.
-- µû¶ó¼­ ÀÌ ¸Þ½ÃÁö´Â ÇöÀç Codex ½ÇÇà È¯°æÀÇ ºñ´ëÈ­Çü stdin Æ¯¼º ¿µÇâ °¡´É¼ºÀÌ ³ô°í, ½ÇÁ¦ ¿î¿µ Àå¾Ö¿Í´Â ºÐ¸®ÇØ¼­ ºÁ¾ß ÇÑ´Ù.
-- ´Ù¸¸ ¿À´Ã ·Î±×´Â ÀÌ¹Ì Áßº¹ ÀÎ½ºÅÏ½º ÈçÀû°ú »÷µå¹Ú½º ¼öµ¿ ½ÇÇà ÈçÀûÀÌ ¼¯¿© ÀÖ¾î, ¿ÏÀü Ã»Á¤ ÆÇÁ¤Àº ´ÙÀ½ ¾ÆÄ§ ·Î±×¿¡¼­ ÀçÈ®ÀÎ ÇÊ¿äÇÏ´Ù.
+- The server uses a single-instance lock file plus a localhost listener on port `5081`.
+- The downloader attaches to a dedicated Edge session on port `9333`.
+- The preferred Edge profile is the dedicated no-extension automation profile used by the current batch files.
+- Health is tracked through `health_status.json`, scheduler logs, watchdog logs, and per-run stdout/stderr logs.
 
-## 8. 2026-06-04 ÇöÀç ¿î¿µ »óÅÂ¿Í ÇâÈÄ °³¹ß ¹æÇâ
+## 3. Major Confirmed Failure Themes
 
-### ÇöÀç ¿î¿µ »óÅÂ
-- `2026-06-04 07:26` Àç±âµ¿ ÀÌÈÄ ±âÁØÀ¸·Î´Â ÇöÀç ´ÜÀÏ ÀÎ½ºÅÏ½º Á¤ÇÕ¼ºÀÌ ¸Â´Â »óÅÂ¸¦ È®ÀÎÇß´Ù.
-  - `run_server.pid = 51512`
-  - `v11.lock = 51512`
-  - `127.0.0.1:5081 LISTENING = 51512`
-  - `edge_9333.pid = 36080`
-  - `127.0.0.1:9333 LISTENING = 36080`
-- ÃÖ½Å ÀÚµ¿ »çÀÌÅ¬µµ Á¤»ó ¿Ï·áµÇ¾ú´Ù.
-  - `07:26:39` »çÀÌÅ¬ ½ÃÀÛ
-  - »ê¾÷/ÀÓ¾÷ Á¶È¸ Á¤»ó
-  - ½Å±Ô `0°Ç`
-  - `READY ÆÄÀÏ ¾øÀ½`
-  - `07:26:47` »çÀÌÅ¬ Á¤»ó ¿Ï·á ÈÄ sleep ÁøÀÔ
-- `07:27 ~ 07:39` ±¸°£ sleep heartbeat °¡ ¿¬¼ÓÀ¸·Î ³²¾Æ ÀÖ¾î, ÇöÀç ½ÃÁ¡¿¡¼­´Â ÇÁ·Î¼¼½º°¡ »ì¾Æ ÀÖ°í ´ë±â ·çÇÁµµ Á¤»ó µ¿ÀÛ ÁßÀÌ´Ù.
-- µû¶ó¼­ ÇöÀç ½ÃÁ¡ ±âÁØÀ¸·Î´Â **Á¤»ó µ¿ÀÛ Áß**À¸·Î ÆÇ´ÜÇÑ´Ù.
+### 2026-05-13
 
-### ÇöÀç±îÁö Á¤¸®µÈ ±Ùº» ¿øÀÎ
-- ¹Ýº¹ Àå¾ÖÀÇ º»ÁúÀº ´Ù¿î·Îµå/¾÷·Îµå ºñÁî´Ï½º ·ÎÁ÷º¸´Ù **¿î¿µ ±¸Á¶ Ãæµ¹**¿¡ ÀÖ´Ù.
-- Æ¯È÷ ¾Æ·¡ 4°¡Áö°¡ ÇÙ½É ¿øÀÎ ÃàÀÌ´Ù.
-  - Áßº¹ `run_server.py` ÀÎ½ºÅÏ½º ÀÜÁ¸
-  - stale `run_server.pid`, `v11.lock` °ú ½ÇÁ¦ Æ÷Æ® ¼ÒÀ¯ PID ºÒÀÏÄ¡
-  - °øÀ¯ Edge µð¹ö±× Æ÷Æ® `9333` ¿Í ºê¶ó¿ìÀú ¼¼¼Ç ¼ÒÀ¯±Ç Ãæµ¹
-  - ¼öµ¿/ÀÚµ¿/º¹±¸ °æ·Î°¡ ¼­·Î ´Ù¸¥ ¹èÄ¡¿Í ¼­·Î ´Ù¸¥ Edge ÇÁ·ÎÇÊÀ» »ç¿ë
-- heartbeat Áø´Ü °á°ú `sleep` ÀÚÃ¼´Â Á÷Á¢ ¿øÀÎÀÌ ¾Æ´Ï¸ç, **sleep Áß ¿ÜºÎ Á¾·á ¶Ç´Â ÀÎ½ºÅÏ½º Ãæµ¹** ÂÊ °¡´É¼ºÀÌ ´õ ³ô´Ù.
+- Scheduler launched, but `run_server.py` did not actually start.
+- Root cause: `Start-Process` output redirection handling was fragile, and operational verification was too weak.
+- Recovery was completed manually for missing files.
 
-### ¾ÕÀ¸·ÎÀÇ °³¹ß ¹æÇâ
-- ÇöÀç PC È¯°æÀº ÀýÀü/·Î±×¿ÀÇÁ/¹é½Å/°ø¿ë µ¥½ºÅ©Åé »ç¿ë ¿µÇâÀÌ Å©¹Ç·Î, Àå±âÀûÀ¸·Î´Â **»ó½Ã ±¸µ¿ °¡»ó¼­¹ö(¶Ç´Â Àü¿ë ¼­¹ö) ÀÌÀü**ÀÌ °¡Àå À¯·ÂÇÑ ±Ùº» ÇØ°á ¹æÇâÀÌ´Ù.
-- ´Ü, ¼­¹ö ÀÌÀü¸¸À¸·Î´Â ºÎÁ·ÇÏ°í **½ÇÇà ±¸Á¶ ´ÜÀÏÈ­**°¡ ÇÔ²² °¡¾ß ÇÑ´Ù.
+### 2026-05-19
 
-### ¿ì¼± Àû¿ëÇÒ ±¸Á¶ °³¼± ¿øÄ¢
-1. ¼­¹ö ½ÃÀÛ °æ·Î¸¦ ÇÏ³ª·Î ÅëÀÏÇÑ´Ù.
-   - ¼öµ¿ ½ÃÀÛ°ú ÀÚµ¿ ½ÃÀÛÀÌ °°Àº ¹èÄ¡/°°Àº ±ÔÄ¢À» Å¸µµ·Ï Á¤¸®
-2. Edge ½ÇÇà Ã¥ÀÓÀ» ÇÑ ±ºµ¥·Î ÅëÀÏÇÑ´Ù.
-   - `START_SCHEDULED.bat` ¿Í `run_server.py` °¡ µ¿½Ã¿¡ ºê¶ó¿ìÀú¸¦ ¶ç¿ìÁö ¾Êµµ·Ï ¿ªÇÒ ºÐ¸®
-3. Edge ÇÁ·ÎÇÊÀ» ÇÏ³ª·Î ÅëÀÏÇÑ´Ù.
-   - ÀÚµ¿/¼öµ¿/º¹±¸ °æ·Î ¸ðµÎ µ¿ÀÏ `user-data-dir` »ç¿ë
-4. °¨½Ã ±âÁØÀ» PID ÆÄÀÏÀÌ ¾Æ´Ï¶ó ½ÇÁ¦ ¼ÒÀ¯±Ç ±âÁØÀ¸·Î °­È­ÇÑ´Ù.
-   - `5081` PID, `run_server.pid`, `v11.lock`, app ·Î±× PID ¸¦ Ç×»ó ´ëÁ¶ °¡´ÉÇÏ°Ô À¯Áö
-5. watchdog À» Ãß°¡ÇÑ´Ù.
-   - `5081`, `9333`, PID Á¤ÇÕ¼º ±úÁü ½Ã ÀÚµ¿ Á¤¸® ¹× Àç±âµ¿
+- Restart after cleanup still failed due to stale pid/lock files and zombie `msedgedriver` processes.
+- Recovery lesson: `STOP_SCHEDULED` alone was not enough; stale files and driver processes also had to be cleared.
 
-### °¡»ó¼­¹ö ÀÌÀü ½Ã ±â´ë È¿°ú
-- »ç¿ëÀÚ PC »ç¿ë°ú ÀÚµ¿È­ ½ÇÇàÀÌ ºÐ¸®µÇ¾î ºê¶ó¿ìÀú/ÇÁ·Î¼¼½º Ãæµ¹ °¨¼Ò
-- ÀýÀü, ·Î±×¿ÀÇÁ, È­¸é Àá±Ý, ¼öµ¿ ½ÇÇà ÈçÀû ¿µÇâ ÃÖ¼ÒÈ­
-- Àü¿ë Edge ÇÁ·ÎÇÊ/Àü¿ë Æ÷Æ®/Àü¿ë ÀÛ¾÷ ½ºÄÉÁÙ·¯·Î ¿î¿µ ÀÏ°ü¼º È®º¸
-- µ¿ÀÏ È¯°æ¿¡¼­ 24½Ã°£ ·Î±× ÃàÀûÀÌ °¡´ÉÇØ Àç¹ß ºÐ¼® Á¤¹Ðµµ Çâ»ó
+### 2026-06-05
 
-### ÇöÀç °á·Ð
-- **ÇöÀç´Â Á¤»ó ÀÛµ¿ ÁßÀÌÁö¸¸, ±¸Á¶ÀûÀ¸·Î´Â ¾ÆÁ÷ Àç¹ß °¡´É¼ºÀÌ ³²¾Æ ÀÖ´Ù.**
-- ´ÙÀ½ °³¹ßÀÇ ¸ñÇ¥´Â ±â´É ¼öÁ¤ÀÌ ¾Æ´Ï¶ó **¿î¿µ ±¸Á¶ ´Ü¼øÈ­ + °¡»ó¼­¹ö ÀÌÀü ÁØºñ**´Ù.
+- A non-Youngrim Edge instance occupied port `9333`.
+- Result: scheduled startup aborted correctly, but the system had no sufficient automatic recovery/alert path.
 
+### 2026-06-10
 
----
+- Watchdog-based recovery and `RESTART_CLEAN.bat` were introduced.
+- Health checks were strengthened to wait for `5081`, `9333`, and `app_YYYYMMDD.json`.
 
-## 9. 2026-06-04 ?? ?? ?? ?? ? ?? ?? ???
+### 2026-07-20 to 2026-07-21
 
-### ? ??? ??
-- ?? ??? ?? ???? ? "??? ??? ?????"? ?? ???? ?? ?????.
-- ?? ?? ??? ???, ?? ?? ??? ?? ?? ??? ?? ???.
+- Downloads after late morning were delayed or missed.
+- Root cause cluster:
+  - repeated browser reconnect failures
+  - server/Edge shutdown at 17:00
+  - watchdog skipping recovery outside its configured time window
+- Recovery on 2026-07-21 confirmed missing files were later collected.
 
-### ?? ???(Baseline)
-- ??/???? ???? ??? ? ???
-  - `run_server.pid = ?? 5081 PID`
-  - `v11.lock = ?? 5081 PID`
-  - `edge_9333.pid = ?? 9333 PID`
-- `run_server.py`? ?? ?? ??? ??? ???.
-  - `faulthandler`
-  - sleep heartbeat
-  - ?? ??? ??
-  - `python -m py_compile run_server.py` ?? ??
-- `START_SCHEDULED.bat`? ?? ?? ??? ??? ???.
-  - `5081` ??? ?? ??
-  - `9333` ??? ? `YoungrimAutoEdgeProfile` ??
-  - ??? ????? ?? ??? ??
-  - ?? ?? ? `health_check.bat` ??
-- `notify_failure.bat`, `health_check.bat`? ????.
-  - ?? ??? ?? `logs\health_YYYYMMDD.log`? ???
+### 2026-07-22 to 2026-07-23
 
-### ?? ?? ? ?? ?? ??? ??
-1. ?? ????? ??? ?????
-   - `5081` ??? ?? ??
-2. ??? ?? ??? PID ??? ????
-   - `run_server.pid`, `v11.lock`, `5081 PID` ??
-3. ????? ?? ??? ??? Edge ???? ?? ????
-   - `9333` PID? CommandLine ??
-4. sleep heartbeat? ? ????, ? ?? ?????
-   - ? ???? ?? ???? ??? ??
-5. ????? ??? ??????
-   - `scheduler_YYYYMMDD.log`, `health_YYYYMMDD.log` ??
+- User symptom: downloads appeared to stop around `7/22`.
+- Confirmed behavior:
+  - watchdog repeatedly detected `run_server.pid missing`, `5081 not listening`, missing app log, and stale health
+  - outside the recovery window, watchdog only logged `outside_window`
+  - once morning recovery started, Edge often failed to make `9333` ready within the old 30-second timeout
+- Root causes:
+  - Edge startup delay
+  - watchdog recovery timeout too short for real restart time
+  - recovery window policy leaving overnight failures untouched until morning
 
-### ??? ???? ? ??/?? ??
-1. `logs\app_YYYYMMDD.json`
-2. `logs\run_server_stderr_YYYYMMDD.log`
-3. `logs\scheduler_YYYYMMDD.log`
-4. `logs\health_YYYYMMDD.log`
-5. `logs\run_server.pid`
-6. `logs\v11.lock`
-7. `logs\edge_9333.pid`
+## 4. Fixes Applied on 2026-07-27
 
-### ?? ?? ??
-1. `STOP_SCHEDULED.bat` ??
-2. ?? ?? `python.exe`, `pythonw.exe`, `msedgedriver.exe` ??
-3. `9333`? ?? Edge? CommandLine ??
-4. `YoungrimAutoEdgeProfile`? ??? ??? ?? Edge? ??
-5. stale PID/lock ?? ??
-6. `START_SCHEDULED.bat` ??
-7. ??? ?? ?? ??
-   - `run_server.pid`
-   - `v11.lock`
-   - `edge_9333.pid`
-   - `netstat -ano | findstr 5081`
-   - `netstat -ano | findstr 9333`
-8. ? ??? ?? ?? ?? ??
+### Edge and restart timing
 
-### ?? ???? ??? ?
-- ???? `9333 LISTENING`?? ??? ?????.
-- ??? `YoungrimAutoEdgeProfile`? ?? ?? ????? ?? ????.
-- ???? ?? ??? ??? ??? ???.
-- ??? `notify_failure.bat`, `health_check.bat`? ?? health ??? ???.
-- ???? `run_server.py`? ????, sleep ???, ?? ???? ??? ???.
-- ??? `faulthandler`, sleep heartbeat, signal ??? ??? ????.
+- `START_SCHEDULED.bat`
+  - Edge wait increased to `60s`
+  - server wait increased to `60s`
+  - retry once after cleaning Youngrim-profile processes
+- `RESTART_CLEAN.bat`
+  - Edge wait increased to `60s`
+  - server wait increased to `60s`
+  - app log wait increased to `90s`
+  - retry once for Edge startup failure
+- `start_edge_debug.bat`
+  - Edge wait increased to `60s`
+- `run_server.py`
+  - browser auto-start wait increased to `60s` through `EDGE_START_WAIT_SEC`
 
-### ????? ?? ?? ?? ??
-- ?? ??? ??? ???? ???? ?? ?? ????.
-- ?? ?? ??? ?? ????.
-  - ?? `run_server.py` ????
-  - stale `run_server.pid`, `v11.lock`
-  - ?? `9333` ??? ??? Edge ??? ???
-  - ??/??/?? ??? ?? ?? ???? ?? ??? ??
+## 4A. Additional confirmed issue and fix from log-stamped runtime on 2026-07-28
 
-### ?? ?? ??
-- ???? ?? ???? ? ???? ??? ???? ????.
-- ???? ????? ??? ??? ??.
-  1. ?? ?? ???
-  2. ???? ?? ?? ???
-  3. Edge ??? ?? ??
-  4. watchdog ??
-  5. ?? PC ?? ??(??/????/?? Edge ??) ?? ??
+- First recovery cycle behavior:
+  - the downloader queried `start_date=2026-07-21` to `end_date=2026-07-28`, so the stalled `2026-07-24` to `2026-07-27` range was inside scope
+  - however, the first cycle was redirected to `login.jsp?returl=...estimate_list.jsp...` and found `0 actionable rows`
+- Later state after login was restored:
+  - backlog files were downloaded, but some remained in `READY`
+  - confirmed local state before manual drain:
+    - `2026-07-24`: `COMPLETED 1`, `READY 9`
+    - `2026-07-27`: `READY 5`
+  - `2026-07-25` and `2026-07-26` had no local backlog entries in `v10_state.json`
+- Root cause of the leftover backlog:
+  - `run_server.py` upload logic enforced `MAX_ROWS_PER_UPLOAD = 300`
+  - once the row budget was exceeded, `auto_upload()` stopped and left the rest for the next cycle
+- Applied follow-up fix:
+  - same-cycle upload draining was added
+  - new `drain_ready_uploads()` repeatedly runs upload batches until `READY=0` or progress stalls
+  - manual recovery completed the stranded backlog at `Sheet5` timestamp `2026-07-28 07:36:51` (`14` files, `482` rows)
 
+## 4B. Current verified operational judgment after post-incident review
 
-### ?? ??: Selenium localhost timeout ?? ??
-- `2026-06-04 10:01` ????, ??? ???? ??? ??? `run_cycle()` ?? ?? ?? ??? `driver.get(config.YOUNGRIM_URL)` ?? ????.
-- ?? ??? ??:
-  - `HTTPConnectionPool(host='localhost', port=xxxxx): Read timed out. (read timeout=120)`
-- ? ??? ???? ?? ?? ??? ??? `msedgedriver` / Edge ?? ?? ?????, ?? `no such window` ?? ??? ????? ???? ???.
-- ??? `run_server.py` ?? ?? ??? ??? ? ??? ???? ????.
-  - `Read timed out`
-  - `HTTPConnectionPool`
-  - `Max retries exceeded`
-  - `Failed to establish a new connection`
-  - `localhost ... timed out`
-- ??? ?? ?? ?? ?? ?, ?? ??? ??? ??? ?? ?? ???? ??? ??? ???? ???? ??.
-- ?? ??? ?? `[Main] Unhandled error` ? ????, ? ?? ??? ???? ?? ????? ???? ????.
+- Profile contamination trigger:
+  - confirmed symptom: the old automation profile could hang on Selenium debugger attach
+  - unconfirmed cause: no checked log or code path proves what originally contaminated that profile
+  - current status: the trigger remains unknown
+- `--disable-extensions` evaluation:
+  - confirmed working recovery path used both `--disable-extensions` and a fresh dedicated no-extension profile
+  - not yet proven: `--disable-extensions` alone fixing the old contaminated profile
+  - operational interpretation: this is a strong mitigation, but not yet a fully isolated root-cause fix by itself
+- Watchdog outside-window behavior:
+  - the old "full skip" state is no longer exact
+  - current code still skips full `RESTART_CLEAN` outside the configured window, but may trigger `V10_AutoStart` as reduced recovery
+  - this means outside-window recovery is better than before, but still cannot solve every profile-level failure mode
+- Alerting status:
+  - `notify_failure.bat` is not a stub; it posts to the monitor web app URL
+  - however, watchdog logs on `2026-07-22` recorded repeated `HTTP Error 403: Forbidden` responses during alert attempts
+  - current operational judgment: alert code exists, but end-to-end alert delivery is not verified healthy
+- Update-trigger hypothesis:
+  - `2026-07-22 15:47` was not the first sign of failure; scheduler logs already showed `9333` startup failures at `2026-07-22 14:53` and `15:28`
+  - EdgeUpdate activity existed around `2026-07-22 15:00`, `16:00`, and `17:01`, but checked logs showed update checks/service activity rather than a confirmed install event in that exact failure window
+  - checked local file/version evidence points more strongly to later Edge version movement around `2026-07-24` and `2026-07-27`
+  - current operational judgment: automatic Edge update is not confirmed as the direct trigger for the `2026-07-22 15:47~17:00` break
 
-## 2026-06-04 Ãß°¡ »óÈ² Á¤¸®
+### Watchdog behavior
 
-### ÇöÀç±îÁö È®ÀÎµÈ Èå¸§
+- `watchdog_check.py`
+  - `WATCHDOG_RESTART_CLEAN_TIMEOUT_SEC` default set to `180`
+  - long-running `RESTART_CLEAN.bat` no longer gets cut off after 10 seconds
+  - new outside-window reduced recovery path added:
+    - instead of full `RESTART_CLEAN`, watchdog may call scheduled task `V10_AutoStart`
+    - controlled by `WATCHDOG_OUTSIDE_WINDOW_AUTOSTART`
 
-- `start_edge_debug.bat`, `START.bat`°¡ ±âº» Edge ÇÁ·ÎÇÊÀ» »ç¿ëÇÏ°í ÀÖ¾î `9333` Ãæµ¹À» À¯¹ßÇß´Ù.
-- ÀÌ¸¦ `YoungrimAutoEdgeProfile` ¹æÇâÀ¸·Î Á¤¸®ÇÑ µÚ ¼­¹ö/ºê¶ó¿ìÀú PID Á¤ÇÕ¼ºÀº ´Ù½Ã ¸ÂÃè´Ù.
-- ±× ´ÙÀ½ »õ Áø´Ü ·Î±×¿¡¼­, ´Ù¿î·Îµå ´©¶ôÃ³·³ º¸ÀÎ Çö»óÀÇ Á÷Á¢ ¿øÀÎÀÌ `login.jsp` ¸®´ÙÀÌ·ºÆ®¶ó´Â Á¡ÀÌ µå·¯³µ´Ù.
+### Log separation
 
-### ÀÌ¹ø¿¡ »õ·Î È®ÀÎµÈ ÇÙ½É »ç½Ç
+- `START_SCHEDULED.bat` and `RESTART_CLEAN.bat` now write per-run logs:
+  - `run_server_stdout_YYYYMMDD_HHMMSS.log`
+  - `run_server_stderr_YYYYMMDD_HHMMSS.log`
+- This prevents same-day restart runs from sharing one stdout/stderr filename.
 
-- ¼­¹ö/Æ÷Æ® »óÅÂ°¡ Á¤»óÀÌ¾îµµ ´Ù¿î·Îµå°¡ ¾È µÉ ¼ö ÀÖ´Ù.
-- ÀÌ¶§ ¹Ýµå½Ã `logs/app_YYYYMMDD.json`¿¡¼­ ¾Æ·¡¸¦ º»´Ù.
-  - ¿äÃ» URLÀÌ `estimate_list.jsp`ÀÎÁö
-  - ¾Æ´Ï¸é `login.jsp?returl=...` ÀÎÁö
-- ¸¸¾à `login.jsp`·Î °¡¸é:
-  - ¸ñ·Ï ¼öÁý/ÆäÀÌÁö³×ÀÌ¼Ç ¹®Á¦º¸´Ù ¸ÕÀú
-  - ¿µ¸² ·Î±×ÀÎ ¼¼¼Ç ¸¸·á¸¦ ÀÇ½ÉÇØ¾ß ÇÑ´Ù.
+## 5. Current Recovery Policy
 
-### »õ ºñ±³ ±âÁØ
+- Full recovery window:
+  - default `06:05` to `16:45`
+- Outside that window:
+  - full `RESTART_CLEAN` is skipped
+  - reduced recovery may still trigger `V10_AutoStart`
+- Remaining risk:
+  - if the scheduled task itself cannot recover the process, overnight failures may still last until daytime intervention
+  - if the browser is alive but logged out, downloads can still appear healthy at process level while returning `0 actionable rows`
+  - if a future profile-level attach failure reappears, reduced outside-window autostart may still be insufficient without manual profile intervention
 
-Á¤»ó:
-- `run_server.pid = v11.lock = 5081 PID`
-- `9333`Àº `YoungrimAutoEdgeProfile`
-- ·Î±×¿¡ `estimate_list.jsp`
-- `actionable rows found > 0`
-- `order_nos=[...]`¿¡ ½ÇÁ¦ ÁÖ¹®¹øÈ£ Á¸Àç
+## 6. What to Check First During an Incident
 
-ºñÁ¤»ó:
-- `login.jsp?returl=...estimate_list.jsp...`
-- `actionable rows found = 0`
-- `order_nos=[]`
+1. `logs/scheduler_YYYYMMDD.log`
+2. `logs/watchdog_YYYYMMDD.log`
+3. `logs/restart_clean_YYYYMMDD.log`
+4. `logs/app_YYYYMMDD.json`
+5. `logs/health_status.json`
+6. actual listeners on:
+   - `127.0.0.1:5081`
+   - `127.0.0.1:9333`
+7. whether `9333` belongs to `YoungrimAutoEdgeProfile`
 
-### Àå¾Ö ½Ã Áï½Ã º¹±¸ ¼ø¼­
+## 7. Expected Healthy Startup Evidence
 
-1. `9333` Æ÷Æ® Edge°¡ Àü¿ë ÇÁ·ÎÇÊÀÎÁö È®ÀÎ
-2. Àü¿ë Edge Ã¢¿¡¼­ ¿µ¸² ·Î±×ÀÎ »óÅÂ È®ÀÎ
-3. ·Î±×ÀÎ ÈÄ ´ÙÀ½ »çÀÌÅ¬ ·Î±× ÀçÈ®ÀÎ
-4. ¾Æ·¡ ¼¼ ÁÙÀÌ Á¤»óÀÎÁö È®ÀÎ
-5. `Estimate page 1/2`
-6. `actionable rows found (...)`
-7. `Page summary ... order_nos=[...]`
+In a healthy automatic start cycle, the scheduler log should contain both:
 
-### ÀÌ¹ø Áø´ÜÀ¸·Î ¹Ù²ï Á¡
+- `Edge debug port 9333 is ready`
+- `run_server.py is listening on port 5081`
 
-- ÀÌÀü¿¡´Â »ê¾÷ ´©¶ô °ÇÀ» ÆäÀÌÁö³×ÀÌ¼Ç/ÇàÃßÃâ ¹®Á¦·Î¸¸ ÀÇ½ÉÇßÀ½
-- ÀÌÁ¦´Â µ¿ÀÏ Áõ»óÀÌ¶óµµ ¸ÕÀú
-  - ÇÁ·ÎÇÊ Ãæµ¹
-  - ·Î±×ÀÎ ¼¼¼Ç ¸¸·á
-  ¸¦ ¹èÁ¦ÇØ¾ß ÇÑ´Ù´Â ±âÁØÀÌ »ý±è
+If only one appears, startup is incomplete.
 
+Healthy recovery of backlog also requires:
 
----
+- the dedicated debug Edge to stay on an authenticated Youngrim OMS page, not `login.jsp`
+- `Sheet5` growth that matches the backlog files, with no lingering `READY` estimate entries in `v10_state.json`
 
-## ì•Œë ¤ì§„ ë¯¸í•´ê²° ë¦¬ìŠ¤í¬
+## 8. Legacy Preservation
 
-### ê¸°ë³¸ Edgeì˜ 9333 í¬íŠ¸ ì„ ì  (2026-06-05 í™•ì¸)
-
-- **í˜„ìƒ**: ì‹œìŠ¤í…œ ì™¸ë¶€ì˜ `msedge.exe`ê°€ `--remote-debugging-port=9333`ìœ¼ë¡œ
-  ì‹¤í–‰ë˜ì–´ ìžˆìœ¼ë©´ `START_SCHEDULED.bat`ì´ Abortedë˜ê³  ë‹¹ì¼ ë‹¤ìš´ë¡œë“œ ì „ë©´ ì¤‘ë‹¨.
-- **í˜„ìž¬ ë°©ì–´**: í”„ë¡œí•„ ê²€ì¦ ë¡œì§ìœ¼ë¡œ ìž˜ëª»ëœ Edge ìž¬ì‚¬ìš© ì°¨ë‹¨ (ì •ìƒ ë™ìž‘).
-- **ë¯¸í•´ê²°**:
-  - â‘  ê¸°ë³¸ Edgeê°€ 9333ì„ ìž¡ëŠ” ê²½ë¡œ ë¶ˆëª…í™•
-  - â‘¡ ì°¨ë‹¨ í›„ ìžë™ ì•Œë¦¼/ìž¬ì‹œë„ ì—†ìŒ
-- **ëŒ€ì‘ ê¸°ì¤€**: ì•„ì¹¨ì— ë‹¤ìš´ë¡œë“œ 0ê±´ì´ë©´ `scheduler_YYYYMMDD.log`ì—ì„œ
-  `Aborted` ì—¬ë¶€ ë¨¼ì € í™•ì¸.
+- Original damaged document preserved as:
+  - `docs/context_legacy.md`
+- Latin1 extraction review file:
+  - `docs/context_review.txt`

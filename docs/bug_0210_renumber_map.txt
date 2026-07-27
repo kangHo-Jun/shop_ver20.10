@@ -1,0 +1,42 @@
+Bug Renumber Map
+Generated: 2026-07-27
+
+Purpose:
+- Track the temporary numbering used earlier in this session versus the legacy-number-aligned numbering now used in `docs/bug_0210.md`.
+- Legacy source comparison remains available in `docs/bug_0210_legacy.md`.
+
+Old session number -> New legacy-aligned number
+
+BUG-13 -> BUG-22
+Reason: same 2026-05-13 scheduler-start / server-not-actually-started theme.
+
+BUG-14 -> BUG-23
+Reason: stale pid/lock/zombie-driver restart residue was folded into the broader runtime ownership/residue problem.
+
+BUG-15 -> BUG-23
+Reason: watchdog/recovery need was merged into the same operational restart-residue theme instead of standing alone.
+
+BUG-16 -> BUG-28
+Reason: wrong Edge instance owning `9333` is the same family as the legacy port-ownership/startup-block problem.
+
+BUG-17 -> BUG-26
+Reason: browser reconnect failure maps to the legacy WebDriver/browser timeout and reconnect instability theme.
+
+BUG-18 -> BUG-29
+Reason: outside-window recovery skip became part of the final overnight-outage root-cause cluster.
+
+BUG-19 -> BUG-29
+Reason: delayed recovery and missed downloads on 2026-07-20~2026-07-21 are treated as precursor behavior leading into the later overnight outage cluster.
+
+BUG-20 -> BUG-29
+Reason: this was already the direct 2026-07-22~2026-07-23 outage summary.
+
+BUG-21 -> BUG-29
+Reason: 2026-07-27 timing fixes are recorded as remediation under the final outage item, not as a standalone bug number.
+
+BUG-22 -> BUG-29
+Reason: reduced outside-window recovery is part of the same remediation set for the final outage item.
+
+Notes:
+- The previous `BUG-13`~`BUG-22` sequence was a temporary rewrite-stage numbering scheme, not a faithful carry-over from the damaged legacy document.
+- The current document intentionally resumes the readable legacy continuity from `BUG-22` through `BUG-29`.

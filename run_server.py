@@ -46,10 +46,33 @@ EDGE_PID_FILE = config.LOGS_DIR / "edge_9333.pid"
 LOCK_FILE = config.LOGS_DIR / "v11.lock"
 SHEET_RESET_DATE_FILE = config.LOGS_DIR / "sheet_reset_date.txt"
 SINGLE_INSTANCE_PORT = int(os.getenv("RUN_SERVER_LOCK_PORT", "5081"))
+EDGE_START_WAIT_SEC = int(os.getenv("EDGE_START_WAIT_SEC", "60"))
 instance_lock_socket = None
 sleep_loop_counter = 0
 last_cycle_completed_at = None
 faulthandler_log_handle = None
+HEALTH_STATUS_FILE = config.LOGS_DIR / "health_status.json"
+last_download_summaries = []
+
+
+def _write_health_status(status, **extra):
+    payload = {
+        "status": status,
+        "timestamp": datetime.now().isoformat(),
+        "pid": os.getpid(),
+        "lock_port": SINGLE_INSTANCE_PORT,
+        "edge_port": config.BROWSER_DEBUG_PORT,
+        "running": running,
+        "last_cycle_completed_at": last_cycle_completed_at,
+    }
+    payload.update(extra)
+
+    tmp_path = HEALTH_STATUS_FILE.with_suffix(".json.tmp")
+    try:
+        tmp_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        tmp_path.replace(HEALTH_STATUS_FILE)
+    except Exception as exc:
+        logger.warning("[Health] Failed to write %s: %s", HEALTH_STATUS_FILE, exc)
 
 
 def _write_pid_file():
@@ -175,6 +198,12 @@ def _log_sleep_heartbeat(second_index):
             sleep_loop_counter,
             running,
         )
+        _write_health_status(
+            "sleeping",
+            sleep_elapsed_sec=second_index,
+            sleep_interval_sec=config.DOWNLOAD_INTERVAL_SEC,
+            sleep_loop_counter=sleep_loop_counter,
+        )
 
 
 def acquire_single_instance_lock():
@@ -277,22 +306,26 @@ def connect_browser():
     global driver
     port = config.BROWSER_DEBUG_PORT
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    result = sock.connect_ex(('127.0.0.1', port))
-    sock.close()
+    def _port_is_open():
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            return sock.connect_ex(('127.0.0.1', port)) == 0
+        finally:
+            sock.close()
 
-    if result != 0:
+    if not _port_is_open():
         logger.info("[Browser] Edge not running on port %s. Launching...", port)
         subprocess.Popen(
             ["cmd", "/c", "start_edge_debug.bat"],
             creationflags=subprocess.CREATE_NEW_CONSOLE
         )
-        time.sleep(5)
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        result = sock.connect_ex(('127.0.0.1', port))
-        sock.close()
-        if result != 0:
-            raise ConnectionError(f"Edge debug port {port} is not available")
+        deadline = time.time() + EDGE_START_WAIT_SEC
+        while time.time() < deadline:
+            if _port_is_open():
+                break
+            time.sleep(1)
+        if not _port_is_open():
+            raise ConnectionError(f"Edge debug port {port} is not available after {EDGE_START_WAIT_SEC}s")
         _record_edge_pid_from_listener(port)
 
     options = EdgeOptions()
@@ -507,6 +540,21 @@ def _extract_list_rows(soup):
     return actionable_rows
 
 
+def _extract_order_numbers(rows, limit=20):
+    order_numbers = []
+    for row in rows:
+        cols = row.find_all("td")
+        if not cols:
+            continue
+        order_no = cols[0].get_text(strip=True)
+        if not order_no:
+            continue
+        order_numbers.append(order_no)
+        if len(order_numbers) >= limit:
+            break
+    return order_numbers
+
+
 def _read_filter_values(soup):
     filters = {}
     for name in ("start_date", "end_date", "younglim_gubun"):
@@ -610,11 +658,16 @@ def download_from_page(list_url, save_dir, doc_type):
 
 # ?????? ???????????????????????????????????????????????????????????????????????????????????????????????????????
 def _download_from_page_impl(list_url, save_dir, doc_type):
+    global last_download_summaries
+
     completed_keys = set(state_manager.get_keys_by_status(doc_type, state_manager.STATUS_COMPLETED))
     history_keys = set(load_history().get(doc_type, []))
     queue = [_apply_date_window(list_url)]
     visited = set()
     downloaded = 0
+    skipped_existing = 0
+    missing_detail_url = 0
+    actionable_total = 0
 
     while queue:
         current_list_url = queue.pop(0)
@@ -636,10 +689,20 @@ def _download_from_page_impl(list_url, save_dir, doc_type):
 
         soup = BeautifulSoup(html_source, 'html.parser')
         rows = _extract_list_rows(soup)
+        actionable_total += len(rows)
         filters = _read_filter_values(soup)
         logger.info("[Download] %s actionable rows found (%s) filters=%s", len(rows), current_url, filters)
+        logger.info(
+            "[Download] Page summary: url=%s queue_remaining=%s visited_pages=%s order_nos=%s",
+            current_url,
+            len(queue),
+            len(visited),
+            _extract_order_numbers(rows),
+        )
 
-        for next_url in _extract_pagination_urls(list_url, current_url, soup, html_source):
+        next_urls = _extract_pagination_urls(list_url, current_url, soup, html_source)
+        logger.info("[Download] Pagination candidates from %s -> %s", current_url, next_urls)
+        for next_url in next_urls:
             if next_url not in visited and next_url not in queue:
                 queue.append(next_url)
 
@@ -658,9 +721,11 @@ def _download_from_page_impl(list_url, save_dir, doc_type):
             button_ref = _extract_button_reference(order_no, row, cols[-1], younglim_gubun)
             history_key = button_ref["history_key"]
             if history_key in completed_keys or history_key in history_keys:
+                skipped_existing += 1
                 continue
 
             if not button_ref["detail_url"]:
+                missing_detail_url += 1
                 logger.warning("[Download] Missing detail URL for %s, fallback key=%s", order_no, history_key)
                 state_manager.update_state(doc_type, history_key, state_manager.STATUS_FAILED, "Missing detail URL / button reference")
                 continue
@@ -694,6 +759,23 @@ def _download_from_page_impl(list_url, save_dir, doc_type):
                 logger.error("[Download] Error %s (%s): %s", order_no, history_key, e)
                 state_manager.update_state(doc_type, history_key, state_manager.STATUS_FAILED, str(e)[:200])
 
+    logger.info(
+        "[Download] Final summary for %s: downloaded=%s skipped_existing=%s missing_detail_url=%s visited_pages=%s",
+        list_url,
+        downloaded,
+        skipped_existing,
+        missing_detail_url,
+        len(visited),
+    )
+    last_download_summaries.append({
+        "url": list_url,
+        "doc_type": doc_type,
+        "actionable_rows": actionable_total,
+        "downloaded": downloaded,
+        "skipped_existing": skipped_existing,
+        "missing_detail_url": missing_detail_url,
+        "visited_pages": len(visited),
+    })
     return downloaded
 
 
@@ -701,7 +783,7 @@ def auto_upload(doc_type="estimate"):
     ready_keys = sorted(state_manager.get_keys_by_status(doc_type, state_manager.STATUS_READY))
     if not ready_keys:
         logger.info("[Upload] READY files not found")
-        return
+        return {"processed_files": 0, "remaining_ready": 0}
 
     logger.info("[Upload] READY %s files found. Starting Google Sheets upload...", len(ready_keys))
 
@@ -729,7 +811,7 @@ def auto_upload(doc_type="estimate"):
 
     if not rows:
         logger.info("[Upload] No rows collected for upload")
-        return
+        return {"processed_files": 0, "remaining_ready": len(ready_keys)}
 
     try:
         result = sheet_hub.stage_and_copy(doc_type, rows, processed)
@@ -737,7 +819,10 @@ def auto_upload(doc_type="estimate"):
             for key in processed:
                 state_manager.update_state(doc_type, key, state_manager.STATUS_FAILED, "No mapped rows for Google Sheets")
             logger.warning("[Upload] 0 mapped rows for %s file(s); marked FAILED instead of COMPLETED", len(processed))
-            return
+            return {
+                "processed_files": len(processed),
+                "remaining_ready": len(state_manager.get_keys_by_status(doc_type, state_manager.STATUS_READY)),
+            }
         if not result.get("skipped_duplicate"):
             sheet_hub.complete(force_clear=False)
         history = load_history()
@@ -747,13 +832,69 @@ def auto_upload(doc_type="estimate"):
                 history[doc_type].append(key)
         logger.info("[Upload] %s rows / %s files -> Google Sheets complete", result['row_count'], result['file_count'])
         save_history(history)
+        return {
+            "processed_files": len(processed),
+            "remaining_ready": len(state_manager.get_keys_by_status(doc_type, state_manager.STATUS_READY)),
+        }
     except Exception as e:
         logger.error("[Upload] Google Sheets upload failed: %s", e)
+        return {
+            "processed_files": 0,
+            "remaining_ready": len(state_manager.get_keys_by_status(doc_type, state_manager.STATUS_READY)),
+        }
+
+
+def drain_ready_uploads(doc_type="estimate", max_batches=10):
+    total_processed = 0
+    previous_ready = None
+
+    for batch_index in range(1, max_batches + 1):
+        ready_before = len(state_manager.get_keys_by_status(doc_type, state_manager.STATUS_READY))
+        if ready_before <= 0:
+            break
+
+        logger.info(
+            "[Upload] Batch %s/%s starting with READY=%s",
+            batch_index,
+            max_batches,
+            ready_before,
+        )
+
+        result = auto_upload(doc_type)
+        processed_files = result.get("processed_files", 0)
+        ready_after = result.get(
+            "remaining_ready",
+            len(state_manager.get_keys_by_status(doc_type, state_manager.STATUS_READY)),
+        )
+        total_processed += processed_files
+
+        if ready_after <= 0:
+            break
+
+        if processed_files <= 0 or ready_after == previous_ready:
+            logger.warning(
+                "[Upload] READY drain stalled after batch %s: processed=%s remaining_ready=%s",
+                batch_index,
+                processed_files,
+                ready_after,
+            )
+            break
+
+        previous_ready = ready_after
+
+    return {
+        "processed_files": total_processed,
+        "remaining_ready": len(state_manager.get_keys_by_status(doc_type, state_manager.STATUS_READY)),
+    }
 
 
 # Main cycle
 def run_cycle():
-    global last_cycle_completed_at
+    global last_cycle_completed_at, last_download_summaries
+    cycle_started_at = datetime.now().isoformat()
+    last_download_summaries = []
+
+    _write_health_status("cycle_started", last_cycle_started_at=cycle_started_at)
     try:
         ensure_daily_sheet_reset()
     except Exception as e:
@@ -766,6 +907,11 @@ def run_cycle():
             connect_browser()
         except Exception as e:
             logger.error("[Cycle] Browser reconnect failed: %s", e)
+            _write_health_status(
+                "browser_reconnect_failed",
+                last_cycle_started_at=cycle_started_at,
+                last_error=str(e),
+            )
             return
 
     # ??轅붽틓????????
@@ -786,17 +932,55 @@ def run_cycle():
 
     # Upload READY files
     ready_count = len(state_manager.get_keys_by_status("estimate", state_manager.STATUS_READY))
+    _write_health_status(
+        "download_complete",
+        last_cycle_started_at=cycle_started_at,
+        downloaded_new=total_new,
+        ready_count=ready_count,
+        download_pages=last_download_summaries,
+    )
     if ready_count > 0:
         logger.info("[Cycle] READY %s docs found. Starting upload.", ready_count)
+        _write_health_status(
+            "upload_started",
+            last_cycle_started_at=cycle_started_at,
+            downloaded_new=total_new,
+            ready_count=ready_count,
+            download_pages=last_download_summaries,
+        )
         try:
             sheet_hub.connect()
-            auto_upload("estimate")
+            upload_result = drain_ready_uploads("estimate")
+            logger.info(
+                "[Cycle] Upload drain finished: processed_files=%s remaining_ready=%s",
+                upload_result["processed_files"],
+                upload_result["remaining_ready"],
+            )
         except Exception as e:
             logger.error("[Cycle] Upload error: %s", e)
+            _write_health_status(
+                "upload_error",
+                last_cycle_started_at=cycle_started_at,
+                downloaded_new=total_new,
+                ready_count=ready_count,
+                remaining_ready_count=len(state_manager.get_keys_by_status("estimate", state_manager.STATUS_READY)),
+                download_pages=last_download_summaries,
+                last_error=str(e),
+            )
     else:
         logger.info("[Cycle] No READY files. Upload skipped.")
 
     logger.info("[Cycle] Completed. Next cycle in %s minutes", config.DOWNLOAD_INTERVAL_SEC // 60)
+    last_cycle_completed_at = datetime.now().isoformat()
+    _write_health_status(
+        "cycle_completed",
+        last_cycle_started_at=cycle_started_at,
+        last_cycle_completed_at=last_cycle_completed_at,
+        downloaded_new=total_new,
+        ready_count=ready_count,
+        remaining_ready_count=len(state_manager.get_keys_by_status("estimate", state_manager.STATUS_READY)),
+        download_pages=last_download_summaries,
+    )
 
 
 # ?????? ?饔낅떽???????????????????????????????????????????????????????????????????????????????????????????????????????
