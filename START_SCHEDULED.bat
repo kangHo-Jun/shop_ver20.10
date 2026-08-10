@@ -131,7 +131,7 @@ set "EDGE_START_ATTEMPT=1"
 
 :start_edge_attempt
 echo [%date% %time%] Starting dedicated Edge debug browser... attempt=!EDGE_START_ATTEMPT! >> "%LOG_FILE%"
-powershell -NoProfile -Command "$p = Start-Process -FilePath 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' -ArgumentList '--remote-debugging-port=9333 --user-data-dir=""%EDGE_PROFILE_DIR%"" --profile-directory=""Default"" --disable-extensions --no-first-run --no-default-browser-check http://door.yl.co.kr/oms/main.jsp' -PassThru; Set-Content -Path '%cd%\%EDGE_PID_FILE%' -Value $p.Id"
+powershell -NoProfile -Command "$args = @('--remote-debugging-port=9333', '--user-data-dir=%EDGE_PROFILE_DIR%', '--profile-directory=Default', '--disable-extensions', '--no-first-run', '--no-default-browser-check', 'http://door.yl.co.kr/oms/main.jsp'); $p = Start-Process -FilePath 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' -ArgumentList $args -PassThru; Set-Content -Path '%cd%\%EDGE_PID_FILE%' -Value $p.Id"
 if errorlevel 1 (
     echo [%date% %time%] Failed to start Edge debug browser on attempt !EDGE_START_ATTEMPT! >> "%LOG_FILE%"
     if "!EDGE_START_ATTEMPT!"=="1" (
