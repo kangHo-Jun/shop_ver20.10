@@ -217,6 +217,28 @@ Last updated: 2026-07-27
     - actual Selenium attach probe success
   - watchdog default timeout for `RESTART_CLEAN` increased from `180s` to `420s`
 
+## 5C. 2026-08-12 live recovery status and remaining gaps
+
+- Confirmed live failure pattern after the above hardening:
+  - a fresh `run_server.py` could still start and bind `5081`, but browser attach could fail immediately after startup with:
+    - `session not created: cannot connect to microsoft edge at 127.0.0.1:9333`
+    - `from chrome not reachable`
+  - watchdog still observed repeated half-alive states with only `9333` left alive
+- Confirmed recovery result:
+  - after clearing the stuck Youngrim debug Edge session and starting again through `START_SCHEDULED.bat`
+  - listeners recovered to:
+    - `127.0.0.1:9333`
+    - `127.0.0.1:5081`
+  - both probes passed again:
+    - `edge_debug_probe.py --port 9333 --require-youngrim`
+    - `edge_attach_probe.py --port 9333 --require-youngrim`
+  - `health_status.json` returned to `cycle_completed`
+- Remaining unresolved risks:
+  - Edge attach failure is reduced but not eliminated; the same `chrome not reachable` condition still reappeared in the field
+  - watchdog alert delivery is still broken with repeated `HTTP 403` responses
+  - recovery outside the main window is still weaker than in-window recovery because it can fall back to `V10_AutoStart` instead of always doing a full cleanup
+  - host time/log time can drift ahead of the expected operational date, which complicates incident timelines and scheduler interpretation
+
 ## 6. What to Check First During an Incident
 
 1. `logs/scheduler_YYYYMMDD.log`
@@ -230,6 +252,7 @@ Last updated: 2026-07-27
 7. whether `9333` belongs to `YoungrimAutoEdgeProfile`
 8. whether `edge_debug_probe.py --port 9333 --require-youngrim` passes
 9. whether `edge_attach_probe.py --port 9333 --require-youngrim` passes
+10. whether the host clock and the expected operational date still match before trusting log chronology
 
 ## 7. Expected Healthy Startup Evidence
 

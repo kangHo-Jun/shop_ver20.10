@@ -523,3 +523,13 @@ Sheet3/Sheet4 諛깆뾽 + Sheet5 濡쒓렇 + ?대━??meta ??idle
 
 - `9333`과 DevTools JSON 응답만으로는 정상 Edge를 보장하지 못한다는 점을 확인했고, 실제 attach 실패(`chrome not reachable`)가 반복된 장애 원인으로 재정리했다.
 - `edge_attach_probe.py`를 추가하고 `START_SCHEDULED.bat`, `RESTART_CLEAN.bat`, `watchdog_check.py`를 보강해, 실제 Selenium attach 가능 여부와 더 긴 recovery timeout(`420s`)을 기준으로 복구 흐름을 조정했다.
+
+## [2026-08-12] 재발 확인 후 재복구, 미해결 리스크 재정리
+
+- 위 보강 이후에도 `chrome not reachable` 기반 attach 실패가 다시 재발했고, `9333`만 남는 half-alive 상태가 반복됨을 확인했다.
+- Youngrim 전용 Edge debug 세션을 다시 정리한 뒤 `START_SCHEDULED.bat`로 재기동하여 `5081`, `9333`, DevTools probe, attach probe, `health_status.json=cycle_completed`까지 다시 복구했다.
+- 다만 이번 조사로 아직 미해결인 축도 명확해졌다:
+  - Edge attach failure의 재발 가능성
+  - watchdog Web App 알림 `HTTP 403`
+  - outside-window recovery 한계
+  - host/log date drift
