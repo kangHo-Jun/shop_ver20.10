@@ -14,7 +14,9 @@ set "EDGE_PROFILE_DIR=%LOCALAPPDATA%\YoungrimAutoEdgeProfile_noext"
 set "SERVER_PORT=5081"
 set "EDGE_PORT=9333"
 set "EDGE_WAIT_SEC=60"
-set "SERVER_WAIT_SEC=60"
+set "EDGE_PROBE_WAIT_SEC=20"
+set "EDGE_ATTACH_PROBE_WAIT_SEC=2"
+set "SERVER_WAIT_SEC=180"
 set "RUN_SERVER_STDOUT=logs\run_server_stdout_%LOG_DATE%_%LOG_TIME%.log"
 set "RUN_SERVER_STDERR=logs\run_server_stderr_%LOG_DATE%_%LOG_TIME%.log"
 
@@ -50,10 +52,12 @@ if not defined SERVER_LISTENER_PID (
         if not "%EXISTING_SERVER_PID%"=="" (
             powershell -NoProfile -Command "if (Get-Process -Id %EXISTING_SERVER_PID% -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"
             if not errorlevel 1 (
-                set "SERVER_LISTENER_PID=%EXISTING_SERVER_PID%"
-                echo [%date% %time%] Existing run_server.py PID %EXISTING_SERVER_PID% is still running. Reusing without restart. >> "%LOG_FILE%"
+                echo [%date% %time%] Stale run_server PID file detected without port %SERVER_PORT% listener. Killing PID %EXISTING_SERVER_PID% and starting fresh. >> "%LOG_FILE%"
+                taskkill /f /pid %EXISTING_SERVER_PID% /t >> "%LOG_FILE%" 2>&1
+                timeout /t 2 /nobreak >nul
             )
         )
+        del "%SERVER_PID_FILE%" >nul 2>&1
     )
 )
 
@@ -75,11 +79,26 @@ if errorlevel 1 (
 
 echo [%date% %time%] Waiting for run_server.py to bind port %SERVER_PORT%... >> "%LOG_FILE%"
 set "SERVER_READY_PID="
+set "STARTED_SERVER_PID="
+for /f "usebackq delims=" %%I in ("%SERVER_PID_FILE%") do (
+    set "STARTED_SERVER_PID=%%I"
+    goto :started_server_pid_loaded
+)
+
+:started_server_pid_loaded
 for /l %%N in (1,1,%SERVER_WAIT_SEC%) do (
     for /f "tokens=5" %%P in ('netstat -ano ^| findstr /R /C:":%SERVER_PORT% .*LISTENING"') do (
         set "SERVER_READY_PID=%%P"
         > "%SERVER_PID_FILE%" echo %%P
         goto :server_ready
+    )
+    if defined STARTED_SERVER_PID (
+        powershell -NoProfile -Command "if (Get-Process -Id %STARTED_SERVER_PID% -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"
+        if errorlevel 1 (
+            echo [%date% %time%] run_server.py PID %STARTED_SERVER_PID% exited before binding port %SERVER_PORT%. >> "%LOG_FILE%"
+            call "%~dp0notify_failure.bat" "START_SCHEDULED: run_server.py exited before binding port %SERVER_PORT%"
+            exit /b 1
+        )
     )
     timeout /t 1 /nobreak >nul
 )
@@ -121,6 +140,12 @@ if defined EDGE_LISTENER_PID (
         call "%~dp0notify_failure.bat" "START_SCHEDULED: %EDGE_PORT% owned by non-Youngrim-noext profile PID=!EDGE_LISTENER_PID!"
         exit /b 1
     )
+    call :probe_edge "reuse_existing"
+    if errorlevel 1 (
+        echo [%date% %time%] Existing Edge debug browser PID %EDGE_LISTENER_PID% failed health probe. Recreating session. >> "%LOG_FILE%"
+        call :cleanup_edge_profile_processes
+        goto :start_edge
+    )
     > "%EDGE_PID_FILE%" echo %EDGE_LISTENER_PID%
     echo [%date% %time%] Port %EDGE_PORT% already listening. Reusing existing debug browser PID %EDGE_LISTENER_PID%. >> "%LOG_FILE%"
     exit /b 0
@@ -136,9 +161,7 @@ if errorlevel 1 (
     echo [%date% %time%] Failed to start Edge debug browser on attempt !EDGE_START_ATTEMPT! >> "%LOG_FILE%"
     if "!EDGE_START_ATTEMPT!"=="1" (
         echo [%date% %time%] Retrying Edge launch after Youngrim-noext profile cleanup... >> "%LOG_FILE%"
-        powershell -NoProfile -Command "$targets = Get-WmiObject Win32_Process | Where-Object { (($_.Name -eq 'msedge.exe') -or ($_.Name -eq 'msedgedriver.exe')) -and $_.CommandLine -like '*YoungrimAutoEdgeProfile_noext*' }; foreach ($p in $targets) { try { Stop-Process -Id $p.ProcessId -Force -ErrorAction Stop } catch {} }" >> "%LOG_FILE%" 2>&1
-        for /f "tokens=5" %%P in ('netstat -ano ^| findstr /R /C:":%EDGE_PORT% .*LISTENING"') do taskkill /f /pid %%P /t >> "%LOG_FILE%" 2>&1
-        timeout /t 2 /nobreak >nul
+        call :cleanup_edge_profile_processes
         set "EDGE_START_ATTEMPT=2"
         goto :start_edge_attempt
     )
@@ -159,9 +182,7 @@ for /l %%N in (1,1,%EDGE_WAIT_SEC%) do (
 
 if "!EDGE_START_ATTEMPT!"=="1" (
     echo [%date% %time%] Edge debug port %EDGE_PORT% did not become ready within %EDGE_WAIT_SEC%s on first attempt. Cleaning Youngrim-noext profile processes and retrying once... >> "%LOG_FILE%"
-    powershell -NoProfile -Command "$targets = Get-WmiObject Win32_Process | Where-Object { (($_.Name -eq 'msedge.exe') -or ($_.Name -eq 'msedgedriver.exe')) -and $_.CommandLine -like '*YoungrimAutoEdgeProfile_noext*' }; foreach ($p in $targets) { try { Stop-Process -Id $p.ProcessId -Force -ErrorAction Stop } catch {} }" >> "%LOG_FILE%" 2>&1
-    for /f "tokens=5" %%P in ('netstat -ano ^| findstr /R /C:":%EDGE_PORT% .*LISTENING"') do taskkill /f /pid %%P /t >> "%LOG_FILE%" 2>&1
-    timeout /t 2 /nobreak >nul
+    call :cleanup_edge_profile_processes
     set "EDGE_START_ATTEMPT=2"
     goto :start_edge_attempt
 )
@@ -171,7 +192,39 @@ call "%~dp0notify_failure.bat" "START_SCHEDULED: Edge debug port %EDGE_PORT% not
 exit /b 1
 
 :edge_ready
+call :probe_edge "fresh_launch_attempt_!EDGE_START_ATTEMPT!"
+if errorlevel 1 (
+    if "!EDGE_START_ATTEMPT!"=="1" (
+        echo [%date% %time%] Edge debug port %EDGE_PORT% opened but health probe failed on first attempt. Recreating session once... >> "%LOG_FILE%"
+        call :cleanup_edge_profile_processes
+        set "EDGE_START_ATTEMPT=2"
+        goto :start_edge_attempt
+    )
+    echo [%date% %time%] Edge debug port %EDGE_PORT% opened but health probe still failed after retry. >> "%LOG_FILE%"
+    call "%~dp0notify_failure.bat" "START_SCHEDULED: Edge debug port %EDGE_PORT% unhealthy after launch"
+    exit /b 1
+)
 echo [%date% %time%] Edge debug port %EDGE_PORT% is ready with PID %EDGE_READY_PID%. >> "%LOG_FILE%"
+exit /b 0
+
+:probe_edge
+".\.venv\Scripts\python.exe" edge_debug_probe.py --port %EDGE_PORT% --timeout-sec 5 --retries %EDGE_PROBE_WAIT_SEC% --sleep-sec 1 --require-youngrim >> "%LOG_FILE%" 2>&1
+if errorlevel 1 (
+    echo [%date% %time%] Edge health probe failed for %~1. >> "%LOG_FILE%"
+    exit /b 1
+)
+".\.venv\Scripts\python.exe" edge_attach_probe.py --port %EDGE_PORT% --timeout-sec 15 --retries %EDGE_ATTACH_PROBE_WAIT_SEC% --sleep-sec 2 --require-youngrim >> "%LOG_FILE%" 2>&1
+if errorlevel 1 (
+    echo [%date% %time%] Edge attach probe failed for %~1. >> "%LOG_FILE%"
+    exit /b 1
+)
+echo [%date% %time%] Edge health probe passed for %~1. >> "%LOG_FILE%"
+exit /b 0
+
+:cleanup_edge_profile_processes
+powershell -NoProfile -Command "$targets = Get-WmiObject Win32_Process | Where-Object { (($_.Name -eq 'msedge.exe') -or ($_.Name -eq 'msedgedriver.exe')) -and $_.CommandLine -like '*YoungrimAutoEdgeProfile_noext*' }; foreach ($p in $targets) { try { Stop-Process -Id $p.ProcessId -Force -ErrorAction Stop } catch {} }" >> "%LOG_FILE%" 2>&1
+for /f "tokens=5" %%P in ('netstat -ano ^| findstr /R /C:":%EDGE_PORT% .*LISTENING"') do taskkill /f /pid %%P /t >> "%LOG_FILE%" 2>&1
+timeout /t 2 /nobreak >nul
 exit /b 0
 
 :done

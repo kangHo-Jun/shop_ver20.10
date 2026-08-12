@@ -158,6 +158,64 @@ Last updated: 2026-07-27
   - if the scheduled task itself cannot recover the process, overnight failures may still last until daytime intervention
   - if the browser is alive but logged out, downloads can still appear healthy at process level while returning `0 actionable rows`
   - if a future profile-level attach failure reappears, reduced outside-window autostart may still be insufficient without manual profile intervention
+  - before `2026-08-11` hardening, `9333` listen-only checks and stale `run_server.pid` reuse could misclassify a hung browser/session as healthy
+
+## 5A. 2026-08-11 Re-diagnosis and hardening
+
+- Confirmed field symptom:
+  - the dedicated Edge window could become `Not Responding`
+  - after killing that hung Edge and starting a fresh one, automation resumed normally
+- Confirmed failure pattern from `2026-08-11` logs:
+  - `09:25:13` cycle started
+  - `ReadTimeoutError` repeated against the local WebDriver session
+  - `09:35:21` `Browser connection appears dead`
+  - `09:57:02` `Browser reconnect failed: cannot connect to microsoft edge at 127.0.0.1:9333`
+  - process sleep continued with `last_cycle_completed_at=None`, so the server looked alive while work was no longer completing
+- Operational judgment:
+  - the direct trigger is most likely a hung Edge renderer/debugger session, not a simple closed port
+  - the outage was prolonged because health checks trusted `9333` listen state too loosely and startup logic could still reuse stale `run_server.pid`
+- Hardening applied on `2026-08-11`:
+  - added `edge_debug_probe.py`
+  - `START_SCHEDULED.bat` and `RESTART_CLEAN.bat` now require a successful DevTools probe, not just `9333 LISTENING`
+  - probe verifies:
+    - `/json/version` responds as Edge
+    - `/json/list` responds
+    - at least one Youngrim OMS tab exists
+  - if probe fails, the existing Edge debug browser is treated as unhealthy and rebuilt
+  - `START_SCHEDULED.bat` no longer reuses `run_server.pid` when `5081` is not actually listening; stale pid-only state is killed and restarted fresh
+- Recovery proof after hardening:
+  - fresh Edge attached successfully at `2026-08-11 13:29:57`
+  - Google Sheets connected at `2026-08-11 13:30:04`
+  - same cycle completed at `2026-08-11 13:31:07`
+  - output: `28 rows / 6 files -> Google Sheets complete`
+
+## 5B. 2026-08-12 Follow-up diagnosis: `9333 open` was still weaker than real Selenium attach
+
+- Confirmed field symptom:
+  - Edge could remain visible or keep `9333` listening while automation still could not attach
+  - users also observed the dedicated Edge window showing `Not Responding`
+- Confirmed failure evidence from `2026-08-12`:
+  - repeated watchdog failures showed:
+    - `run_server.pid missing`
+    - `server port 5081 not listening`
+    - `half-alive state: Edge port 9333 ... server port 5081 down`
+  - `run_server_stderr_20260812_140006.log` recorded:
+    - `session not created: cannot connect to microsoft edge at 127.0.0.1:9333`
+    - `from chrome not reachable`
+  - several exit snapshots showed true process loss, not only health-check noise:
+    - `2026-08-12 09:40:37`
+    - `2026-08-12 12:43:22`
+    - `2026-08-12 15:02:24`
+- Updated operational judgment:
+  - `9333 LISTENING` plus DevTools JSON response was still not a strong enough health signal
+  - the real success condition is whether Selenium can attach to the existing debugger session
+  - `RESTART_CLEAN` also needed a longer watchdog budget because Edge cleanup + relaunch + attach validation could exceed `180s`
+- Hardening applied on `2026-08-12`:
+  - added `edge_attach_probe.py`
+  - `START_SCHEDULED.bat` and `RESTART_CLEAN.bat` now require both:
+    - DevTools probe success
+    - actual Selenium attach probe success
+  - watchdog default timeout for `RESTART_CLEAN` increased from `180s` to `420s`
 
 ## 6. What to Check First During an Incident
 
@@ -170,6 +228,8 @@ Last updated: 2026-07-27
    - `127.0.0.1:5081`
    - `127.0.0.1:9333`
 7. whether `9333` belongs to `YoungrimAutoEdgeProfile`
+8. whether `edge_debug_probe.py --port 9333 --require-youngrim` passes
+9. whether `edge_attach_probe.py --port 9333 --require-youngrim` passes
 
 ## 7. Expected Healthy Startup Evidence
 
@@ -184,6 +244,7 @@ Healthy recovery of backlog also requires:
 
 - the dedicated debug Edge to stay on an authenticated Youngrim OMS page, not `login.jsp`
 - `Sheet5` growth that matches the backlog files, with no lingering `READY` estimate entries in `v10_state.json`
+- a successful Edge health probe when `9333` is reused, not just a raw listener check
 
 ## 8. Legacy Preservation
 

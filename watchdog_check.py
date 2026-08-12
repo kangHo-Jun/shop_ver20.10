@@ -40,7 +40,7 @@ MONITOR_WEBAPP_URL = os.getenv(
     "MONITOR_WEBAPP_URL",
     "https://script.google.com/macros/s/AKfycbw2u655TMN5MHz4udSKBFW9n69joOofTxPhbxCg6aJFIPqRR70SWJJMxzDSkQVvnNB0_g/exec",
 )
-RESTART_CLEAN_TIMEOUT_SEC = int(os.getenv("WATCHDOG_RESTART_CLEAN_TIMEOUT_SEC", "180"))
+RESTART_CLEAN_TIMEOUT_SEC = int(os.getenv("WATCHDOG_RESTART_CLEAN_TIMEOUT_SEC", "420"))
 
 
 def now():

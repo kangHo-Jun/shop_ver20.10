@@ -513,3 +513,13 @@ Sheet3/Sheet4 諛깆뾽 + Sheet5 濡쒓렇 + ?대━??meta ??idle
 - `docs/context.md`, `docs/bug_0210.md` 레거시 원본이 광범위한 인코딩 손상 상태라 직접 복원이 어렵다고 판단했다.
 - `docs/context_legacy.md`, `docs/bug_0210_legacy.md` 로 원본을 보존하고, 검증 가능한 로그/코드/리뷰 추출본 기준으로 새 UTF-8 문서를 재작성했다.
 - 목적은 손상 문서의 원문 복구가 아니라 현재 운영과 장애 대응에 필요한 사실을 안전하게 다시 문서화하는 것이었다.
+
+## [2026-08-11] Edge hung 재진단 및 startup health probe 보강
+
+- `Edge Not Responding` 상태가 실제 자동화 중단의 직접 원인인지 재진단했고, `9333` listen-only 판단과 stale `run_server.pid` 재사용이 장애를 길게 끌었다고 정리했다.
+- `edge_debug_probe.py`를 추가하고 `START_SCHEDULED.bat`, `RESTART_CLEAN.bat`에 DevTools health probe와 stale PID 차단 로직을 넣어, hung Edge/debug session 재사용을 막았다.
+
+## [2026-08-12] Selenium attach probe 기준으로 Edge health 판정 강화
+
+- `9333`과 DevTools JSON 응답만으로는 정상 Edge를 보장하지 못한다는 점을 확인했고, 실제 attach 실패(`chrome not reachable`)가 반복된 장애 원인으로 재정리했다.
+- `edge_attach_probe.py`를 추가하고 `START_SCHEDULED.bat`, `RESTART_CLEAN.bat`, `watchdog_check.py`를 보강해, 실제 Selenium attach 가능 여부와 더 긴 recovery timeout(`420s`)을 기준으로 복구 흐름을 조정했다.
