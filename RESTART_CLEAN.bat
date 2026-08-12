@@ -72,7 +72,7 @@ set "EDGE_START_ATTEMPT=1"
 
 :restart_edge_attempt
 echo [%date% %time%] Starting Edge debug browser... attempt=!EDGE_START_ATTEMPT! >> "%LOG_FILE%"
-powershell -NoProfile -Command "$args = @('--remote-debugging-port=%EDGE_PORT%', '--user-data-dir=%EDGE_PROFILE_DIR%', '--profile-directory=Default', '--disable-extensions', '--no-first-run', '--no-default-browser-check', 'http://door.yl.co.kr/oms/main.jsp'); $p=Start-Process -FilePath 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' -ArgumentList $args -PassThru; Set-Content -Path '%cd%\%EDGE_PID_FILE%' -Value $p.Id; Write-Output ('Edge PID=' + $p.Id)" >> "%LOG_FILE%" 2>&1
+powershell -NoProfile -Command "$args = @('--remote-debugging-port=%EDGE_PORT%', '--remote-debugging-address=127.0.0.1', '--user-data-dir=%EDGE_PROFILE_DIR%', '--profile-directory=Default', '--disable-extensions', '--no-first-run', '--no-default-browser-check', 'http://door.yl.co.kr/oms/main.jsp'); $p=Start-Process -FilePath 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' -ArgumentList $args -PassThru; Set-Content -Path '%cd%\%EDGE_PID_FILE%' -Value $p.Id; Write-Output ('Edge PID=' + $p.Id)" >> "%LOG_FILE%" 2>&1
 if errorlevel 1 (
     echo [%date% %time%] Failed to start Edge on attempt !EDGE_START_ATTEMPT!. >> "%LOG_FILE%"
     if "!EDGE_START_ATTEMPT!"=="1" (

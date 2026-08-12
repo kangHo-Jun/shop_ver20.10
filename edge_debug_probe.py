@@ -8,12 +8,18 @@ import urllib.request
 
 
 def port_open(host, port):
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.settimeout(2)
-    try:
-        return sock.connect_ex((host, port)) == 0
-    finally:
-        sock.close()
+    last_error = None
+    for family, socktype, proto, _, sockaddr in socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM):
+        sock = socket.socket(family, socktype, proto)
+        sock.settimeout(2)
+        try:
+            if sock.connect_ex(sockaddr) == 0:
+                return True
+        except OSError as exc:
+            last_error = exc
+        finally:
+            sock.close()
+    return False
 
 
 def fetch_json(url, timeout_sec):

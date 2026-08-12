@@ -34,8 +34,18 @@ def _create_driver(options):
 def probe(port, timeout_sec, require_youngrim):
     options = EdgeOptions()
     options.add_experimental_option("debuggerAddress", f"127.0.0.1:{port}")
-
-    driver = _create_driver(options)
+    last_error = None
+    for debugger_host in ("127.0.0.1", "localhost", "[::1]"):
+        options = EdgeOptions()
+        options.add_experimental_option("debuggerAddress", f"{debugger_host}:{port}")
+        try:
+            driver = _create_driver(options)
+            break
+        except Exception as exc:
+            last_error = exc
+            driver = None
+    if driver is None:
+        raise last_error
     try:
         driver.set_page_load_timeout(timeout_sec)
         driver.set_script_timeout(timeout_sec)
