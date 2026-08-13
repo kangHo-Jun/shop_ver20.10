@@ -545,3 +545,7 @@ Sheet3/Sheet4 諛깆뾽 + Sheet5 濡쒓렇 + ?대━??meta ??idle
 - watchdog 비정상 메일 알람 수신을 실제로 확인했고, 알람 본문이 `run_server.pid missing`, `5081 down`, stale `health_status`를 정확히 반영함을 확인했다.
 - 같은 세션에서 hung automation Edge가 `9333`만 붙잡고 `5081`은 죽어 있는 반쪽 장애를 다시 확인했고, stuck Edge 정리 후 `START_SCHEDULED.bat`로 `9333`/`5081`/attach probe/다운로드-업로드 사이클까지 재복구했다.
 - 단, 호스트 시계가 하루 앞서 있어 이번 복구 로그는 `20260814` 파일명으로 남았다.
+
+## [2026-08-13] watchdog 로그인/승인 감지 기반 재설계 반영
+
+- `watchdog_check.py`, `edge_attach_probe.py`에 로그인 페이지/승인 징후 감지, `health_status.json` 확장 필드, half-alive/attach 실패 누적 기반 복구 분기, 창 밖 attach-fail-only 유예 조건을 실제 코드로 반영했다.

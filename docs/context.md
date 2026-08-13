@@ -302,6 +302,19 @@ Healthy recovery of backlog also requires:
 - a successful Edge health probe when `9333` is reused, not just a raw listener check
 - direct email alerting now depends on local SMTP settings (`ALERT_SMTP_*`) being configured
 
+## 7A. Persistent Incident Capture Reminder
+
+```text
+[Required operational instruction]
+If a real login page or approval page appears again, capture both of the following at the same time:
+1. a browser screenshot
+2. http://127.0.0.1:9333/json/list output with URL/title
+
+Purpose:
+- verify actual login.jsp / returl / approval text patterns
+- validate watchdog login/approval detection rules against the real page
+```
+
 ## 8. Legacy Preservation
 
 - Original damaged document preserved as:
