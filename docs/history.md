@@ -533,3 +533,15 @@ Sheet3/Sheet4 諛깆뾽 + Sheet5 濡쒓렇 + ?대━??meta ??idle
   - watchdog Web App 알림 `HTTP 403`
   - outside-window recovery 한계
   - host/log date drift
+
+## [2026-08-12] 비정상 판정 시 직접 메일 알람 경로 추가
+
+- `send_alert_email.py`를 추가해 watchdog 비정상 판정 시 직접 SMTP 메일도 시도하도록 했다.
+- `notify_failure.bat`도 같은 메일 경로를 호출하도록 연결해, 배치 기반 실패 알림도 메일 발송을 시도할 수 있게 했다.
+- 실제 발송에는 `.env`에 SMTP 설정(`ALERT_SMTP_*`)이 필요하다.
+
+## [2026-08-13] 야간 장애 메일 알람 확인 및 hung Edge 정리 후 재복구
+
+- watchdog 비정상 메일 알람 수신을 실제로 확인했고, 알람 본문이 `run_server.pid missing`, `5081 down`, stale `health_status`를 정확히 반영함을 확인했다.
+- 같은 세션에서 hung automation Edge가 `9333`만 붙잡고 `5081`은 죽어 있는 반쪽 장애를 다시 확인했고, stuck Edge 정리 후 `START_SCHEDULED.bat`로 `9333`/`5081`/attach probe/다운로드-업로드 사이클까지 재복구했다.
+- 단, 호스트 시계가 하루 앞서 있어 이번 복구 로그는 `20260814` 파일명으로 남았다.

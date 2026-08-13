@@ -239,6 +239,38 @@ Last updated: 2026-07-27
   - recovery outside the main window is still weaker than in-window recovery because it can fall back to `V10_AutoStart` instead of always doing a full cleanup
   - host time/log time can drift ahead of the expected operational date, which complicates incident timelines and scheduler interpretation
 
+## 5D. 2026-08-13 overnight failure, alert email confirmation, and live recovery
+
+- Alert behavior confirmed:
+  - watchdog abnormal-state email alert was received for the overnight outage
+  - the email body correctly reflected:
+    - `run_server.pid missing`
+    - `server port 5081 not listening`
+    - stale `health_status`
+    - missing same-day `app_YYYYMMDD.json`
+- Actual incident timeline:
+  - `run_server.py` had already disappeared on `2026-08-13 12:33:46`
+  - after that point, the system stayed in a degraded state where:
+    - `5081` was down
+    - `9333` sometimes remained as a half-alive or hung Edge session
+  - overnight watchdog checks kept detecting the failure and attempting recovery, but automatic recovery did not complete
+- Live recovery result on `2026-08-13`:
+  - a stuck automation Edge session holding `9333` had to be cleared
+  - after that, `START_SCHEDULED.bat` succeeded again and the expected startup evidence returned:
+    - `Edge debug port 9333 is ready`
+    - `run_server.py is listening on port 5081`
+  - `edge_attach_probe.py` passed again after recovery
+  - the next cycle completed successfully:
+    - `Download complete: new 4 docs`
+    - `Upload drain finished: processed_files=4 remaining_ready=0`
+- Important date note:
+  - host time was still one day ahead during this recovery session
+  - as a result, fresh logs were written under `20260814` even though the operating date for this incident record is `2026-08-13`
+  - when investigating this incident, trust both:
+    - file contents and timestamps inside the logs
+    - the known host clock drift
+  - do not assume that a `20260814` filename automatically means the outage happened on real calendar `2026-08-14`
+
 ## 6. What to Check First During an Incident
 
 1. `logs/scheduler_YYYYMMDD.log`
@@ -268,6 +300,7 @@ Healthy recovery of backlog also requires:
 - the dedicated debug Edge to stay on an authenticated Youngrim OMS page, not `login.jsp`
 - `Sheet5` growth that matches the backlog files, with no lingering `READY` estimate entries in `v10_state.json`
 - a successful Edge health probe when `9333` is reused, not just a raw listener check
+- direct email alerting now depends on local SMTP settings (`ALERT_SMTP_*`) being configured
 
 ## 8. Legacy Preservation
 

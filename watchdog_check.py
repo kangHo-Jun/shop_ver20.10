@@ -41,6 +41,7 @@ MONITOR_WEBAPP_URL = os.getenv(
     "https://script.google.com/macros/s/AKfycbw2u655TMN5MHz4udSKBFW9n69joOofTxPhbxCg6aJFIPqRR70SWJJMxzDSkQVvnNB0_g/exec",
 )
 RESTART_CLEAN_TIMEOUT_SEC = int(os.getenv("WATCHDOG_RESTART_CLEAN_TIMEOUT_SEC", "420"))
+ALERT_EMAIL_SCRIPT = BASE_DIR / "send_alert_email.py"
 
 
 def now():
@@ -345,6 +346,45 @@ def send_alert(message):
         return False, str(exc)
 
 
+def send_email_alert(message, failures, context):
+    if not ALERT_EMAIL_SCRIPT.exists():
+        return False, f"missing {ALERT_EMAIL_SCRIPT.name}"
+
+    subject = "[영림 자동화] 비정상 알람"
+    body_lines = [
+        "자동화 비정상 판정",
+        "",
+        message,
+        "",
+        f"last_health_status={context.get('health_status')}",
+        f"server_listener_pid={context.get('server_listener_pid')}",
+        f"edge_listener_pid={context.get('edge_listener_pid')}",
+        f"pid_file={context.get('pid_file')}",
+        f"app_log_age_min={context.get('app_log_age_min')}",
+        "",
+        "failures:",
+        *[f"- {item}" for item in failures],
+    ]
+    body = "\n".join(body_lines)[:4000]
+
+    result = run_command(
+        [
+            sys.executable,
+            str(ALERT_EMAIL_SCRIPT),
+            "--system",
+            "영림 자동화",
+            "--status",
+            "비정상",
+            "--subject",
+            subject,
+            "--message",
+            body,
+        ]
+    )
+    detail = f"returncode={result.returncode} stdout={result.stdout[-500:]} stderr={result.stderr[-500:]}"
+    return result.returncode == 0, detail
+
+
 def append_log(line):
     LOGS_DIR.mkdir(parents=True, exist_ok=True)
     path = LOGS_DIR / f"watchdog_{now().strftime('%Y%m%d')}.log"
@@ -386,6 +426,8 @@ def main():
     if should_send_alert(signature):
         ok, response = send_alert(message[:1500])
         append_log(f"alert_sent={ok} response={response[:500]}")
+        mail_ok, mail_detail = send_email_alert(message[:1500], failures, context)
+        append_log(f"alert_email_sent={mail_ok} response={mail_detail[:500]}")
         save_alert_state(signature)
     else:
         append_log("alert_suppressed=cooldown")
