@@ -549,3 +549,35 @@ Sheet3/Sheet4 諛깆뾽 + Sheet5 濡쒓렇 + ?대━??meta ??idle
 ## [2026-08-13] watchdog 로그인/승인 감지 기반 재설계 반영
 
 - `watchdog_check.py`, `edge_attach_probe.py`에 로그인 페이지/승인 징후 감지, `health_status.json` 확장 필드, half-alive/attach 실패 누적 기반 복구 분기, 창 밖 attach-fail-only 유예 조건을 실제 코드로 반영했다.
+
+## [2026-08-21] watchdog stale lock 재기동 직후 오탐 메일 분석 및 완화
+
+- 증상
+  - `2026-08-21 07:13:17`에 watchdog abnormal-state email이 추가로 도착했다.
+  - 메일 본문 핵심 failure는 `v11.lock stale: pid=1452` 단독 항목이었다.
+- 로그 기준 실제 흐름
+  - `07:13:01` watchdog이 실제 장애를 감지했다.
+    - `run_server.pid stale`
+    - `server port 5081 not listening`
+    - `v11.lock stale`
+  - 같은 시각 watchdog이 `full_restart_clean`을 시작했다.
+  - `07:13:07`~`07:13:17` 사이 `RESTART_CLEAN.bat`이 Edge/서버 재기동을 수행했다.
+  - 그런데 `07:13:16` watchdog이 다시 한 번 돌면서, 재기동 과도 상태의 stale `v11.lock`만 보고 2차 메일을 보냈다.
+  - 직후 `07:13:18` 새 `run_server.py`가 `5081` lock을 다시 획득했고, `07:13:27` Google Sheets 연결, `07:13:36` 첫 cycle 완료까지 정상 복구됐다.
+- 원인 정리
+  - watchdog은 `v11.lock` 안 PID가 살아 있지 않으면 즉시 `v11.lock stale` failure로 취급했다.
+  - 재기동 직후 수 초 동안은 새 프로세스가 완전히 자리잡기 전이라 stale lock 판단이 잠깐 가능했다.
+  - 이 짧은 과도 상태가 실제 1차 장애와 별개인 2차 알람 메일로 이어졌다.
+- 수정 사항
+  - `watchdog_check.py`
+    - stale `v11.lock` 단독 상태는 더 이상 바로 failure로 취급하지 않는다.
+    - `pid stale`, `5081 down`, `app log stale/missing`, `health stale` 중 하나라도 함께 있을 때만 stale lock failure로 본다.
+  - `watchdog_check.py`
+    - `WATCHDOG_RECOVERY_GRACE_MIN` 기본 `3`분을 추가했다.
+    - 최근 recovery가 성공한 직후 grace 구간에서는 stale lock 같은 재기동 과도 상태 알람을 억제한다.
+    - watchdog 출력 context에 `recovery_grace_active`, `recovery_grace_minutes_since`, `recent_recovery_reason`를 추가했다.
+- 검증
+  - 수정 후 `watchdog_check.py --no-alert` 결과 `OK: watchdog check passed`.
+  - 현재 서버/Edge/app log/health 상태 모두 정상으로 확인됐다.
+- 기대 효과
+  - 실제 장애 1건에 대해 재기동 도중 `stale lock` 단독 메일이 한 번 더 가는 현상을 줄인다.

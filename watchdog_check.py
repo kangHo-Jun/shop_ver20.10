@@ -32,6 +32,7 @@ READY_STALE_MIN = int(os.getenv("WATCHDOG_READY_STALE_MIN", "10"))
 ALERT_COOLDOWN_MIN = int(os.getenv("WATCHDOG_ALERT_COOLDOWN_MIN", "30"))
 AUTO_RECOVER = os.getenv("WATCHDOG_AUTO_RECOVER", "true").lower() == "true"
 RECOVERY_COOLDOWN_MIN = int(os.getenv("WATCHDOG_RECOVERY_COOLDOWN_MIN", "30"))
+RECOVERY_GRACE_MIN = float(os.getenv("WATCHDOG_RECOVERY_GRACE_MIN", "3"))
 RECOVERY_START_HOUR = int(os.getenv("WATCHDOG_RECOVERY_START_HOUR", "6"))
 RECOVERY_START_MINUTE = int(os.getenv("WATCHDOG_RECOVERY_START_MINUTE", "5"))
 RECOVERY_END_HOUR = int(os.getenv("WATCHDOG_RECOVERY_END_HOUR", "16"))
@@ -250,7 +251,7 @@ def check_login_status(devtools_state):
     }
 
 
-def check_approval_status_via_attach(port=EDGE_PORT):
+def check_approval_status_via_attach(port=EDGE_PORT, require_youngrim=True, timeout_sec=20):
     if not ATTACH_PROBE_SCRIPT.exists():
         return {
             "attach_ok": False,
@@ -274,11 +275,28 @@ def check_approval_status_via_attach(port=EDGE_PORT):
             "1",
             "--sleep-sec",
             "1",
-            "--require-youngrim",
             "--dump-json",
         ],
-        timeout_sec=20,
+        timeout_sec=timeout_sec,
     )
+    if require_youngrim:
+        result = run_command(
+            [
+                sys.executable,
+                str(ATTACH_PROBE_SCRIPT),
+                "--port",
+                str(port),
+                "--timeout-sec",
+                "10",
+                "--retries",
+                "1",
+                "--sleep-sec",
+                "1",
+                "--require-youngrim",
+                "--dump-json",
+            ],
+            timeout_sec=timeout_sec,
+        )
     if result.returncode != 0:
         return {
             "attach_ok": False,
@@ -461,7 +479,22 @@ def collect_failures_from_merged_state(merged_state):
         failures.append(f"half-alive state: Edge port {EDGE_PORT} pid={edge_listener}, server port {SERVER_PORT} down")
 
     lock_text = merged_state.get("lock_file")
-    if lock_text and not is_pid_alive(lock_text):
+    lock_pid_alive = is_pid_alive(lock_text) if lock_text else False
+    health_time = parse_iso(health.get("timestamp"))
+    health_is_fresh = bool(health_time and merged_state["now_ts"] - health_time <= timedelta(minutes=HEALTH_STALE_MIN))
+    app_log_is_fresh = bool(app_log_age is not None and app_log_age <= APP_LOG_STALE_MIN)
+    pid_problem = bool(pid_text and not merged_state.get("pid_alive"))
+    server_problem = not bool(server_listener)
+    recovery_grace = recent_recovery_grace_state(merged_state["now_ts"])
+
+    # A stale lock by itself can appear briefly during watchdog-triggered restarts.
+    # Treat it as a failure only when another runtime signal also looks unhealthy.
+    if (
+        lock_text
+        and not lock_pid_alive
+        and not recovery_grace["active"]
+        and (pid_problem or server_problem or not app_log_is_fresh or not health_is_fresh)
+    ):
         failures.append(f"v11.lock stale: pid={lock_text}")
 
     if not merged_state.get("app_log_exists"):
@@ -469,7 +502,6 @@ def collect_failures_from_merged_state(merged_state):
     elif app_log_age is not None and app_log_age > APP_LOG_STALE_MIN:
         failures.append(f"app log stale: {merged_state['app_log_name']} age={app_log_age:.1f}min")
 
-    health_time = parse_iso(health.get("timestamp"))
     if not health:
         if not server_listener or app_log_age is None or app_log_age > APP_LOG_STALE_MIN:
             failures.append("health_status.json missing or invalid")
@@ -545,6 +577,21 @@ def recovery_cooldown_active():
     if not last_attempt:
         return False
     return now() - last_attempt < timedelta(minutes=RECOVERY_COOLDOWN_MIN)
+
+
+def recent_recovery_grace_state(current=None):
+    current = current or now()
+    state = load_json(WATCHDOG_RECOVERY_STATE_FILE) or {}
+    last_attempt = parse_iso(state.get("last_attempt_at"))
+    if not last_attempt or not state.get("ok"):
+        return {"active": False, "minutes_since": None, "reason": state.get("reason")}
+
+    elapsed = current - last_attempt
+    return {
+        "active": elapsed < timedelta(minutes=RECOVERY_GRACE_MIN),
+        "minutes_since": round(elapsed.total_seconds() / 60, 2),
+        "reason": state.get("reason"),
+    }
 
 
 def decide_recovery_action(merged_state, failures, block_force_restart, block_reason):
@@ -725,7 +772,7 @@ def main():
     runtime_state = collect_runtime_state()
     browser_probe = probe_edge_devtools_state()
     login_state = check_login_status(browser_probe)
-    approval_state = check_approval_status_via_attach() if runtime_state.get("edge_listener_pid") else {
+    approval_state = check_approval_status_via_attach(require_youngrim=True) if runtime_state.get("edge_listener_pid") else {
         "attach_ok": False,
         "approval_required_suspected": False,
         "login_required": False,
@@ -757,6 +804,10 @@ def main():
         "browser_last_probe_url": merged_state.get("browser_last_probe_url"),
         "browser_last_probe_title": merged_state.get("browser_last_probe_title"),
     }
+    recovery_grace = recent_recovery_grace_state(merged_state["now_ts"])
+    context["recovery_grace_active"] = recovery_grace["active"]
+    context["recovery_grace_minutes_since"] = recovery_grace["minutes_since"]
+    context["recent_recovery_reason"] = recovery_grace["reason"]
 
     if not failures:
         message = "OK: watchdog check passed"
@@ -778,6 +829,13 @@ def main():
     if args.no_alert:
         append_log("alert_and_recovery_skipped=no_alert")
         append_log(f"recovery_skipped reason={decision['reason']}")
+        return 2
+
+    if recovery_grace["active"] and decision["action"] in {"noop", "alert_only"}:
+        append_log(
+            "alert_suppressed=recovery_grace "
+            f"minutes_since={recovery_grace['minutes_since']} reason={recovery_grace['reason']}"
+        )
         return 2
 
     should_alert = decision["action"] != "noop_with_counter" and should_send_alert(signature)

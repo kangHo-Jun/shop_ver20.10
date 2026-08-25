@@ -260,6 +260,46 @@ if not in_recovery_window and server_listener_pid and not attach_ok:
         reason = "outside_window_attach_fail_grace"
     else:
         action = "alert_only"
+
+## 2026-08-21 follow-up: stale lock false positive during recovery
+
+### Observed issue
+
+- During a watchdog-triggered recovery, a second abnormal-state email could be emitted even after recovery had already started.
+- The representative symptom was a single failure line:
+  - `v11.lock stale: pid=...`
+- In the confirmed incident, the first watchdog pass detected a real outage and launched `full_restart_clean`.
+- A second watchdog pass then ran during the short restart transition and interpreted the old `v11.lock` owner as a fresh failure.
+
+### Root cause
+
+- `v11.lock` was treated as immediately abnormal whenever the pid stored in the file was no longer alive.
+- That rule was too aggressive for the restart transition, because lock-file replacement and `5081` listener acquisition do not happen at exactly the same instant.
+- As a result, watchdog could send:
+  - one email for the real outage
+  - one extra email for the transient stale-lock state during successful recovery
+
+### Hardening applied
+
+- `watchdog_check.py`
+  - stale `v11.lock` is no longer considered a standalone failure signal
+  - it now requires another unhealthy runtime signal as corroboration, such as:
+    - stale or dead `run_server.pid`
+    - missing `5081` listener
+    - stale/missing app log
+    - stale health status
+- `watchdog_check.py`
+  - `WATCHDOG_RECOVERY_GRACE_MIN` was added with default `3`
+  - after a successful recovery, watchdog suppresses noop or alert-only noise during this short grace window
+  - recovery context is now surfaced in watchdog output:
+    - `recovery_grace_active`
+    - `recovery_grace_minutes_since`
+    - `recent_recovery_reason`
+
+### Operational meaning
+
+- A stale lock is still treated seriously when it aligns with other unhealthy signals.
+- A stale lock by itself, immediately after a successful recovery, is now treated as transition noise rather than a new incident.
         reason = "outside_window_attach_fail_persistent"
 ```
 
@@ -438,3 +478,42 @@ decide_recovery_action(...):
   - `returl`
   - 승인 관련 한글 키워드
   조합으로 구현하고, 실제 캡처 발생 시 패턴을 검증해 보정한다.
+
+## Appendix A. Isolated Test Results (2026-08-13)
+
+### Test scope
+
+- The live `9333` Youngrim session was not touched.
+- Fixture-only tests used no browser at all.
+- Browser-isolated tests used only temporary local ports and local dummy HTML pages.
+- `--require-youngrim` remained enforced in the production watchdog call path.
+- A test-only seam was added to `check_approval_status_via_attach(port=..., require_youngrim=False)` so local dummy pages can be validated without affecting production behavior.
+
+### Result table
+
+| Scenario | Method | Expected | Actual | Result |
+|---|---|---|---|---|
+| `1` main.jsp logged-in candidate | fixture | `login_required=False`, `browser_login_state=logged_in_candidate` | matched exactly | `PASS` |
+| `2` login.jsp returl detected | fixture | `login_required=True`, `browser_login_state=login_page_only` | matched exactly | `PASS` |
+| `5a` outside-window attach fail first hit | fixture | `noop_with_counter` | matched exactly | `PASS` |
+| `5b` outside-window attach fail second hit | fixture | `noop_with_counter` | matched exactly | `PASS` |
+| `5c` outside-window attach fail third hit | fixture | `alert_only` | matched exactly | `PASS` |
+| `6a` half-alive under 15 min | fixture | `should_force_restart=False`, recovery remains below force threshold | `should_force_restart=False`, `full_restart_clean` path | `PASS` |
+| `6b` half-alive at 15 min | fixture | `should_force_restart=True`, `force_restart_edge` | matched exactly | `PASS` |
+| `3a` approval dummy page | isolated browser + `edge_attach_probe.py --dump-json` | attach succeeds and approval text visible | attach succeeded, approval text captured | `PASS` |
+| `3b` approval dummy page via wrapper | isolated browser + `check_approval_status_via_attach(require_youngrim=False)` | `attach_ok=True`, `approval_required_suspected=True`, matched text captured | returned `attach_ok=True`, `approval_required_suspected=True`, `matched_text='새로운 기기에서 접속했습니다'` | `PASS` |
+| `4a` clean dummy page | isolated browser + `edge_attach_probe.py --dump-json` | attach succeeds and no approval text | attach succeeded, no approval text present | `PASS` |
+| `4b` clean dummy page via wrapper | isolated browser + `check_approval_status_via_attach(require_youngrim=False)` | `attach_ok=True`, `approval_required_suspected=False` | returned `attach_ok=True`, `approval_required_suspected=False`, `matched_text=None` | `PASS` |
+
+### Operational notes from isolated testing
+
+- The fixture-only decision logic for scenarios `5` and `6` behaved exactly as intended.
+- The wrapper function now supports local-only isolated testing without weakening the production watchdog path.
+- The production watchdog still calls:
+
+```python
+check_approval_status_via_attach(require_youngrim=True)
+```
+
+- During cleanup, some temporary test-only Edge listener PIDs on isolated ports remained visible as `Unknown`/lingering Windows processes even after force-stop attempts.
+- These test-only ports were separate from `9333`, so the live Youngrim session was not affected.
