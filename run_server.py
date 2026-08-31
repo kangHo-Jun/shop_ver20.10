@@ -960,7 +960,9 @@ def run_cycle():
     logger.info("[Cycle] Download complete: estimate=%s ledger=%s total=%s", estimate_new, ledger_new, total_new)
 
     # Upload READY files
-    ready_count = len(state_manager.get_keys_by_status("estimate", state_manager.STATUS_READY))
+    estimate_ready_count = len(state_manager.get_keys_by_status("estimate", state_manager.STATUS_READY))
+    ledger_ready_count = len(state_manager.get_keys_by_status("ledger", state_manager.STATUS_READY))
+    ready_count = estimate_ready_count + ledger_ready_count
     _write_health_status(
         "download_complete",
         last_cycle_started_at=cycle_started_at,
@@ -969,7 +971,12 @@ def run_cycle():
         download_pages=last_download_summaries,
     )
     if ready_count > 0:
-        logger.info("[Cycle] READY %s docs found. Starting upload.", ready_count)
+        logger.info(
+            "[Cycle] READY docs found. estimate=%s ledger=%s total=%s. Starting upload.",
+            estimate_ready_count,
+            ledger_ready_count,
+            ready_count,
+        )
         _write_health_status(
             "upload_started",
             last_cycle_started_at=cycle_started_at,
@@ -977,27 +984,58 @@ def run_cycle():
             ready_count=ready_count,
             download_pages=last_download_summaries,
         )
-        try:
-            sheet_hub.connect()
-            upload_result = drain_ready_uploads("estimate")
-            logger.info(
-                "[Cycle] Upload drain finished: processed_files=%s remaining_ready=%s",
-                upload_result["processed_files"],
-                upload_result["remaining_ready"],
-            )
-        except Exception as e:
-            logger.error("[Cycle] Upload error: %s", e)
-            _write_health_status(
-                "upload_error",
-                last_cycle_started_at=cycle_started_at,
-                downloaded_new=total_new,
-                ready_count=ready_count,
-                remaining_ready_count=len(state_manager.get_keys_by_status("estimate", state_manager.STATUS_READY)),
-                download_pages=last_download_summaries,
-                last_error=str(e),
-            )
+        if estimate_ready_count > 0:
+            try:
+                sheet_hub.connect()
+                upload_result = drain_ready_uploads("estimate")
+                logger.info(
+                    "[Cycle] Estimate upload drain finished: processed_files=%s remaining_ready=%s",
+                    upload_result["processed_files"],
+                    upload_result["remaining_ready"],
+                )
+            except Exception as e:
+                logger.error("[Cycle] Estimate upload error: %s", e)
+                _write_health_status(
+                    "upload_error",
+                    last_cycle_started_at=cycle_started_at,
+                    downloaded_new=total_new,
+                    ready_count=ready_count,
+                    remaining_ready_count=(
+                        len(state_manager.get_keys_by_status("estimate", state_manager.STATUS_READY))
+                        + len(state_manager.get_keys_by_status("ledger", state_manager.STATUS_READY))
+                    ),
+                    download_pages=last_download_summaries,
+                    last_error=str(e),
+                )
+        else:
+            logger.info("[Cycle] No READY estimate files. Estimate upload skipped.")
+
+        if ledger_ready_count > 0:
+            try:
+                upload_result = drain_ready_uploads("ledger")
+                logger.info(
+                    "[Cycle] Ledger upload drain finished: processed_files=%s remaining_ready=%s",
+                    upload_result["processed_files"],
+                    upload_result["remaining_ready"],
+                )
+            except Exception as e:
+                logger.error("[Cycle] Ledger upload error: %s", e)
+                _write_health_status(
+                    "upload_error",
+                    last_cycle_started_at=cycle_started_at,
+                    downloaded_new=total_new,
+                    ready_count=ready_count,
+                    remaining_ready_count=(
+                        len(state_manager.get_keys_by_status("estimate", state_manager.STATUS_READY))
+                        + len(state_manager.get_keys_by_status("ledger", state_manager.STATUS_READY))
+                    ),
+                    download_pages=last_download_summaries,
+                    last_error=str(e),
+                )
+        else:
+            logger.info("[Cycle] No READY ledger files. Ledger upload skipped.")
     else:
-        logger.info("[Cycle] No READY files. Upload skipped.")
+        logger.info("[Cycle] No READY files. Estimate and ledger upload skipped.")
 
     logger.info("[Cycle] Completed. Next cycle in %s minutes", config.DOWNLOAD_INTERVAL_SEC // 60)
     last_cycle_completed_at = datetime.now().isoformat()
@@ -1007,7 +1045,10 @@ def run_cycle():
         last_cycle_completed_at=last_cycle_completed_at,
         downloaded_new=total_new,
         ready_count=ready_count,
-        remaining_ready_count=len(state_manager.get_keys_by_status("estimate", state_manager.STATUS_READY)),
+        remaining_ready_count=(
+            len(state_manager.get_keys_by_status("estimate", state_manager.STATUS_READY))
+            + len(state_manager.get_keys_by_status("ledger", state_manager.STATUS_READY))
+        ),
         download_pages=last_download_summaries,
     )
 
