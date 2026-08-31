@@ -18,6 +18,20 @@ COMPANY_MAPPING = {
 # MHTML / HTML 파싱 관련 함수
 # =================================================================================================
 
+def _resolve_source_date(file_path_hint: str = "") -> str:
+    """Prefer the Youngrim open date embedded in the saved filename/history key."""
+    if file_path_hint:
+        basename = os.path.basename(file_path_hint)
+        match = re.match(r"^(\d{4}-\d{2}-\d{2})_", basename)
+        if match:
+            try:
+                source_date = datetime.datetime.strptime(match.group(1), "%Y-%m-%d")
+                return source_date.strftime("%Y/%m/%d")
+            except ValueError:
+                pass
+    return datetime.datetime.now().strftime('%Y/%m/%d')
+
+
 def extract_html_from_mhtml(mhtml_content: str) -> str:
     """MHTML 내용에서 HTML 추출 및 디코딩"""
     try:
@@ -575,7 +589,8 @@ def process_html_content(html_content: str, file_path_hint: str = "", target_typ
     print(f"[{file_path_hint}] 회사 감지: {company_info['display']} ({company_info['brand']})")
     
     erp_rows = []
-    
+    source_date = _resolve_source_date(file_path_hint)
+
     for row in raw_data:
         # row: [NO, 품목명(공백), 색상, 품명, 규격, 수량, 단가, 금액, 비고]
         color_raw = row[2]
@@ -599,7 +614,6 @@ def process_html_content(html_content: str, file_path_hint: str = "", target_typ
         
         # ERP 행 생성 (최근 업로드 엔진은 탭 구분을 선호하므로 충분한 열 확보)
         erp_row = [''] * 30
-        today = datetime.datetime.now().strftime('%Y/%m/%d')
         
         if target_type == 'estimate':
             # V7 사용자 요청: 견적서입력 팝업
@@ -613,14 +627,14 @@ def process_html_content(html_content: str, file_path_hint: str = "", target_typ
             erp_row = [''] * 22  # ← 22열로 변경!
             erp_row[1] = '00166'            # 거래처코드 (B)
             erp_row[2] = '기타매출처/doo'   # 거래처명 (C)
-            erp_row[3] = today             # 일자 (D)
+            erp_row[3] = source_date             # 일자 (D)
             erp_row[5] = '두현숙'           # 표시담당자 (F)
             erp_row[14] = product_code   # 품목코드 (O)
             erp_row[15] = product_name   # 품목명 (P)
             erp_row[16] = quantity_raw   # 수량 (Q)
         else:
             # 기본 구매입력 (Ledger) 레이아웃
-            erp_row[0] = today          # 날짜
+            erp_row[0] = source_date          # 날짜
             erp_row[6] = '100'          # 100
             erp_row[16] = product_name  # 품목명 (Q) - 기존 V6 기준
             erp_row[17] = product_code  # 품목코드 (R)
