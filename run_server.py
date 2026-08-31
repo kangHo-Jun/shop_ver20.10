@@ -22,6 +22,8 @@ from config import config
 from logging_config import logger
 from state_manager import state_manager
 from google_sheet_hub import GoogleSheetHub
+from ledger_sheet_hub import get_ledger_sheet_hub
+import ledger_file_processor
 import local_file_processor
 
 from selenium import webdriver
@@ -797,14 +799,21 @@ def auto_upload(doc_type="estimate"):
             continue
         try:
             html_content = html_file.read_text(encoding='utf-8')
-            erp_data = local_file_processor.process_html_content(
-                html_content, file_path_hint=html_file.name, target_type=doc_type
-            )
-            if erp_data:
-                if len(rows) + len(erp_data) > MAX_ROWS_PER_UPLOAD:
+            if doc_type == "ledger":
+                ledger_data = local_file_processor.process_html_content(
+                    html_content, file_path_hint=html_file.name, target_type='ledger'
+                )
+                upload_rows = ledger_file_processor.map_ledger_to_estimate_schema(ledger_data or [])
+            else:
+                upload_rows = local_file_processor.process_html_content(
+                    html_content, file_path_hint=html_file.name, target_type=doc_type
+                )
+
+            if upload_rows:
+                if len(rows) + len(upload_rows) > MAX_ROWS_PER_UPLOAD:
                     logger.info("[Upload] Reached MAX_ROWS_PER_UPLOAD=%s. Remaining files will be uploaded in the next batch.", MAX_ROWS_PER_UPLOAD)
                     break
-                rows.extend(erp_data)
+                rows.extend(upload_rows)
                 processed.append(key)
         except Exception as e:
             logger.error("[Upload] Failed to process file %s: %s", key, e)
@@ -814,7 +823,11 @@ def auto_upload(doc_type="estimate"):
         return {"processed_files": 0, "remaining_ready": len(ready_keys)}
 
     try:
-        result = sheet_hub.stage_and_copy(doc_type, rows, processed)
+        if doc_type == "ledger":
+            upload_hub = get_ledger_sheet_hub()
+            result = upload_hub.stage_and_copy(doc_type, rows, processed)
+        else:
+            result = sheet_hub.stage_and_copy(doc_type, rows, processed)
         if result.get('row_count', 0) <= 0:
             for key in processed:
                 state_manager.update_state(doc_type, key, state_manager.STATUS_FAILED, "No mapped rows for Google Sheets")
@@ -824,7 +837,10 @@ def auto_upload(doc_type="estimate"):
                 "remaining_ready": len(state_manager.get_keys_by_status(doc_type, state_manager.STATUS_READY)),
             }
         if not result.get("skipped_duplicate"):
-            sheet_hub.complete(force_clear=False)
+            if doc_type == "ledger":
+                upload_hub.complete(force_clear=False)
+            else:
+                sheet_hub.complete(force_clear=False)
         history = load_history()
         for key in processed:
             state_manager.update_state(doc_type, key, state_manager.STATUS_COMPLETED)
