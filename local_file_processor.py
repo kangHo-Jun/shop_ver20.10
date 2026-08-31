@@ -22,13 +22,17 @@ def _resolve_source_date(file_path_hint: str = "") -> str:
     """Prefer the Youngrim open date embedded in the saved filename/history key."""
     if file_path_hint:
         basename = os.path.basename(file_path_hint)
-        match = re.match(r"^(\d{4}-\d{2}-\d{2})_", basename)
-        if match:
-            try:
-                source_date = datetime.datetime.strptime(match.group(1), "%Y-%m-%d")
-                return source_date.strftime("%Y/%m/%d")
-            except ValueError:
-                pass
+        for pattern, fmt in (
+            (r"^(\d{4}-\d{2}-\d{2})_", "%Y-%m-%d"),
+            (r"^(\d{2}-\d{2}-\d{2})_", "%y-%m-%d"),
+        ):
+            match = re.match(pattern, basename)
+            if match:
+                try:
+                    source_date = datetime.datetime.strptime(match.group(1), fmt)
+                    return source_date.strftime("%Y/%m/%d")
+                except ValueError:
+                    pass
     return datetime.datetime.now().strftime('%Y/%m/%d')
 
 
