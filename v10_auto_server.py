@@ -1301,12 +1301,19 @@ class AutoDownloader(threading.Thread):
 
             # 2. Download from Ledger Lists (multiple pages: 산업/임업)
             l_new = 0
-            logger.info("[Downloader] Ledger download is disabled. Skipping ledger pages.")
-            # Legacy ledger download flow retained for rollback/reference only.
-            # logger.info("[Downloader] Processing Ledger Lists...")
-            # for idx, ledger_url in enumerate(config.YOUNGRIM_LEDGER_URLS, 1):
-            #     logger.info(f"[Downloader] Processing Ledger page {idx}/{len(config.YOUNGRIM_LEDGER_URLS)}")
-            #     l_new += self.download_from_page(ledger_url, config.DOWNLOADS_DIR / "ledger", "ledger", force_mode=force_mode)
+            # Keep ledger download failures isolated from the estimate cycle.
+            try:
+                logger.info("[Downloader] Processing Ledger Lists...")
+                for idx, ledger_url in enumerate(config.YOUNGRIM_LEDGER_URLS, 1):
+                    logger.info(f"[Downloader] Processing Ledger page {idx}/{len(config.YOUNGRIM_LEDGER_URLS)}")
+                    l_new += self.download_from_page(
+                        ledger_url,
+                        config.DOWNLOADS_DIR / "ledger",
+                        "ledger",
+                        force_mode=force_mode,
+                    )
+            except Exception as ledger_error:
+                logger.error(f"[Downloader] Ledger cycle failed; continuing estimate cycle: {ledger_error}")
 
             # 3. Download from Estimate Lists (multiple pages: 산업/임업)
             logger.info("[Downloader] Processing Estimate Lists...")
@@ -1320,7 +1327,7 @@ class AutoDownloader(threading.Thread):
                 logger.info("[Downloader] No new files downloaded this cycle.")
             else:
                 server_status["empty_cycle_count"] = 0
-                logger.info(f"[Downloader] Downloaded {e_new} estimate files. Ledger download is disabled.")
+                logger.info(f"[Downloader] Downloaded {e_new} estimate files, {l_new} ledger files.")
 
             # 자동 업로드: READY 파일이 있고 업로드가 진행 중이 아니면 자동 트리거
             ready_count = len(state_manager.get_keys_by_status("estimate", state_manager.STATUS_READY))
