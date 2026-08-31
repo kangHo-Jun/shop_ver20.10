@@ -921,14 +921,27 @@ def run_cycle():
             f"Keep session on {config.YOUNGRIM_URL}",
         )
 
+    # Download ledger documents first, but keep any ledger failure isolated.
+    ledger_new = 0
+    if config.ENABLE_LEDGER:
+        try:
+            logger.info("[Cycle] Processing Ledger Lists...")
+            for idx, ledger_url in enumerate(config.YOUNGRIM_LEDGER_URLS, 1):
+                logger.info("[Cycle] Ledger page %s/%s", idx, len(config.YOUNGRIM_LEDGER_URLS))
+                ledger_new += download_from_page(ledger_url, config.DOWNLOADS_DIR / "ledger", "ledger")
+        except Exception as ledger_error:
+            logger.error("[Cycle] Ledger cycle failed; continuing estimate cycle: %s", ledger_error)
+
     # Download estimate documents
-    total_new = 0
+    estimate_new = 0
     if config.ENABLE_ESTIMATE:
+        logger.info("[Cycle] Processing Estimate Lists...")
         for idx, url in enumerate(config.YOUNGRIM_ESTIMATE_URLS, 1):
             logger.info("[Cycle] Estimate page %s/%s", idx, len(config.YOUNGRIM_ESTIMATE_URLS))
-            total_new += download_from_page(url, config.DOWNLOADS_DIR / "estimate", "estimate")
+            estimate_new += download_from_page(url, config.DOWNLOADS_DIR / "estimate", "estimate")
 
-    logger.info("[Cycle] Download complete: new %s docs", total_new)
+    total_new = ledger_new + estimate_new
+    logger.info("[Cycle] Download complete: estimate=%s ledger=%s total=%s", estimate_new, ledger_new, total_new)
 
     # Upload READY files
     ready_count = len(state_manager.get_keys_by_status("estimate", state_manager.STATUS_READY))
