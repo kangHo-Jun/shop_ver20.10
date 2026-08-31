@@ -3,6 +3,8 @@ from copy import deepcopy
 import pytest
 
 from ledger_file_processor import map_ledger_to_estimate_schema
+from v10_auto_server import sheet_hub as estimate_sheet_hub
+from ledger_sheet_hub import get_ledger_sheet_hub
 
 
 def make_ledger_row():
@@ -69,3 +71,11 @@ def test_preserves_row_order_and_does_not_mutate_input_rows():
 
     assert [row[15] for row in result] == ["영림195 도어", "두 번째 품목"]
     assert rows == original
+
+
+def test_ledger_hub_uses_new_spreadsheet_id():
+    assert get_ledger_sheet_hub().spreadsheet_id == "1G2M05l7YbtV4CtXBn7StYE9ytYH1QM_mkcfCZnbu_EA"
+
+
+def test_ledger_hub_id_differs_from_default_estimate_hub():
+    assert get_ledger_sheet_hub().spreadsheet_id != estimate_sheet_hub.spreadsheet_id
