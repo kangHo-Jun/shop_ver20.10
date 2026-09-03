@@ -589,3 +589,19 @@ Sheet3/Sheet4 諛깆뾽 + Sheet5 濡쒓렇 + ?대━??meta ??idle
   - 현재 서버/Edge/app log/health 상태 모두 정상으로 확인됐다.
 - 기대 효과
   - 실제 장애 1건에 대해 재기동 도중 `stale lock` 단독 메일이 한 번 더 가는 현상을 줄인다.
+
+## [2026-09-04] watchdog 장시간 무감시 장애 대응
+
+- 증상
+  - `2026-09-03 07:09` 이후 `run_server.py` 오전 프로세스가 사라졌고, `2026-09-03 17:00` 예약 정지 전까지 약 10시간 동안 자동 복구가 일어나지 않았다.
+  - `logs/app_20260903.json` 기준 오전 마지막 정상 heartbeat는 `2026-09-03 07:09:35`였고, `17:00` 정지 작업은 이미 없는 PID `43088`을 찾다가 실패했다.
+- 원인
+  - `V10_Watchdog` 작업 XML에서 `MultipleInstancesPolicy=IgnoreNew`가 설정되어 있었다.
+  - 워치독 1회 실행이 hang 상태로 남으면 이후 5분 반복 트리거가 모두 무시될 수 있는 구조였다.
+  - `watchdog_20260903.log`에는 `07:00~16:45` 구간 실행 기록이 없고, `2026-09-03T17:08:00`에야 `outside_window_server_down`으로 서버 다운을 뒤늦게 감지했다.
+- 조치
+  - `V10_Watchdog` 작업에 `ExecutionTimeLimit=PT4M`을 적용해 워치독 1회 실행이 4분을 넘기면 Task Scheduler가 강제 종료하도록 변경했다.
+  - `.env`에 `WATCHDOG_RECOVERY_END_HOUR=18`, `WATCHDOG_RECOVERY_END_MINUTE=0`을 추가해 복구 윈도우를 `18:00`까지 확장했다.
+- 백업
+  - 원본 작업 XML 백업: `docs/watchdog/watchdog_task_backup_20260903.xml`
+  - 수정 적용 XML: `docs/watchdog/watchdog_task_new_20260903.xml`
