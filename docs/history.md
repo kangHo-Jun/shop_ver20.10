@@ -13,6 +13,24 @@
 
 ---
 
+## 2026-09-04 Fix: 원장 시트 버튼 오작동 (견적 시트 ID 하드코딩)
+
+- 증상: 원장 시트(`ver_10_원장`) Sheet2의 "복사"/"완료" 버튼 무반응
+- 원인: 원장 시트가 견적 시트의 사본으로 생성되면서, 바운드
+  Apps Script(`sheet_hub.gs`)의 `spreadsheetId`가 견적 시트 ID
+  (`1oEyPMkRxIOKZ8DTS7KnwwSpxftgYO4HSIR1S06Pl2Kk`)로 하드코딩된 채 그대로 복사됨
+- 위험: 버튼 클릭 시 원장 시트가 아닌 견적 시트를 잘못 조작할
+  가능성이 있었음 (실제 클릭 전 발견되어 사고는 없었음)
+- 조치: 원장 시트 바운드 스크립트의 `spreadsheetId`를
+  원장 시트 자체 ID(`1G2M05l7YbtV4CtXBn7StYE9ytYH1QM_mkcfCZnbu_EA`)로 직접 수정
+- 교훈: 향후 Google Sheets를 "사본으로 만들기"로 복제할 때,
+  바운드 스크립트 안 하드코딩된 `spreadsheetId`도 함께
+  확인/수정 필요 (자동으로 안 바뀜)
+
+커밋: `docs: record ledger sheet button fix (hardcoded spreadsheet id)`
+
+---
+
 ## 2026-08-25 Fix: ???? ?? ?? ??
 
 - ??: `local_file_processor.process_html_content()`? ???? ???? ??? ?? ????? ?? ??, ??? ??? `datetime.now()`? ERP/???? ??? ??????.
